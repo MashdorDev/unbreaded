@@ -81,6 +81,8 @@ DerivedDataCache/*
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
+.idea/
+
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
