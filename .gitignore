@@ -48,6 +48,7 @@ SourceArt/**/*.tga
 # Binary Files
 Binaries/*
 Plugins/*/Binaries/*
+Plugins/
 
 # Builds
 Build/*
@@ -81,6 +82,8 @@ DerivedDataCache/*
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
+.idea/
+
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
