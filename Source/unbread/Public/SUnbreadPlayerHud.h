@@ -23,6 +23,11 @@ public:
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
+	virtual void NativeConstruct() override;
+
+	void LerpDelayedHPBar(const float& InDeltaTime);
+	
+
 	UPROPERTY(EditAnywhere, meta= (BindWidget))
 	class UProgressBar* HealthBar;
 
@@ -32,11 +37,19 @@ public:
 	UPROPERTY(EditAnywhere)
 	int Ammo;
 
+	UPROPERTY(EditAnywhere)
+	float HPDelayThreshold;
+	
+
 private:
 	float BarPercentage;
 	float TimeSinceHit;
-	float HPDelayThreshold;
+	
 	float DelayBarPercentage;
+	float DelayBarLerpT;
+	float DelayBarLerpStart;
+	float DelayBarLerpTarget;
+	bool IsLerping;
 
 	
 	
