@@ -1,3 +1,5 @@
+# ignore the assets folder
+Content/Assets/*
 # Visual Studio 2015 user specific files
 .vs/
 
