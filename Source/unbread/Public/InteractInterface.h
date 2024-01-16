@@ -25,10 +25,10 @@ class UNBREAD_API IInteractInterface
 public:
 	
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interact")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")
 	void Interact();
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interact")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")
 	void BeginFocus();
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interact")
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")
 	void EndFocus();
 };
