@@ -67,8 +67,8 @@ void USUnbreadPlayerHud::LerpDelayedHPBar(const float& InDeltaTime)
 	
 	if(DelayBarLerpT >= 0.0f)
 	{
-		DelayBarLerpT -= 0.1f;
 		// continue lerping
+		DelayBarLerpT -= 0.1f;
 		DelayBarPercentage = FMath::Lerp(DelayBarLerpTarget, DelayBarLerpStart, DelayBarLerpT);
 		DelayedHealthBar->SetPercent(DelayBarPercentage);
 		
