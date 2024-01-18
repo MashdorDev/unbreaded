@@ -34,10 +34,10 @@ void ASCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MoveVector = Value.Get<FVector2D>();
 	
-	const FVector Forward = FVector(0.f, 1.f,0.f);
+	const FVector Forward = FVector(1.f, 0.f,0.f);
 	AddMovementInput(Forward, MoveVector.Y * MoveSpeed);
 	
-	const FVector Right = FVector(1.f, 0.f,0.f);
+	const FVector Right = FVector(0.f, 1.f,0.f);
 	AddMovementInput(Right, MoveVector.X * RotationRate);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
@@ -60,14 +60,15 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(RotateAxisValue.X);
 		AddControllerPitchInput(RotateAxisValue.Y);
-	}
+	}	
+
+	// TODO: Update rotation according to camera, lerp as tank
 }
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
