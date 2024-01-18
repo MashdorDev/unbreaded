@@ -10,7 +10,7 @@ public class unbread : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", "UMG"
+			"Core", "CoreUObject", "Engine", "InputCore", "UMG", "SlateCore"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
