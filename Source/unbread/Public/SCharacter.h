@@ -19,6 +19,17 @@ public:
 	// Sets default values for this character's properties
 	ASCharacter();
 
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* BaseMesh;
+
+	// TEMP
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UStaticMeshComponent* ForwardDirectionIndicatorMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USceneComponent* ProjectileSpawnPoint;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -33,13 +44,17 @@ protected:
 	UInputAction* RotateAction;
 
 	void Move(const FInputActionValue& Value);
-	void Rotate(const FInputActionValue& Value);
+	//void Rotate(const FInputActionValue& Value);
+	void RotateToTarget(const FVector LookAtTarget);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float MoveSpeed = 100.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float RotationRate = 100.f;
+
+	UPROPERTY()
+	APlayerController* PlayerController;
 	
 
 public:	
