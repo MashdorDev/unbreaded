@@ -3,7 +3,12 @@
 
 #include "SNavigatableMenu.h"
 
+#include "FrameTypes.h"
+#include "PropertyAccess.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
+#include "Framework/Application/NavigationConfig.h"
 
 void USNavigatableMenu::AddButton(USMenuButton* Button)
 {
@@ -14,12 +19,30 @@ void USNavigatableMenu::AddButton(USMenuButton* Button)
 	}
 	
 
+	Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	if(UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(Button))
+	{
+		I->SetAlignment(FVector2D(0.5f, 0.5f));
+	}
+	// Custom Hover functionality, for mousing over
+	Button->BindOnHovered();
+	Button->Hovered.AddDynamic(this, &USNavigatableMenu::SetSelected);
+	
+	
 	Buttons.Add(Button->Name, Button);
 }
 
 void USNavigatableMenu::Navigate(EDirection Direction)
 {
-	
+	if(TimeBetweenInput <= TimeBetweenInputThreshold)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+						TEXT("Inputting too quickly"));
+		return;
+	}
+
+	TimeBetweenInput = 0.0f;
+
 	FString Name = Selected->Connections[Direction];
 	if(Name == "")
 	{
@@ -59,16 +82,86 @@ void USNavigatableMenu::AddConnection(USMenuButton* FromButton, USMenuButton* To
 
 void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 {
-	if(Selected)
+	if (SelectedButton_)
 	{
-		Selected->Button->SetStyle(SelectedButton_->Button->GetStyle());
-	}
+		Selected = *Buttons.Find(SelectedButton_->Name);
 
-	
-	Selected = *Buttons.Find(SelectedButton_->Name);
-	FButtonStyle ButtonStyle = Selected->Button->GetStyle();
-	ButtonStyle.Normal = ButtonStyle.Hovered;
-	
-	Selected->Button->SetStyle(ButtonStyle);
+		if (Selected && Selected->Button)
+		{
+			const UCanvasPanelSlot* S = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected);
+			UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
+
+			if (!S || !I)
+			{
+				return;
+			}
+
+			ResetLerp(S->GetPosition());
+			
+			if (Selected->Button->GetIsFocusable())
+			{
+				// Set focus on the button if it's focusable
+				Selected->Button->SetFocus();
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("SettingFocus"));
+			}
+			else
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Button is not focusable"));
+			}
+		}
+	}
+}
+
+void USNavigatableMenu::LerpImage()
+{
+	ImageLerpT += 0.1 * LerpSpeed;
+	CurrentLocation = FMath::Lerp(OriginLocation, DestinationLocation, ImageLerpT);
+	ImageLocation->SetPosition(CurrentLocation);
+	if(ImageLerpT >= 1.0f)
+	{
+		ImageLocation->SetPosition(DestinationLocation);
+	}
+}
+
+void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_)
+{
+	OriginLocation = ImageLocation->GetPosition();
+	DestinationLocation = DestinationLocation_;
+	ImageLerpT = 0.0f;
 	
 }
+
+
+void USNavigatableMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	TimeBetweenInput += InDeltaTime;
+
+	
+	if(ImageLerpT < 1.0f) { LerpImage(); }
+
+
+}
+
+void USNavigatableMenu::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	const auto& SlateApplication = FSlateApplication::Get();
+	auto& NavigationConfig = *SlateApplication.GetNavigationConfig();
+
+	NavigationConfig.bAnalogNavigation = false;
+
+
+	
+}
+
+void USNavigatableMenu::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+	ImageLocation = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
+	OriginLocation = ImageLocation->GetPosition();
+
+}
+
+

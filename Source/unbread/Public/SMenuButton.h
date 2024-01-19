@@ -15,6 +15,7 @@ class UButton;
 UENUM()
 enum EDirection { Up = 0, Right, Down, Left };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMenuButtonHovered, USMenuButton*, Button);
 
 UCLASS()
 class UNBREAD_API USMenuButton : public UCanvasPanel
@@ -30,9 +31,18 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	FString Name;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMenuButtonHovered Hovered;
 	
 	UFUNCTION()
 	void AddConnection(EDirection Direction_, FString Name_);
+
+	UFUNCTION()
+	void MenuButtonOnHovered();
+
+	UFUNCTION()
+	void BindOnHovered();
 
 	
 };

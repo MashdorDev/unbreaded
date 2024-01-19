@@ -14,7 +14,7 @@
  * 
  */
 class UButton;
-
+class UImage;
 
 UCLASS()
 class UNBREAD_API USNavigatableMenu : public UUserWidget
@@ -27,8 +27,21 @@ public:
 	UPROPERTY(EditAnywhere)
 	USMenuButton* Selected;
 
-	
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UImage* SelectedImage;
 
+	UPROPERTY(EditAnywhere)
+	FVector2D SelectedImagePadding;
+
+	UPROPERTY(EditAnywhere)
+	float TimeBetweenInputThreshold;
+
+	UPROPERTY()
+	UCanvasPanelSlot* ImageLocation;
+
+	UPROPERTY(EditAnywhere)
+	float LerpSpeed;
+	
 	UFUNCTION(BlueprintCallable)
 	void AddButton(USMenuButton* Button);
 
@@ -38,9 +51,26 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddConnection(USMenuButton* FromButton, USMenuButton* ToButton, EDirection Direction);
 
-	
-
 	UFUNCTION(BlueprintCallable)
 	void SetSelected(USMenuButton* Selected_);
+
+	UFUNCTION()
+	void LerpImage();
 	
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	virtual void NativeConstruct() override;
+
+	virtual void NativePreConstruct() override;
+
+private:
+	float TimeBetweenInput;
+	float ImageLerpT;
+	FVector2D DestinationLocation;
+	FVector2D OriginLocation;
+	FVector2D CurrentLocation;
+
+	void ResetLerp(FVector2D DestinationLocation_);
+
+
 };

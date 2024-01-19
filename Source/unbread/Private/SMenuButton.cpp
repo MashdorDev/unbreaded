@@ -3,6 +3,7 @@
 
 #include "SMenuButton.h"
 #include "iostream"
+#include "Components/Button.h"
 
 void USMenuButton::AddConnection(EDirection Direction_, FString Name_)
 {
@@ -15,4 +16,16 @@ void USMenuButton::AddConnection(EDirection Direction_, FString Name_)
 	
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
 				TEXT("Added connection:" + Name + " To " + Name_));
+
+}
+
+void USMenuButton::MenuButtonOnHovered()
+{
+	Hovered.Broadcast(this);
+
+}
+
+void USMenuButton::BindOnHovered()
+{
+	Button->OnHovered.AddDynamic(this, &USMenuButton::MenuButtonOnHovered);
 }
