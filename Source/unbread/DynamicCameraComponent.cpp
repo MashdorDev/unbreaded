@@ -58,6 +58,9 @@ void UDynamicCameraComponent::TransitionCamera(const float TransitionTime)
 
 	// Transition to the NextCameraActor 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(NextCameraActor, TransitionTime);
+	CurrentCameraActor = NextCameraActor;
+
+	if(DefaultCameraActor == nullptr) DefaultCameraActor = CurrentCameraActor;
 
 	return;
 }

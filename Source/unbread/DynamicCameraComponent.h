@@ -25,6 +25,10 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	AActor* NextCameraActor;
 
+	// A reference to the actor containing the currently used camera
+	UPROPERTY(BlueprintReadWrite)
+	AActor* CurrentCameraActor;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
