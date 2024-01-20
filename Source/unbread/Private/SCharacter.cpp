@@ -90,7 +90,7 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 	FVector ToTarget = LookAtTarget - ForwardDirectionIndicatorMesh->GetComponentLocation(); // this is a world rotation
 	FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw, 0.f); //
 
-	BaseMesh->SetWorldRotation(FMath::RInterpTo(BaseMesh->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 1.f));
+	BaseMesh->SetWorldRotation(FMath::RInterpTo(BaseMesh->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
 
 	// TODO: Update rotation according to camera, lerp as tank
 }
