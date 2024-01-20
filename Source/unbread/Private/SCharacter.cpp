@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "unbread/DynamicCameraComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -23,6 +24,8 @@ ASCharacter::ASCharacter()
 	ForwardDirectionIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>("ForwardDirectionIndicatorMesh");
 	ForwardDirectionIndicatorMesh->SetupAttachment(BaseMesh);
 
+	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
+	
 	// TODO: ADD PROJECTILE SPAWN POINT
 
 }
@@ -93,6 +96,19 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 	BaseMesh->SetWorldRotation(FMath::RInterpTo(BaseMesh->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
 
 	// TODO: Update rotation according to camera, lerp as tank
+}
+
+void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
+{
+	IDynamicCameraInterface::SetNextCamera_Implementation(CameraActor);
+	if(GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Set Next Camera Called"));
+	DynamicCamera->SetNextCamera(CameraActor);
+}
+
+void ASCharacter::TransitionCamera_Implementation(const float TransitionTime)
+{
+	IDynamicCameraInterface::TransitionCamera_Implementation(TransitionTime);
+	DynamicCamera->TransitionCamera(TransitionTime);
 }
 
 // Called every frame

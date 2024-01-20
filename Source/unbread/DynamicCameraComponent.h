@@ -9,7 +9,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class UNBREAD_API UDynamicCameraComponent : public UActorComponent, public IDynamicCameraInterface
+class UNBREAD_API UDynamicCameraComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -33,9 +33,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetNextCamera_Implementation(AActor* CameraActor) override;
+	void SetNextCamera(AActor* CameraActor);
 
-	void TransitionCamera_Implementation(const float TransitionTime) override;
-
-		
+	void TransitionCamera(const float TransitionTime);
 };

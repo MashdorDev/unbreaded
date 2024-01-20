@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DynamicCameraInterface.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
+class UDynamicCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 
 UCLASS()
-class UNBREAD_API ASCharacter : public ACharacter
+class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface
 {
 	GENERATED_BODY()
 
@@ -29,6 +31,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* ProjectileSpawnPoint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UDynamicCameraComponent*  DynamicCamera;
 
 protected:
 	// Called when the game starts or when spawned
@@ -55,6 +60,11 @@ protected:
 
 	UPROPERTY()
 	APlayerController* PlayerController;
+
+	
+	void SetNextCamera_Implementation(AActor* CameraActor) override;
+
+	void TransitionCamera_Implementation(const float TransitionTime) override;
 	
 
 public:	

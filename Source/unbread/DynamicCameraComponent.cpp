@@ -34,8 +34,9 @@ void UDynamicCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType
 }
 
 // Sets the camera that will be transitioned to next
-void UDynamicCameraComponent::SetNextCamera_Implementation(AActor* CameraActor)
+void UDynamicCameraComponent::SetNextCamera(AActor* CameraActor)
 {
+	
 	if(CameraActor == nullptr)
 	{
 		NextCameraActor = DefaultCameraActor;
@@ -47,7 +48,7 @@ void UDynamicCameraComponent::SetNextCamera_Implementation(AActor* CameraActor)
 }
 
 // Transitions to the next camera
-void UDynamicCameraComponent::TransitionCamera_Implementation(const float TransitionTime)
+void UDynamicCameraComponent::TransitionCamera(const float TransitionTime)
 {
 	// Do nothing if there is no camera actor to transition to
 	if(NextCameraActor == nullptr)
