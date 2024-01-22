@@ -8,6 +8,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "unbread/DynamicCameraComponent.h"
 
 // Sets default values
@@ -17,6 +19,12 @@ ASCharacter::ASCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(34.f, 88.f);
+
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
+	SpringArmComponent->SetupAttachment(GetMesh());
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
+	CameraComponent->SetupAttachment(SpringArmComponent);
 
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("BaseMesh");
 	BaseMesh->SetupAttachment(GetMesh());

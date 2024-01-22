@@ -11,6 +11,8 @@
 class UDynamicCameraComponent;
 class UInputAction;
 class UInputMappingContext;
+class USpringArmComponent;
+class UCameraComponent;
 
 UCLASS()
 class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface
@@ -22,6 +24,13 @@ public:
 	ASCharacter();
 
 private:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* SpringArmComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UCameraComponent* CameraComponent;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* BaseMesh;
 
