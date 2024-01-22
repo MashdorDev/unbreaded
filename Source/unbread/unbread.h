@@ -4,3 +4,16 @@
 
 #include "CoreMinimal.h"
 
+UENUM(BlueprintType)
+enum class EAbilityInputID : uint8
+{
+	None,
+	Confirm,
+	Cancel,
+	PrimaryAttack,
+	SecondaryAttack,
+	MovementAbility,
+	InteractionAbility,
+	UtilityAbility
+};
+
