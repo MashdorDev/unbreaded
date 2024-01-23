@@ -95,21 +95,17 @@ void USNavigatableMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 	if(ImageLerpT < 1.0f) { LerpImage(); }
 }
 
-void USNavigatableMenu::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	const auto& SlateApplication = FSlateApplication::Get();
-	auto& NavigationConfig = *SlateApplication.GetNavigationConfig();
-
-	NavigationConfig.bAnalogNavigation = false;
-}
 
 void USNavigatableMenu::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 	ImageLocation = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
 	OriginLocation = ImageLocation->GetPosition();
+
+	const auto& SlateApplication = FSlateApplication::Get();
+	auto& NavigationConfig = *SlateApplication.GetNavigationConfig();
+
+	NavigationConfig.bAnalogNavigation = false;
 
 }
 
