@@ -33,9 +33,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	FVector2D SelectedImagePadding;
 
-	UPROPERTY(EditAnywhere)
-	float TimeBetweenInputThreshold;
-
 	UPROPERTY()
 	UCanvasPanelSlot* ImageLocation;
 
@@ -64,7 +61,6 @@ public:
 	virtual void NativePreConstruct() override;
 
 private:
-	float TimeBetweenInput;
 	float ImageLerpT;
 	FVector2D DestinationLocation;
 	FVector2D OriginLocation;

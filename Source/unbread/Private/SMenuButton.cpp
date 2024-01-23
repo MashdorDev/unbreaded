@@ -11,18 +11,12 @@ void USMenuButton::AddConnection(EDirection Direction_, FString Name_)
 	{
 		Connections.SetNum(4);
 	}
-
 	Connections[Direction_] = Name_;
-	
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-				TEXT("Added connection:" + Name + " To " + Name_));
-
 }
 
 void USMenuButton::MenuButtonOnHovered()
 {
 	Hovered.Broadcast(this);
-
 }
 
 void USMenuButton::BindOnHovered()

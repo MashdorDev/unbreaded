@@ -12,71 +12,36 @@
 
 void USNavigatableMenu::AddButton(USMenuButton* Button)
 {
-	if(Buttons.Find(Button->Name))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Button Already Exists!"));
-		return;
-	}
-	
+	if(Buttons.Find(Button->Name)) return; // already exists
 
 	Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	if(UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(Button))
 	{
 		I->SetAlignment(FVector2D(0.5f, 0.5f));
 	}
+	
 	// Custom Hover functionality, for mousing over
 	Button->BindOnHovered();
 	Button->Hovered.AddDynamic(this, &USNavigatableMenu::SetSelected);
-	
 	
 	Buttons.Add(Button->Name, Button);
 }
 
 void USNavigatableMenu::Navigate(EDirection Direction)
 {
-	if(TimeBetweenInput <= TimeBetweenInputThreshold)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
-						TEXT("Inputting too quickly"));
-		return;
-	}
-
-	TimeBetweenInput = 0.0f;
-
 	FString Name = Selected->Connections[Direction];
-	if(Name == "")
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
-        				TEXT("No Connection in desired direction"));
-		
-		return;		
+	
+	if(Name == "") return;
+	
+	if(USMenuButton* Button = *Buttons.Find(Name)) SetSelected(Button);
 
-	}
-	if(USMenuButton* Button = *Buttons.Find(Name))
-     	{
-     		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-     			TEXT("Navigating to button") + Name);
-     		SetSelected(Button);
-     	}
-
-	// This should not have taken this long
 }
 
 void USNavigatableMenu::AddConnection(USMenuButton* FromButton, USMenuButton* ToButton, EDirection Direction)
 {
-	
-
-	
-	if(!Buttons.Find(FromButton->Name) || !Buttons.Find(ToButton->Name))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
-				TEXT("Unable to add connection"));
-		return;
-	}
+	if(!Buttons.Find(FromButton->Name) || !Buttons.Find(ToButton->Name)) return;
 
 	FromButton->AddConnection(Direction, ToButton->Name);
-
-	
 }
 
 
@@ -91,23 +56,16 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 			const UCanvasPanelSlot* S = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected);
 			UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
 
-			if (!S || !I)
-			{
-				return;
-			}
-
-			ResetLerp(S->GetPosition());
+			if (!S || !I) return;
 			
 			if (Selected->Button->GetIsFocusable())
 			{
 				// Set focus on the button if it's focusable
 				Selected->Button->SetFocus();
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("SettingFocus"));
 			}
-			else
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Button is not focusable"));
-			}
+			
+			ResetLerp(S->GetPosition());
+			
 		}
 	}
 }
@@ -128,19 +86,13 @@ void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_)
 	OriginLocation = ImageLocation->GetPosition();
 	DestinationLocation = DestinationLocation_;
 	ImageLerpT = 0.0f;
-	
 }
 
 
 void USNavigatableMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
-	TimeBetweenInput += InDeltaTime;
-
-	
 	if(ImageLerpT < 1.0f) { LerpImage(); }
-
-
 }
 
 void USNavigatableMenu::NativeConstruct()
@@ -151,9 +103,6 @@ void USNavigatableMenu::NativeConstruct()
 	auto& NavigationConfig = *SlateApplication.GetNavigationConfig();
 
 	NavigationConfig.bAnalogNavigation = false;
-
-
-	
 }
 
 void USNavigatableMenu::NativePreConstruct()
