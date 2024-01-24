@@ -17,7 +17,7 @@ class UButton;
 class UImage;
 
 UCLASS()
-class UNBREAD_API USNavigatableMenu : public UUserWidget
+class UNBREAD_API USNavigatableMenu : public UUserWidget, public ISMenuWidgetInterface
 {
 	GENERATED_BODY()
 public:
@@ -57,6 +57,9 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	virtual void NativePreConstruct() override;
+
+// MenuWidgetInterface overrides
+	void ToggleVisibility_Implementation(bool Visible) override;
 
 private:
 	float ImageLerpT;

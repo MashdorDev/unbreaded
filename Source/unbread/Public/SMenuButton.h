@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SMenuWidgetInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/CanvasPanel.h"
 #include "SMenuButton.generated.h"
@@ -17,8 +18,8 @@ enum EDirection { Up = 0, Right, Down, Left };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMenuButtonHovered, USMenuButton*, Button);
 
-UCLASS()
-class UNBREAD_API USMenuButton : public UCanvasPanel
+UCLASS(Blueprintable)
+class UNBREAD_API USMenuButton : public UCanvasPanel, public ISMenuWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -44,5 +45,14 @@ public:
 	UFUNCTION()
 	void BindOnHovered();
 
-	
+// SMenuWidgetInterface 
+	void SetChildWidget_Implementation(const TScriptInterface<ISMenuWidgetInterface>& Child) override;
+
+	void OpenChildWidget_Implementation() override;
+
+	void CloseChildWidget_Implementation() override;
+
+private:
+	bool HasChild = false;
+	TScriptInterface<ISMenuWidgetInterface> ChildWidget;
 };

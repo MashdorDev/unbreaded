@@ -109,4 +109,14 @@ void USNavigatableMenu::NativePreConstruct()
 
 }
 
+void USNavigatableMenu::ToggleVisibility_Implementation(bool Visible)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("open child "));
+
+	ESlateVisibility V = (Visible) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	this->SetVisibility(V);
+}
+
+
+
 
