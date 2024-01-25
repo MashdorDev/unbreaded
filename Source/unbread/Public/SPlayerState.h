@@ -8,7 +8,7 @@
 #include "SPlayerState.generated.h"
 
 class UAbilitySystemComponent;
-class UTDSHealthAttributeSet;
+class USHealthAttributeSet;
 
 /**
  * 
@@ -24,8 +24,8 @@ public:
 	// Inherited via IAbilitySystemInterface
 	UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
-	UTDSHealthAttributeSet* HealthAttributeSet;*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
+	USHealthAttributeSet* HealthAttributeSet;
 
 protected:
 	UPROPERTY()

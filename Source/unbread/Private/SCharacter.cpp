@@ -14,6 +14,7 @@
 #include "../unbread.h"
 #include "AbilitySystemComponent.h"
 #include "SPlayerState.h"
+#include "SGameplayAbility.h"
 
 
 // Sets default values
@@ -190,6 +191,57 @@ void ASCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	InitAbilitySystemComponent();
+
+	InitializeAbilities();
+	InitializeEffects();
+}
+
+void ASCharacter::InitializeAbilities()
+{
+	if (!AbilitySystemComponent.IsValid())
+	{
+		return;
+	}
+
+	// Iterate and give abilities to all
+	for (TSubclassOf<USGameplayAbility>& Ability : DefaultAbilities)
+	{
+		FGameplayAbilitySpecHandle SpecHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability, 1, static_cast<int32>(Ability.GetDefaultObject()->AbilityInputID), this));
+		GivenAbilites.Add(SpecHandle);
+	}
+}
+
+void ASCharacter::InitializeEffects()
+{
+	if (!AbilitySystemComponent.IsValid())
+	{
+		return;
+	}
+
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	for (TSubclassOf<UGameplayEffect>& Effect : DefaultEffects)
+	{
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1, EffectContext);
+		if (SpecHandle.IsValid())
+		{
+			FActiveGameplayEffectHandle GEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void ASCharacter::ClearGivenAbilities()
+{
+	if (!AbilitySystemComponent.IsValid())
+	{
+		return;
+	}
+
+	for (FGameplayAbilitySpecHandle AbilitySpecHandle : GivenAbilites)
+	{
+		AbilitySystemComponent->ClearAbility(AbilitySpecHandle);
+	}
 }
 
 void ASCharacter::OnPrimaryAttack(const FInputActionValue& Value)

@@ -16,6 +16,8 @@ class UInputMappingContext;
 class USpringArmComponent;
 class UCameraComponent;
 struct FInputActionValue;
+class USGameplayAbility;
+class UGameplayEffect;
 
 UCLASS()
 class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface
@@ -124,5 +126,15 @@ public:
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<class UAbilitySystemComponent> AbilitySystemComponent;
+
+	virtual void InitializeAbilities();
+	virtual void InitializeEffects();
+	virtual void ClearGivenAbilities();
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GAS")
+	TArray<TSubclassOf<USGameplayAbility>> DefaultAbilities;
+	TArray<FGameplayAbilitySpecHandle> GivenAbilites;
 	
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GAS")
+	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
 };
