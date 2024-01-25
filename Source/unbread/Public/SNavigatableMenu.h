@@ -51,9 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSelected(USMenuButton* Selected_);
 
-	UFUNCTION(BlueprintCallable)
-	USMenuButton* GetSelected(){return Selected;}
-
 	UFUNCTION()
 	void LerpImage();
 	
@@ -63,16 +60,12 @@ public:
 
 // MenuWidgetInterface overrides
 	void ToggleVisibility_Implementation(bool Visible) override;
-	void SetParentWidget_Implementation(const TScriptInterface<ISMenuWidgetInterface>& Parent) override;
-	void OpenParentWidget_Implementation() override;
 
 private:
 	float ImageLerpT;
 	FVector2D DestinationLocation;
 	FVector2D OriginLocation;
 	FVector2D CurrentLocation;
-
-	TScriptInterface<ISMenuWidgetInterface> ParentWidget;
 
 	void ResetLerp(FVector2D DestinationLocation_);
 

@@ -32,15 +32,6 @@ public:
 	void CloseChildWidget();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void SetParentWidget(const TScriptInterface<ISMenuWidgetInterface>& Parent);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void OpenParentWidget();
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void CloseParentWidget();
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ToggleVisibility(bool Visible);
 	
 };

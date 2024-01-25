@@ -23,8 +23,6 @@ void USNavigatableMenu::AddButton(USMenuButton* Button)
 	// Custom Hover functionality, for mousing over
 	Button->BindOnHovered();
 	Button->Hovered.AddDynamic(this, &USNavigatableMenu::SetSelected);
-
-	
 	
 	Buttons.Add(Button->Name, Button);
 }
@@ -63,8 +61,6 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 			if (Selected->Button->GetIsFocusable())
 			{
 				// Set focus on the button if it's focusable
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("focus"));
-
 				Selected->Button->SetFocus();
 			}
 			
@@ -115,22 +111,10 @@ void USNavigatableMenu::NativePreConstruct()
 
 void USNavigatableMenu::ToggleVisibility_Implementation(bool Visible)
 {
-	this->SetVisibility((Visible) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-}
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("open child "));
 
-void USNavigatableMenu::SetParentWidget_Implementation(const TScriptInterface<ISMenuWidgetInterface>& Parent)
-{
-	if(Parent)
-	{
-		ParentWidget = Parent;
-		
-	}
-}
-
-void USNavigatableMenu::OpenParentWidget_Implementation()
-{
-	ISMenuWidgetInterface::Execute_ToggleVisibility(ParentWidget.GetObject(), true);
-	
+	ESlateVisibility V = (Visible) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	this->SetVisibility(V);
 }
 
 
