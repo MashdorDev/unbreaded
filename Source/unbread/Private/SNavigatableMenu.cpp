@@ -111,11 +111,33 @@ void USNavigatableMenu::NativePreConstruct()
 
 void USNavigatableMenu::ToggleVisibility_Implementation(bool Visible)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("open child "));
-
+	
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("toggle vis"));
 	ESlateVisibility V = (Visible) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
 	this->SetVisibility(V);
+	
 }
+
+void USNavigatableMenu::SetParentWidget_Implementation(const TScriptInterface<ISMenuWidgetInterface>& Parent)
+{
+	if(Parent)
+	{
+		ParentWidget = Parent;
+		
+	}
+
+}
+
+void USNavigatableMenu::OpenParentWidget_Implementation()
+{
+	
+	ISMenuWidgetInterface::Execute_ToggleVisibility(ParentWidget.GetObject(), true);
+	
+	//this->SetVisibility(ESlateVisibility::Collapsed);
+	
+}
+
+
 
 
 

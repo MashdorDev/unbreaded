@@ -38,6 +38,8 @@ void USMenuButton::SetChildWidget_Implementation(const TScriptInterface<ISMenuWi
 
 void USMenuButton::OpenChildWidget_Implementation()
 {
+	//this->GetParent()->SetVisibility(ESlateVisibility::Collapsed);
+	// TODO: add parent to SMenubuttons to they can access the owning navigatableMenu
 	ISMenuWidgetInterface::Execute_ToggleVisibility(ChildWidget.GetObject(), true);
 	
 }

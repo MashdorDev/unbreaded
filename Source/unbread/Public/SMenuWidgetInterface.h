@@ -33,5 +33,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ToggleVisibility(bool Visible);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void SetParentWidget(const TScriptInterface<ISMenuWidgetInterface>& Parent);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OpenParentWidget();
 	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	TScriptInterface<ISMenuWidgetInterface> GetParentWidget();
 };
