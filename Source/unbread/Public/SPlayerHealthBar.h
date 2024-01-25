@@ -3,31 +3,40 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
-#include "SUnbreadPlayerHud.generated.h"
+#include "Components/CanvasPanel.h"
+#include "SPlayerHealthBar.generated.h"
 
 /**
  * 
  */
-UCLASS(Abstract)
-class UNBREAD_API USUnbreadPlayerHud : public UUserWidget
+class UProgressBar;
+
+UCLASS(Blueprintable)
+class UNBREAD_API USPlayerHealthBar : public UCanvasPanel
 {
 	GENERATED_BODY()
-public:
-	// Update HUD with new HP
+
+
 	UFUNCTION(BlueprintCallable)
 	void SetHealth(float CurrentHealth, float MaxHealth);
 
 	UFUNCTION(BlueprintCallable)
-	void SetAmmunition(int CurrentAmmo, int MaxAmmo);
+	void SetAmmunition(int CurrentAmmo, int MaxAmmo = 3);
 
-	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	UFUNCTION(BlueprintCallable)
+	void OnTick(const float InDeltaTime);
 
-	virtual void NativeConstruct() override;
+	UFUNCTION(BlueprintCallable)
+	void OnConstruct();
 
 	void LerpDelayedHPBar(const float& InDeltaTime);
-	
 
+	void LerpHealthBar(const float InDeltaTime);
+
+
+	UPROPERTY(EditAnywhere)
+	int Ammo;
+	
 	UPROPERTY(EditAnywhere, meta= (BindWidget))
 	class UProgressBar* HealthBar;
 
@@ -35,11 +44,7 @@ public:
 	class UProgressBar* DelayedHealthBar;
 
 	UPROPERTY(EditAnywhere)
-	int Ammo;
-
-	UPROPERTY(EditAnywhere)
 	float HPDelayThreshold;
-	
 
 private:
 	float BarPercentage;
@@ -50,7 +55,4 @@ private:
 	float DelayBarLerpStart;
 	float DelayBarLerpTarget;
 	bool IsLerping;
-
-	
-	
 };

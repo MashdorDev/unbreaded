@@ -1,55 +1,46 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SUnbreadPlayerHud.h"
+#include "SPlayerHealthBar.h"
 
-#include "FrameTypes.h"
-#include "Animation/AnimPhysicsSolver.h"
 #include "Components/ProgressBar.h"
 
-void USUnbreadPlayerHud::SetHealth(float CurrentHealth, float MaxHealth)
+void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
 {
-	if(HealthBar)
+	if(!HealthBar) return;
+	if(CurrentHealth < MaxHealth)
 	{
-		BarPercentage = CurrentHealth / MaxHealth;
-		HealthBar->SetPercent(BarPercentage);
-		TimeSinceHit = 0.0f;
-
+		
 	}
+	BarPercentage = CurrentHealth / MaxHealth;
+	HealthBar->SetPercent(BarPercentage);
+	TimeSinceHit = 0.0f;
 }
 
-void USUnbreadPlayerHud::SetAmmunition(int CurrentAmmo, int MaxAmmo)
+void USPlayerHealthBar::SetAmmunition(int CurrentAmmo, int MaxAmmo)
 {
 	Ammo = CurrentAmmo;	
-	
-	
 }
 
-void USUnbreadPlayerHud::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void USPlayerHealthBar::OnTick(const float InDeltaTime)
 {
-	Super::NativeTick(MyGeometry, InDeltaTime);
-	
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Ticking hp"));
 
 	LerpDelayedHPBar(InDeltaTime);
-	
-	
 }
 
-void USUnbreadPlayerHud::NativeConstruct()
+void USPlayerHealthBar::OnConstruct()
 {
-	Super::NativeConstruct();
 	DelayBarPercentage = HealthBar->GetPercent();
 	DelayedHealthBar->SetPercent(DelayBarPercentage);
 	DelayBarLerpTarget = DelayBarPercentage;
 	DelayBarLerpStart = DelayBarPercentage;
 	DelayBarLerpT = 1.0f;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Construct PlayerHud"));
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Construct health bar"));
 }
 
-void USUnbreadPlayerHud::LerpDelayedHPBar(const float& InDeltaTime)
+void USPlayerHealthBar::LerpDelayedHPBar(const float& InDeltaTime)
 {
-
 	if(!IsLerping)
 	{
 		TimeSinceHit += InDeltaTime;
@@ -81,4 +72,8 @@ void USUnbreadPlayerHud::LerpDelayedHPBar(const float& InDeltaTime)
 		
 		
 	}
+}
+
+void USPlayerHealthBar::LerpHealthBar(const float InDeltaTime)
+{
 }
