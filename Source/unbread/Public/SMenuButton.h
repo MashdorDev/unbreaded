@@ -14,21 +14,24 @@
 class UButton;
 
 UENUM()
-enum EDirection { Up = 0, Right, Down, Left };
+enum EDirection { Up = 0, Right, Down, Left, In, Out };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMenuButtonHovered, USMenuButton*, Button);
 
 UCLASS(Blueprintable)
-class UNBREAD_API USMenuButton : public UCanvasPanel, public ISMenuWidgetInterface
+class UNBREAD_API USMenuButton : public UCanvasPanel
 {
 	GENERATED_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UButton* Button;
+	
 	UPROPERTY(EditAnywhere)
 	TArray<FString> Connections;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCanvasPanel* ChildCanvas;
 	
 	UPROPERTY(EditAnywhere)
 	FString Name;
@@ -45,14 +48,12 @@ public:
 	UFUNCTION()
 	void BindOnHovered();
 
+	UFUNCTION()
+	bool HasChildCanvas() const { return (ChildCanvas) ? true : false;}
+
 // SMenuWidgetInterface 
-	void SetChildWidget_Implementation(const TScriptInterface<ISMenuWidgetInterface>& Child) override;
+	
 
-	void OpenChildWidget_Implementation() override;
 
-	void CloseChildWidget_Implementation() override;
 
-private:
-	bool HasChild = false;
-	TScriptInterface<ISMenuWidgetInterface> ChildWidget;
 };

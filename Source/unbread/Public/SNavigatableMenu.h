@@ -17,7 +17,7 @@ class UButton;
 class UImage;
 
 UCLASS()
-class UNBREAD_API USNavigatableMenu : public UUserWidget, public ISMenuWidgetInterface
+class UNBREAD_API USNavigatableMenu : public UUserWidget
 {
 	GENERATED_BODY()
 public:
@@ -26,6 +26,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	USMenuButton* Selected;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	UCanvasPanel* ParentCanvas;
 
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UImage* SelectedImage;
@@ -59,13 +62,7 @@ public:
 	virtual void NativePreConstruct() override;
 
 // MenuWidgetInterface overrides
-	void ToggleVisibility_Implementation(bool Visible) override;
-
-	void SetParentWidget_Implementation(const TScriptInterface<ISMenuWidgetInterface>& Parent) override;
-
-	void OpenParentWidget_Implementation() override;
-
-	TScriptInterface<ISMenuWidgetInterface> GetParentWidget_Implementation() override {return ParentWidget;};
+	
 
 private:
 	float ImageLerpT;
@@ -73,7 +70,7 @@ private:
 	FVector2D OriginLocation;
 	FVector2D CurrentLocation;
 
-	TScriptInterface<ISMenuWidgetInterface> ParentWidget;
+
 
 
 	void ResetLerp(FVector2D DestinationLocation_);

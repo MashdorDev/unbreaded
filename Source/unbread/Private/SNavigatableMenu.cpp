@@ -33,7 +33,23 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 	
 	if(Name == "") return;
 	
-	if(USMenuButton* Button = *Buttons.Find(Name)) SetSelected(Button);
+	if(USMenuButton* Button = *Buttons.Find(Name))
+	{
+		if(Selected->HasChildCanvas() && Direction == EDirection::In)
+		{
+			Selected->ChildCanvas->SetVisibility(ESlateVisibility::Visible);
+			ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		else if(Button->HasChildCanvas() && Direction == EDirection::Out)
+		{
+			ParentCanvas->SetVisibility(ESlateVisibility::Visible);
+			Button->ChildCanvas->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		
+		SetSelected(Button);
+		
+	}
+	
 
 }
 
@@ -63,7 +79,9 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 				// Set focus on the button if it's focusable
 				Selected->Button->SetFocus();
 			}
+
 			
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("pos: %f %f"),S->GetPosition().X, S->GetPosition().Y));	
 			ResetLerp(S->GetPosition());
 			
 		}
@@ -109,33 +127,7 @@ void USNavigatableMenu::NativePreConstruct()
 
 }
 
-void USNavigatableMenu::ToggleVisibility_Implementation(bool Visible)
-{
-	
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, TEXT("toggle vis"));
-	ESlateVisibility V = (Visible) ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
-	this->SetVisibility(V);
-	
-}
 
-void USNavigatableMenu::SetParentWidget_Implementation(const TScriptInterface<ISMenuWidgetInterface>& Parent)
-{
-	if(Parent)
-	{
-		ParentWidget = Parent;
-		
-	}
-
-}
-
-void USNavigatableMenu::OpenParentWidget_Implementation()
-{
-	
-	ISMenuWidgetInterface::Execute_ToggleVisibility(ParentWidget.GetObject(), true);
-	
-	//this->SetVisibility(ESlateVisibility::Collapsed);
-	
-}
 
 
 
