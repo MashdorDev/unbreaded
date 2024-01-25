@@ -49,7 +49,7 @@ public:
 	void Navigate(EDirection Direction);
 
 	UFUNCTION(BlueprintCallable)
-	void AddConnection(USMenuButton* FromButton, USMenuButton* ToButton, EDirection Direction);
+	void AddConnection(USMenuButton* FromButton, USMenuButton* ToButton, EDirection Direction, bool TwoWay);
 
 	UFUNCTION(BlueprintCallable)
 	void SetSelected(USMenuButton* Selected_);

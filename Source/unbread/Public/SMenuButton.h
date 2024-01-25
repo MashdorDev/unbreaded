@@ -16,6 +16,7 @@ class UButton;
 UENUM()
 enum EDirection { Up = 0, Right, Down, Left, In, Out };
 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMenuButtonHovered, USMenuButton*, Button);
 
 UCLASS(Blueprintable)

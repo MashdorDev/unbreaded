@@ -53,11 +53,31 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 
 }
 
-void USNavigatableMenu::AddConnection(USMenuButton* FromButton, USMenuButton* ToButton, EDirection Direction)
+void USNavigatableMenu::AddConnection(USMenuButton* FromButton, USMenuButton* ToButton, EDirection Direction, bool TwoWay)
 {
 	if(!Buttons.Find(FromButton->Name) || !Buttons.Find(ToButton->Name)) return;
 
 	FromButton->AddConnection(Direction, ToButton->Name);
+
+	// add another connection in the opposite direction
+	if(TwoWay)
+	{
+		switch(Direction)
+		{
+		case EDirection::Up:
+			ToButton->AddConnection(EDirection::Down, FromButton->Name);
+		case EDirection::Down:
+			ToButton->AddConnection(EDirection::Up, FromButton->Name);
+		case EDirection::Left:
+			ToButton->AddConnection(EDirection::Right, FromButton->Name);
+		case EDirection::Right:
+			ToButton->AddConnection(EDirection::Left, FromButton->Name);
+		
+		default:
+			break;
+		}
+	}
+	
 }
 
 
@@ -79,9 +99,6 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 				// Set focus on the button if it's focusable
 				Selected->Button->SetFocus();
 			}
-
-			
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("pos: %f %f"),S->GetPosition().X, S->GetPosition().Y));	
 			ResetLerp(S->GetPosition());
 			
 		}
