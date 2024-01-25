@@ -15,6 +15,7 @@
 #include "AbilitySystemComponent.h"
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
+#include "SHealthAttributeSet.h"
 
 
 // Sets default values
@@ -57,6 +58,16 @@ void ASCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultInputMappingContext, 0);
 		}
 	}
+
+	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
+	if (!PState)
+	{
+			return;
+	}
+
+	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
+
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -242,6 +253,11 @@ void ASCharacter::ClearGivenAbilities()
 	{
 		AbilitySystemComponent->ClearAbility(AbilitySpecHandle);
 	}
+}
+
+void ASCharacter::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	OnHealthChanged(Data.OldValue, Data.NewValue);
 }
 
 void ASCharacter::OnPrimaryAttack(const FInputActionValue& Value)
