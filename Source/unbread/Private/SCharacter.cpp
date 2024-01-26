@@ -65,9 +65,11 @@ void ASCharacter::BeginPlay()
 			return;
 	}
 
+	// Hook Up Delegates
 	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
-
+	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -258,6 +260,11 @@ void ASCharacter::ClearGivenAbilities()
 void ASCharacter::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
 {
 	OnHealthChanged(Data.OldValue, Data.NewValue);
+}
+
+void ASCharacter::OnShieldAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	OnShieldChanged(Data.OldValue, Data.NewValue);
 }
 
 void ASCharacter::OnPrimaryAttack(const FInputActionValue& Value)

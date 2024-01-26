@@ -142,4 +142,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
 	void OnHealthChanged(float OldValue, float NewValue);
+
+	virtual void OnShieldAttributeChanged(const FOnAttributeChangeData& Data);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
+	void OnShieldChanged(float OldValue, float NewValue);
 };
