@@ -8,7 +8,14 @@ public class unbread : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
+
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"UMG", "SlateCore", "Slate"
+		});
+
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 		
