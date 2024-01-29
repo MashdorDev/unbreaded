@@ -26,11 +26,15 @@ public:
 
 	// Properties
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	TArray<AActor*> ConnectedActors;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	bool bIsActive;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Setup")
+	float MaxInteractionDistance;
+
 
 protected:
 	// Called when the game starts or when spawned

@@ -5,7 +5,7 @@
 #include "ActivationInterface.h"
 
 // Sets default values
-ALever::ALever() : bIsActive(false)
+ALever::ALever() : bIsActive(false), MaxInteractionDistance(250.0f)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -35,6 +35,11 @@ void ALever::Tick(float DeltaTime)
 void ALever::Interact_Implementation(AActor* InstigatingActor)
 {
 	IInteractInterface::Interact_Implementation(InstigatingActor);
+
+	if(FVector::Distance(GetTransform().GetLocation(), InstigatingActor->GetTransform().GetLocation()) > MaxInteractionDistance)
+	{
+		return;
+	}
 
 	// Toggle bIsActive
 	bIsActive = !bIsActive;

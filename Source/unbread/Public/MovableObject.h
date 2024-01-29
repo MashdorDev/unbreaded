@@ -23,10 +23,10 @@ public:
 
 	// Properties
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Gameplay")
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Setup")
 	bool bIsBeingMoved;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Gameplay")
+	UPROPERTY(BlueprintReadWrite, Category = "Setup")
 	bool bCanMove;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Setup")

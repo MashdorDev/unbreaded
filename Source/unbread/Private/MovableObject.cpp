@@ -46,8 +46,18 @@ void AMovableObject::Interact_Implementation(AActor* InstigatingActor)
 	bIsBeingMoved = !bIsBeingMoved;
 
 	if(bIsBeingMoved)
-	{		
-		AttachToActor(InstigatingActor, FAttachmentTransformRules::KeepWorldTransform);
+	{
+		USceneComponent* AttachmentPoint = Cast<USceneComponent>(InstigatingActor->GetDefaultSubobjectByName("ItemAttachment"));
+
+		if(AttachmentPoint != nullptr)
+		{
+			AttachToComponent(AttachmentPoint, FAttachmentTransformRules::KeepWorldTransform);
+		}
+
+		else
+		{
+			AttachToActor(InstigatingActor, FAttachmentTransformRules::KeepWorldTransform);
+		}
 	}
 
 	else

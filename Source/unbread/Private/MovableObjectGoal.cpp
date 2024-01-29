@@ -3,6 +3,7 @@
 
 #include "MovableObjectGoal.h"
 
+#include "ActivationInterface.h"
 #include "MovableObject.h"
 #include "Components/BoxComponent.h"
 
@@ -42,16 +43,25 @@ void AMovableObjectGoal::OnEnterVolume(UPrimitiveComponent* OverlappedComp, AAct
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Do nothing if the other actor is not linked
-	if(OtherActor != Cast<AActor>(LinkedObject))
+	if(OtherActor != Cast<AActor>(KeyObject))
 	{
 		return;
 	}
 
 	// Detach the linked object from any other actors and stop it from being moved again
-	LinkedObject->bCanMove = false;
-	LinkedObject->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	KeyObject->bCanMove = false;
+	KeyObject->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 
-	const FTransform MakeTransform(GetActorRotation(), GetActorLocation(), LinkedObject->GetActorScale3D());
-	LinkedObject->SetActorTransform(MakeTransform);	
+	const FTransform MakeTransform(GetActorRotation(), GetActorLocation(), KeyObject->GetActorScale3D());
+	KeyObject->SetActorTransform(MakeTransform);
+
+	// Activate all linked actors
+	for(AActor* Actor : ConnectedActors)
+	{
+		if(Actor->GetClass()->ImplementsInterface(UActivationInterface::StaticClass()))
+		{
+			IActivationInterface::Execute_Activate(Actor);
+		}
+	}
 }
 

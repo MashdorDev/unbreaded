@@ -28,8 +28,13 @@ public:
 
 	// Properties
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Setup")
-	AMovableObject* LinkedObject;
+	// The object that must be moved to this goal
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Setup")
+	AMovableObject* KeyObject;
+
+	// An array of objects that will be activated once the key has been brought to this goal
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	TArray<AActor*> ConnectedActors;
 
 protected:
 	// Called when the game starts or when spawned

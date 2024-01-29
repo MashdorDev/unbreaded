@@ -76,11 +76,13 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	
 	// Forward / Backward
 	const FVector Forward = FVector(1.f, 0.f,0.f);
-	AddMovementInput(Forward, MoveVector.Y * MoveSpeed);
+
+	FVector ToTarget = LookTargetPos - ForwardDirectionIndicatorMesh->GetComponentLocation();
 	
+	AddMovementInput(ToTarget, MoveVector.Y * MoveSpeed);
 
 	// Right / Left
-	const FVector Right = FVector(0.f, 1.f,0.f);
+	const FVector Right = FRotator(0.f, 90.f, 0.f).RotateVector(ToTarget);// FVector(0.f, 1.f,0.f);
 	AddMovementInput(Right, MoveVector.X * MoveSpeed);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
@@ -96,6 +98,8 @@ void ASCharacter::Move(const FInputActionValue& Value)
 void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 {
 
+	LookTargetPos = LookAtTarget;
+	
 	// METHOD 1
 	
 	//const FRotator Rotation = Controller->GetControlRotation();
