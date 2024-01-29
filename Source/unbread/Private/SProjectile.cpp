@@ -16,8 +16,8 @@ ASProjectile::ASProjectile()
 	SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
 	RootComponent = SphereComponent;
 
-	ParticleEffectComponent = CreateDefaultSubobject<UParticleSystemComponent>("ParticleEffectComponent");
-	ParticleEffectComponent->SetupAttachment(SphereComponent);
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
+	StaticMeshComponent->SetupAttachment(RootComponent);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
 	ProjectileMovementComponent->InitialSpeed = 1000.f;
