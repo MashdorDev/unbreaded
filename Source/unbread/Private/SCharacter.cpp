@@ -38,6 +38,9 @@ ASCharacter::ASCharacter()
 	ForwardDirectionIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>("ForwardDirectionIndicatorMesh");
 	ForwardDirectionIndicatorMesh->SetupAttachment(BaseMesh);
 
+	ProjectileSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileSpawnPoint");
+	ProjectileSpawnPoint->SetupAttachment(ForwardDirectionIndicatorMesh);
+
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
 	
 	// TODO: ADD PROJECTILE SPAWN POINT
@@ -65,9 +68,11 @@ void ASCharacter::BeginPlay()
 			return;
 	}
 
+	// Hook Up Delegates
 	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
-
+	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -125,6 +130,21 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 	// TODO: Update rotation according to camera, lerp as tank
 }
 
+void ASCharacter::Jump(const FInputActionValue& Value)
+{
+	ACharacter::Jump();
+}
+
+void ASCharacter::ShootProjectile()
+{
+	FTransform SpawnTM = FTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation());
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+}
+
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
 {
@@ -164,6 +184,10 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction,					ETriggerEvent::Triggered, this, &ASCharacter::Move					);
 		//EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
+		
+		// TEMPORARY
+		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::ShootProjectile);
 
 		// GAS
 		EnhancedInputComponent->BindAction(PrimaryAttackAction,			ETriggerEvent::Triggered, this, &ASCharacter::OnPrimaryAttack			);
@@ -258,6 +282,11 @@ void ASCharacter::ClearGivenAbilities()
 void ASCharacter::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
 {
 	OnHealthChanged(Data.OldValue, Data.NewValue);
+}
+
+void ASCharacter::OnShieldAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	OnShieldChanged(Data.OldValue, Data.NewValue);
 }
 
 void ASCharacter::OnPrimaryAttack(const FInputActionValue& Value)

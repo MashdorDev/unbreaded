@@ -62,6 +62,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* RotateAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* JumpAction;
 
 	// GAMEPLAY ABILITY SYSTEM
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
@@ -79,11 +82,23 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* UtilityAbilityAction;
 
+	// TEMPORARY!!!
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
+	UInputAction* ProjectileAttackAction;
+
 	// FUNCTIONS AND VARIABLES
+
 
 	void Move(const FInputActionValue& Value);
 	//void Rotate(const FInputActionValue& Value);
 	void RotateToTarget(const FVector LookAtTarget);
+	void Jump(const FInputActionValue& Value);
+
+	// TEMP PROJECTILE ATTACk
+	UPROPERTY(EditAnywhere)
+    TSubclassOf<AActor> ProjectileClass;
+    	
+	void ShootProjectile();
 
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
@@ -142,4 +157,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
 	void OnHealthChanged(float OldValue, float NewValue);
+
+	virtual void OnShieldAttributeChanged(const FOnAttributeChangeData& Data);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
+	void OnShieldChanged(float OldValue, float NewValue);
 };
