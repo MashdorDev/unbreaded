@@ -37,7 +37,7 @@ void AS_FallingKnives::SpawnObject()
 	// generate random location within collider
 	FVector Origin = TriggerArea->Bounds.Origin;
 	FVector Extent = TriggerArea->Bounds.BoxExtent;
-	SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(Origin.X, Origin.Y, Origin.Z + Extent.Z + SpawnHeight),
+	SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(Origin.X, Origin.Y, Origin.Z + Extent.Z),
 		FVector(Extent.X, Extent.Y, 0.0f));
 
 	// spawn actor
@@ -94,11 +94,10 @@ void AS_FallingKnives::OnEnterArea(UPrimitiveComponent* OverlappedComponent, AAc
 void AS_FallingKnives::OnExitArea(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// TODO: change this to some sort of interface comparison
+	// TODO: change this to some sort of interface comparison rather than cast
 	if(Cast<ASCharacter>(OtherActor))
 	{
 		isActive = false;
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("exit"));	
 		GetWorld()->GetTimerManager().ClearTimer(SpawnTimer);
 			
 	}
