@@ -3,6 +3,7 @@
 
 #include "S_FallingKnives.h"
 
+#include "SCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
@@ -36,15 +37,18 @@ void AS_FallingKnives::SpawnObject()
 	// generate random location within collider
 	FVector Origin = TriggerArea->Bounds.Origin;
 	FVector Extent = TriggerArea->Bounds.BoxExtent;
-	SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(Origin.X, Origin.Y + Extent.Y, Origin.Z), FVector(Extent.X, 0.0f, Extent.Z));
+	SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(Origin.X, Origin.Y, Origin.Z + Extent.Z + SpawnHeight),
+		FVector(Extent.X, Extent.Y, 0.0f));
 
 	// spawn actor
 	FActorSpawnParameters SpawnParams;
-	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, FRotator(), SpawnParams);
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, FRotator(0.0f), SpawnParams);
 	
 	// call back if still active
 	if(isActive)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow,
+			FString::Printf(TEXT("height: %f"), SpawnHeight));	
 		RandomSpawnDelay = FMath::RandRange(MinSpawnDelay, MaxSpawnDelay);
 		GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AS_FallingKnives::SpawnObject, RandomSpawnDelay, false);
 	}
@@ -77,9 +81,12 @@ void AS_FallingKnives::BeginTick()
 void AS_FallingKnives::OnEnterArea(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	isActive = true;
-	RandomSpawnDelay = FMath::RandRange(MinSpawnDelay, MaxSpawnDelay);
-	GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AS_FallingKnives::SpawnObject, RandomSpawnDelay, false);
+	if(Cast<ASCharacter>(OtherActor))
+	{
+		isActive = true;
+		RandomSpawnDelay = FMath::RandRange(MinSpawnDelay, MaxSpawnDelay);
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AS_FallingKnives::SpawnObject, RandomSpawnDelay, false);
+	}
 	
 	
 }
@@ -87,7 +94,14 @@ void AS_FallingKnives::OnEnterArea(UPrimitiveComponent* OverlappedComponent, AAc
 void AS_FallingKnives::OnExitArea(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	isActive = false;
+	// TODO: change this to some sort of interface comparison
+	if(Cast<ASCharacter>(OtherActor))
+	{
+		isActive = false;
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("exit"));	
+		GetWorld()->GetTimerManager().ClearTimer(SpawnTimer);
+			
+	}
 }
 
 
