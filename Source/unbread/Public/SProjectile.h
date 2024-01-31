@@ -8,7 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
-class UParticleSystemComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class UNBREAD_API ASProjectile : public AActor
@@ -27,10 +27,10 @@ protected:
 	USphereComponent* SphereComponent;
 
 	UPROPERTY(VisibleAnywhere)
-	UProjectileMovementComponent* ProjectileMovementComponent;
-	
+	UStaticMeshComponent* StaticMeshComponent;
+
 	UPROPERTY(VisibleAnywhere)
-	UParticleSystemComponent* ParticleEffectComponent;
+	UProjectileMovementComponent* ProjectileMovementComponent;
 
 public:	
 	// Called every frame
