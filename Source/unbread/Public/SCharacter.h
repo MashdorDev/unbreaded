@@ -35,12 +35,11 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* BaseMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* ProjectileSpawnPoint;
+
+	
 
 	// TEMP
 	// TODO: review after full merge with camera system
@@ -86,19 +85,45 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* ProjectileAttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
+	UInputAction* SprintAction;
+
 	// FUNCTIONS AND VARIABLES
-
-
+	
 	void Move(const FInputActionValue& Value);
 	//void Rotate(const FInputActionValue& Value);
 	void RotateToTarget(const FVector LookAtTarget);
+
+	// TEMPORARY CHARACTER SETUP
+
+	UPROPERTY(EditAnywhere)
+	bool bIsJumping;
+
+	UPROPERTY(EditAnywhere)
+	int JumpCount;
+	
+	void CheckJump();
 	void Jump(const FInputActionValue& Value);
 
-	// TEMP PROJECTILE ATTACk
+	float Speed;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float WalkSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float SprintSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	bool bIsWalking;
+
+	void Sprint();
+
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
     	
 	void ShootProjectile();
+
+	// TODO: UPDATE TEMPORARY SETUP USING GAS
 
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
@@ -108,12 +133,6 @@ protected:
 	void OnUtilityAbility(const FInputActionValue& Value);
 	
 	virtual void SendAbilityLocalInput(const FInputActionValue& Value, int32 InputID);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float MoveSpeed = 100.f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float RotationRate = 100.f;
 
 	UPROPERTY()
 	APlayerController* PlayerController;
@@ -137,6 +156,8 @@ public:
 	void InitAbilitySystemComponent();
 
 	virtual void PossessedBy(AController* NewController) override;
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 protected:
 	UPROPERTY()
