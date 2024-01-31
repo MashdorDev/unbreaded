@@ -27,7 +27,7 @@ ASCharacter::ASCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(34.f, 88.f);
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
-	SpringArmComponent->SetupAttachment(GetMesh());
+	SpringArmComponent->SetupAttachment(GetCapsuleComponent());
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
