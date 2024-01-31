@@ -6,6 +6,7 @@
 #include "SMenuWidgetInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/CanvasPanel.h"
+#include "Components/Slider.h"
 #include "SMenuButton.generated.h"
 
 /**
@@ -27,12 +28,18 @@ class UNBREAD_API USMenuButton : public UCanvasPanel
 public:
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UButton* Button;
+
+	/*UPROPERTY(EditAnywhere, meta=(BindWidget))
+	TSubclassOf<UWidget> Widget;*/
 	
 	UPROPERTY(EditAnywhere)
 	TArray<FString> Connections;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCanvasPanel* ChildCanvas;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCanvasPanel* ParentCanvas;
 	
 	UPROPERTY(EditAnywhere)
 	FString Name;
@@ -51,6 +58,9 @@ public:
 
 	UFUNCTION()
 	bool HasChildCanvas() const { return (ChildCanvas) ? true : false;}
+
+	UFUNCTION()
+	bool HasParentCanvas() const { return (ParentCanvas) ? true : false;}
 
 // SMenuWidgetInterface 
 	
