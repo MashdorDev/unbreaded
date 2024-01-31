@@ -28,9 +28,6 @@ class UNBREAD_API USMenuButton : public UCanvasPanel
 public:
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UButton* Button;
-
-	/*UPROPERTY(EditAnywhere, meta=(BindWidget))
-	TSubclassOf<UWidget> Widget;*/
 	
 	UPROPERTY(EditAnywhere)
 	TArray<FString> Connections;
