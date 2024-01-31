@@ -34,15 +34,10 @@ void AS_FallingKnives::SpawnObject()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, TEXT("spawn knife"));
 
-	// generate random location within collider
-	FVector Origin = TriggerArea->Bounds.Origin;
-	FVector Extent = TriggerArea->Bounds.BoxExtent;
-	SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(Origin.X, Origin.Y, Origin.Z + Extent.Z),
-		FVector(Extent.X, Extent.Y, 0.0f));
+	InstantiateObject();
+	InstantiateObject();
+	InstantiateObject();
 
-	// spawn actor
-	FActorSpawnParameters SpawnParams;
-	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, FRotator(0.0f), SpawnParams);
 	
 	// call back if still active
 	if(isActive)
@@ -52,6 +47,19 @@ void AS_FallingKnives::SpawnObject()
 		RandomSpawnDelay = FMath::RandRange(MinSpawnDelay, MaxSpawnDelay);
 		GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &AS_FallingKnives::SpawnObject, RandomSpawnDelay, false);
 	}
+}
+
+void AS_FallingKnives::InstantiateObject()
+{
+	// generate random location within collider
+	FVector Origin = TriggerArea->Bounds.Origin;
+	FVector Extent = TriggerArea->Bounds.BoxExtent;
+	SpawnLocation = UKismetMathLibrary::RandomPointInBoundingBox(FVector(Origin.X, Origin.Y, Origin.Z + Extent.Z + SpawnHeight),
+		FVector(Extent.X, Extent.Y, 0.0f));
+
+	// spawn actor
+	FActorSpawnParameters SpawnParams;
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, FRotator(0.0f), SpawnParams);
 }
 
 

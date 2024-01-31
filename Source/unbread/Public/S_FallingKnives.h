@@ -50,6 +50,9 @@ protected:
 
 	UFUNCTION()
 	void SpawnObject();
+
+	UFUNCTION()
+	void InstantiateObject();
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
