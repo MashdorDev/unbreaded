@@ -127,7 +127,7 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 	// METHOD 3
 
 	FVector ToTarget = LookAtTarget - ForwardDirectionIndicatorMesh->GetComponentLocation(); // this is a world rotation
-	FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw, 0.f); //
+	FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
 
 	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
 
