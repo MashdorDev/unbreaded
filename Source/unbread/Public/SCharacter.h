@@ -39,8 +39,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USceneComponent* ProjectileSpawnPoint;
 
-	
-
 	// TEMP
 	// TODO: review after full merge with camera system
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
@@ -87,7 +85,7 @@ protected:
 	// TEMPORARY!!!
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* ProjectileAttackAction;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* SprintAction;
 
@@ -109,6 +107,7 @@ protected:
 	
 	void Jump(const FInputActionValue& Value);
 
+	// TEMP PROJECTILE ATTACK
 	float Speed;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -121,14 +120,15 @@ protected:
 	bool bIsWalking;
 
 	void Sprint();
-
+	
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
 	
 	void ShootProjectile();
-
+	
 	// TODO: UPDATE TEMPORARY SETUP USING GAS
 
+	
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
 	void OnSecondaryAttack(const FInputActionValue& Value);
