@@ -49,6 +49,9 @@ ASCharacter::ASCharacter()
 	Speed = WalkSpeed;
 	bIsWalking = true;
 
+	MaxAmmo = 3;
+	CurrentAmmo = 3;
+
 }
 
 // Called when the game starts or when spawned
@@ -170,6 +173,18 @@ void ASCharacter::Sprint()
 }
 
 
+void ASCharacter::CheckAmmo()
+{
+	if (CurrentAmmo > 0)
+	{
+		ShootProjectile();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Ammo!"));
+	}
+}
+
 void ASCharacter::ShootProjectile()
 {
 	FTransform SpawnTM = FTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation());
@@ -178,6 +193,8 @@ void ASCharacter::ShootProjectile()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+	CurrentAmmo--;
+	UE_LOG(LogTemp, Log, TEXT("Ammo Remaining: %d"), CurrentAmmo);
 }
 
 
@@ -226,7 +243,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckJump);
 		
 		// TEMPORARY
-		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::ShootProjectile);
+		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckAmmo);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
 		
 		// GAS
