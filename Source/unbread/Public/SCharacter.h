@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayAbilitySpec.h"
+#include "InteractInterface.h"
 #include "SCharacter.generated.h"
 
 class UDynamicCameraComponent;
@@ -20,7 +21,7 @@ class USGameplayAbility;
 class UGameplayEffect;
 
 UCLASS()
-class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface
+class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface
 {
 	GENERATED_BODY()
 
