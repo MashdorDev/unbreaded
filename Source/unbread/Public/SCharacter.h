@@ -99,13 +99,14 @@ protected:
 
 	// TEMPORARY CHARACTER SETUP
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsJumping;
 
 	UPROPERTY(EditAnywhere)
 	int JumpCount;
 	
 	void CheckJump();
+	
 	void Jump(const FInputActionValue& Value);
 
 	float Speed;
@@ -123,7 +124,7 @@ protected:
 
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
-    	
+	
 	void ShootProjectile();
 
 	// TODO: UPDATE TEMPORARY SETUP USING GAS
