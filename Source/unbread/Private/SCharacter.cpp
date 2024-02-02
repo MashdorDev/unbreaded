@@ -27,20 +27,27 @@ ASCharacter::ASCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(34.f, 88.f);
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
-	SpringArmComponent->SetupAttachment(GetMesh());
+	SpringArmComponent->SetupAttachment(GetCapsuleComponent());
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
-
-	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("BaseMesh");
-	BaseMesh->SetupAttachment(GetMesh());
 	
 	ForwardDirectionIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>("ForwardDirectionIndicatorMesh");
-	ForwardDirectionIndicatorMesh->SetupAttachment(BaseMesh);
+	ForwardDirectionIndicatorMesh->SetupAttachment(GetMesh());
+
+	ProjectileSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileSpawnPoint");
+	ProjectileSpawnPoint->SetupAttachment(ForwardDirectionIndicatorMesh);
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
-	
-	// TODO: ADD PROJECTILE SPAWN POINT
+
+	// TEMPORARY
+	bIsJumping = false;
+	JumpCount = 0;
+
+	WalkSpeed = 0.5f;
+	SprintSpeed = 1.0f;
+	Speed = WalkSpeed;
+	bIsWalking = true;
 
 }
 
@@ -65,9 +72,11 @@ void ASCharacter::BeginPlay()
 			return;
 	}
 
+	// Hook Up Delegates
 	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
-
+	
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -76,12 +85,12 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	
 	// Forward / Backward
 	const FVector Forward = FVector(1.f, 0.f,0.f);
-	AddMovementInput(Forward, MoveVector.Y * MoveSpeed);
+	AddMovementInput(Forward, MoveVector.Y * Speed);
 	
 
 	// Right / Left
 	const FVector Right = FVector(0.f, 1.f,0.f);
-	AddMovementInput(Right, MoveVector.X * MoveSpeed);
+	AddMovementInput(Right, MoveVector.X * Speed);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
 	//
@@ -118,11 +127,56 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 	// METHOD 3
 
 	FVector ToTarget = LookAtTarget - ForwardDirectionIndicatorMesh->GetComponentLocation(); // this is a world rotation
-	FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw, 0.f); //
+	FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
 
-	BaseMesh->SetWorldRotation(FMath::RInterpTo(BaseMesh->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
+	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
 
 	// TODO: Update rotation according to camera, lerp as tank
+}
+
+void ASCharacter::CheckJump()
+{
+	if (bIsJumping)
+	{
+		bIsJumping = false;
+	}
+	else
+	{
+		bIsJumping = true;
+		JumpCount++;
+		if (JumpCount == 2)
+		{
+			LaunchCharacter(FVector(0.f, 0.f, 400.f), false, true);
+		}
+	}
+}
+
+void ASCharacter::Jump(const FInputActionValue& Value)
+{
+	ACharacter::Jump();
+}
+
+void ASCharacter::Sprint()
+{
+	bIsWalking = !bIsWalking;
+	if(bIsWalking)
+	{
+		Speed = WalkSpeed;
+	}
+	else
+	{
+		Speed = SprintSpeed;
+	}
+}
+
+void ASCharacter::ShootProjectile()
+{
+	FTransform SpawnTM = FTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation());
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
 
@@ -151,6 +205,11 @@ void ASCharacter::Tick(float DeltaTime)
 		PlayerController->GetHitResultUnderCursor(ECC_Visibility,false, HitResult);
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Blue, false, -1.f);
 		RotateToTarget(HitResult.ImpactPoint);
+
+		if (bIsJumping)
+		{
+			ACharacter::Jump();
+		}
 	}
 	
 }
@@ -164,7 +223,12 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction,					ETriggerEvent::Triggered, this, &ASCharacter::Move					);
 		//EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
-
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckJump);
+		
+		// TEMPORARY
+		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::ShootProjectile);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
+		
 		// GAS
 		EnhancedInputComponent->BindAction(PrimaryAttackAction,			ETriggerEvent::Triggered, this, &ASCharacter::OnPrimaryAttack			);
 		EnhancedInputComponent->BindAction(SecondaryAttackAction,		ETriggerEvent::Triggered, this, &ASCharacter::OnSecondaryAttack		);
@@ -205,6 +269,13 @@ void ASCharacter::PossessedBy(AController* NewController)
 
 	InitializeAbilities();
 	InitializeEffects();
+}
+
+void ASCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	JumpCount = 0;
 }
 
 void ASCharacter::InitializeAbilities()
@@ -258,6 +329,11 @@ void ASCharacter::ClearGivenAbilities()
 void ASCharacter::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
 {
 	OnHealthChanged(Data.OldValue, Data.NewValue);
+}
+
+void ASCharacter::OnShieldAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	OnShieldChanged(Data.OldValue, Data.NewValue);
 }
 
 void ASCharacter::OnPrimaryAttack(const FInputActionValue& Value)
