@@ -33,7 +33,7 @@ ASCharacter::ASCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	
 	ForwardDirectionIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>("ForwardDirectionIndicatorMesh");
-	ForwardDirectionIndicatorMesh->SetupAttachment(GetMesh());
+	ForwardDirectionIndicatorMesh->SetupAttachment(GetMesh(), TEXT("ProjectileSpawn"));
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileSpawnPoint");
 	ProjectileSpawnPoint->SetupAttachment(ForwardDirectionIndicatorMesh);
@@ -126,8 +126,8 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 
 	// METHOD 3
 
-	FVector ToTarget = LookAtTarget - ForwardDirectionIndicatorMesh->GetComponentLocation(); // this is a world rotation
-	FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
+	const FVector ToTarget = LookAtTarget - ForwardDirectionIndicatorMesh->GetComponentLocation(); // this is a world rotation
+	const FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
 
 	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
 
@@ -169,6 +169,7 @@ void ASCharacter::Sprint()
 	}
 }
 
+
 void ASCharacter::ShootProjectile()
 {
 	FTransform SpawnTM = FTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation());
@@ -183,7 +184,6 @@ void ASCharacter::ShootProjectile()
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
 {
 	IDynamicCameraInterface::SetNextCamera_Implementation(CameraActor);
-	if(GEngine) GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, TEXT("Set Next Camera Called"));
 	DynamicCamera->SetNextCamera(CameraActor);
 }
 
