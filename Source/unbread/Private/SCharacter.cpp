@@ -62,6 +62,10 @@ void ASCharacter::BeginPlay()
 		}
 	}
 
+	APlayerCameraManager* const camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camMan->ViewPitchMax = -50.0f;
+	camMan->ViewPitchMax = 10.0f;
+
 	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
 	if (!PState)
 	{

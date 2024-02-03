@@ -2,7 +2,6 @@
 
 
 #include "CameraRegisterVolume.h"
-
 #include "DynamicCameraInterface.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
@@ -40,8 +39,7 @@ void ACameraRegisterVolume::BeginPlay()
 // Called every frame
 void ACameraRegisterVolume::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
+	Super::BeginPlay();
 }
 
 void ACameraRegisterVolume::OnEnterVolume(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
