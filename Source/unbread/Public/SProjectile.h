@@ -8,7 +8,7 @@
 
 class USphereComponent;
 class UProjectileMovementComponent;
-class UParticleSystemComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class UNBREAD_API ASProjectile : public AActor
@@ -23,14 +23,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//UPROPERTY(VisibleAnywhere)
+	//USphereComponent* SphereComponent;
+
 	UPROPERTY(VisibleAnywhere)
-	USphereComponent* SphereComponent;
+	UStaticMeshComponent* StaticMeshComponent;
 
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComponent;
-	
-	UPROPERTY(VisibleAnywhere)
-	UParticleSystemComponent* ParticleEffectComponent;
 
 public:	
 	// Called every frame
