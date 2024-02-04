@@ -169,7 +169,6 @@ void ASCharacter::Sprint()
 	}
 }
 
-
 void ASCharacter::CheckAmmo()
 {
 	if (CurrentAmmo > 0)
@@ -185,9 +184,9 @@ void ASCharacter::CheckAmmo()
 void ASCharacter::ShootProjectile()
 {
 	// FTransform SpawnTM = FTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation());
-	FVector HandSocketLocation = GetMesh()->GetSocketLocation("Projectile Spawn");
-	FRotator HandSocketRotation = GetMesh()->GetSocketRotation("Projectile Spawn");
-	FTransform SpawnTM = FTransform(HandSocketRotation, HandSocketLocation);
+	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn");
+	FRotator ProjectileSpawnRotation = GetActorForwardVector().Rotation();
+	FTransform SpawnTM = FTransform(ProjectileSpawnRotation, ProjectileSpawnLocation);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
