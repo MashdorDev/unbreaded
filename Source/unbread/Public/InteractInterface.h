@@ -26,7 +26,7 @@ public:
 	
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")
-	void Interact(AActor* InstigatingActor);
+	void Interact();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")
 	void BeginFocus();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")

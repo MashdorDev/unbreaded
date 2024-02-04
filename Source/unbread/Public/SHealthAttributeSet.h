@@ -7,8 +7,6 @@
 #include "AbilitySystemComponent.h"
 #include "SHealthAttributeSet.generated.h"
 
-struct FGameplayEffectModCallbackData;
-struct FGameplayAttribute;
 /**
  * 
  */
@@ -27,22 +25,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Attributes", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(USHealthAttributeSet, MaxHealth);
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes", Meta = (AllowPrivateAccess = true))
-	FGameplayAttributeData Shield;
-	ATTRIBUTE_ACCESSORS(USHealthAttributeSet, Shield);
-	
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes", Meta = (AllowPrivateAccess = true))
-	FGameplayAttributeData MaxShield;
-	ATTRIBUTE_ACCESSORS(USHealthAttributeSet, MaxShield);
-
-	UPROPERTY(BlueprintReadOnly, Category = "Attributes", Meta = (AllowPrivateAccess = true))
-	FGameplayAttributeData AppliedDamage;
-	ATTRIBUTE_ACCESSORS(USHealthAttributeSet, AppliedDamage);
 
 protected:
 
 	virtual void ClampAttributeOnChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
-
-	virtual auto PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) -> void override;
 };

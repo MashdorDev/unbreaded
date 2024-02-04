@@ -6,7 +6,6 @@
 #include "SMenuWidgetInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/CanvasPanel.h"
-#include "Components/Slider.h"
 #include "SMenuButton.generated.h"
 
 /**
@@ -34,9 +33,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCanvasPanel* ChildCanvas;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCanvasPanel* ParentCanvas;
 	
 	UPROPERTY(EditAnywhere)
 	FString Name;
@@ -55,9 +51,6 @@ public:
 
 	UFUNCTION()
 	bool HasChildCanvas() const { return (ChildCanvas) ? true : false;}
-
-	UFUNCTION()
-	bool HasParentCanvas() const { return (ParentCanvas) ? true : false;}
 
 // SMenuWidgetInterface 
 	

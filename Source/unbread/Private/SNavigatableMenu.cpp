@@ -38,11 +38,11 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 		if(Selected->HasChildCanvas() && Direction == EDirection::In)
 		{
 			Selected->ChildCanvas->SetVisibility(ESlateVisibility::Visible);
-			Button->ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
+			ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
 		}
-		else if(Selected->HasParentCanvas() && Direction == EDirection::Out)
+		else if(Button->HasChildCanvas() && Direction == EDirection::Out)
 		{
-			Selected->ParentCanvas->SetVisibility(ESlateVisibility::Visible);
+			ParentCanvas->SetVisibility(ESlateVisibility::Visible);
 			Button->ChildCanvas->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		
@@ -77,7 +77,6 @@ void USNavigatableMenu::AddConnection(USMenuButton* FromButton, USMenuButton* To
 			break;
 		}
 	}
-	
 	
 }
 

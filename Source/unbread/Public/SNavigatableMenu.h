@@ -28,7 +28,7 @@ public:
 	USMenuButton* Selected;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	UCanvasPanel* TopMostCanvas;
+	UCanvasPanel* ParentCanvas;
 
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UImage* SelectedImage;
