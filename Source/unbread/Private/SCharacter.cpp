@@ -21,7 +21,7 @@
 // Sets default values
 ASCharacter::ASCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetCapsuleComponent()->InitCapsuleSize(34.f, 88.f);
@@ -31,14 +31,10 @@ ASCharacter::ASCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
-	
-	ForwardDirectionIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>("ForwardDirectionIndicatorMesh");
-	ForwardDirectionIndicatorMesh->SetupAttachment(GetMesh(), TEXT("ProjectileSpawn"));
-
-	ProjectileSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileSpawnPoint");
-	ProjectileSpawnPoint->SetupAttachment(ForwardDirectionIndicatorMesh);
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
+
+	// TODO: ADD PROJECTILE SPAWN POINT
 
 	// TEMPORARY
 	bIsJumping = false;
@@ -49,6 +45,9 @@ ASCharacter::ASCharacter()
 	Speed = WalkSpeed;
 	bIsWalking = true;
 
+	MaxAmmo = 3;
+	CurrentAmmo = 3;
+
 }
 
 // Called when the game starts or when spawned
@@ -58,9 +57,9 @@ void ASCharacter::BeginPlay()
 
 	// Add Enhanced Input Mapping Context
 	PlayerController = Cast<APlayerController>(GetController());
-	if(PlayerController)
+	if (PlayerController)
 	{
-		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultInputMappingContext, 0);
 		}
@@ -69,12 +68,12 @@ void ASCharacter::BeginPlay()
 	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
 	if (!PState)
 	{
-			return;
+		return;
 	}
 
 	// Hook Up Delegates
 	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
-	
+
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
 }
@@ -82,14 +81,14 @@ void ASCharacter::BeginPlay()
 void ASCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MoveVector = Value.Get<FVector2D>();
-	
+
 	// Forward / Backward
-	const FVector Forward = FVector(1.f, 0.f,0.f);
+	const FVector Forward = FVector(1.f, 0.f, 0.f);
 	AddMovementInput(Forward, MoveVector.Y * Speed);
-	
+
 
 	// Right / Left
-	const FVector Right = FVector(0.f, 1.f,0.f);
+	const FVector Right = FVector(0.f, 1.f, 0.f);
 	AddMovementInput(Right, MoveVector.X * Speed);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
@@ -99,14 +98,14 @@ void ASCharacter::Move(const FInputActionValue& Value)
 
 /*void ASCharacter::Rotate(const FInputActionValue& Value)
 {
-	
+
 }*/
 
 void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 {
 
 	// METHOD 1
-	
+
 	//const FRotator Rotation = Controller->GetControlRotation();
 	//const FRotator YawRotation(0.0f, Rotation.Yaw, 0.0f);
 
@@ -116,7 +115,7 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 	// AddActorLocalRotation(DeltaRotation, true);
 
 	// METHOD 2
-	
+
 	/*const FVector2D RotateAxisValue = Value.Get<FVector2D>();
 	if(GetController())
 	{
@@ -126,10 +125,10 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 
 	// METHOD 3
 
-	const FVector ToTarget = LookAtTarget - ForwardDirectionIndicatorMesh->GetComponentLocation(); // this is a world rotation
+	const FVector ToTarget = LookAtTarget - GetMesh()->GetComponentLocation(); // this is a world rotation
 	const FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
 
-	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(),LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
+	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(), LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
 
 	// TODO: Update rotation according to camera, lerp as tank
 }
@@ -146,10 +145,11 @@ void ASCharacter::CheckJump()
 		JumpCount++;
 		if (JumpCount == 2)
 		{
-			LaunchCharacter(FVector(0.f, 0.f, 400.f), false, true);
+			LaunchCharacter(FVector(0.f, 0.f, 600.f), false, true);
 		}
 	}
 }
+
 
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
@@ -159,7 +159,7 @@ void ASCharacter::Jump(const FInputActionValue& Value)
 void ASCharacter::Sprint()
 {
 	bIsWalking = !bIsWalking;
-	if(bIsWalking)
+	if (bIsWalking)
 	{
 		Speed = WalkSpeed;
 	}
@@ -169,17 +169,39 @@ void ASCharacter::Sprint()
 	}
 }
 
+void ASCharacter::CheckAmmo()
+{
+	if (CurrentAmmo > 0)
+	{
+		ShootProjectile();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Ammo!"));
+	}
+}
 
 void ASCharacter::ShootProjectile()
 {
-	FTransform SpawnTM = FTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation());
+	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn") + FVector(0.f, 0.f, 150.f);
+	FRotator ProjectileSpawnRotation = GetMesh()->GetRelativeRotation() + FRotator(0.0f, 90.f, -10.f);
+	FTransform SpawnTM = FTransform(ProjectileSpawnRotation, ProjectileSpawnLocation);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
+	SpawnParams.Instigator = this;
+
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+	CurrentAmmo--;
+	UE_LOG(LogTemp, Log, TEXT("Ammo Remaining: %d"), CurrentAmmo);
 }
 
+void ASCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	JumpCount = 0;
+}
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
 {
@@ -198,20 +220,20 @@ void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	// Using APlayerController::GetHitResultUnderCursor to line trace to mouse cursor and getting hit information
-	if(PlayerController)
+	if (PlayerController)
 	{
 		// We're passing the FHitResult as reference but not const, because we need to change the information on HitResult with every hit.
 		FHitResult HitResult;
-		PlayerController->GetHitResultUnderCursor(ECC_Visibility,false, HitResult);
+		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Blue, false, -1.f);
 		RotateToTarget(HitResult.ImpactPoint);
-
-		if (bIsJumping)
-		{
-			ACharacter::Jump();
-		}
 	}
-	
+
+	if (bIsJumping)
+	{
+		ACharacter::Jump();
+	}
+
 }
 
 // Called to bind functionality to input
@@ -219,24 +241,24 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	if(UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		EnhancedInputComponent->BindAction(MoveAction,					ETriggerEvent::Triggered, this, &ASCharacter::Move					);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
 		//EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckJump);
-		
+
 		// TEMPORARY
-		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::ShootProjectile);
+		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckAmmo);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
-		
+
 		// GAS
-		EnhancedInputComponent->BindAction(PrimaryAttackAction,			ETriggerEvent::Triggered, this, &ASCharacter::OnPrimaryAttack			);
-		EnhancedInputComponent->BindAction(SecondaryAttackAction,		ETriggerEvent::Triggered, this, &ASCharacter::OnSecondaryAttack		);
-		EnhancedInputComponent->BindAction(MovementAbilityAction,		ETriggerEvent::Triggered, this, &ASCharacter::OnMovementAbility		);
-		EnhancedInputComponent->BindAction(InteractionAbilityAction,	ETriggerEvent::Triggered, this, &ASCharacter::OnInteractionAbility	);
-		EnhancedInputComponent->BindAction(UtilityAbilityAction,		ETriggerEvent::Triggered, this, &ASCharacter::OnUtilityAbility		);
+		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::OnPrimaryAttack);
+		EnhancedInputComponent->BindAction(SecondaryAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::OnSecondaryAttack);
+		EnhancedInputComponent->BindAction(MovementAbilityAction, ETriggerEvent::Triggered, this, &ASCharacter::OnMovementAbility);
+		EnhancedInputComponent->BindAction(InteractionAbilityAction, ETriggerEvent::Triggered, this, &ASCharacter::OnInteractionAbility);
+		EnhancedInputComponent->BindAction(UtilityAbilityAction, ETriggerEvent::Triggered, this, &ASCharacter::OnUtilityAbility);
 	}
-	
+
 }
 
 UAbilitySystemComponent* ASCharacter::GetAbilitySystemComponent() const
@@ -269,13 +291,6 @@ void ASCharacter::PossessedBy(AController* NewController)
 
 	InitializeAbilities();
 	InitializeEffects();
-}
-
-void ASCharacter::Landed(const FHitResult& Hit)
-{
-	Super::Landed(Hit);
-
-	JumpCount = 0;
 }
 
 void ASCharacter::InitializeAbilities()
@@ -377,4 +392,3 @@ void ASCharacter::SendAbilityLocalInput(const FInputActionValue& Value, int32 In
 		AbilitySystemComponent->AbilityLocalInputReleased(InputID);
 	}
 }
-

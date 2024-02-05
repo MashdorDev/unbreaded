@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayAbilitySpec.h"
+#include "InteractInterface.h"
 #include "SCharacter.generated.h"
 
 class UDynamicCameraComponent;
@@ -20,7 +21,7 @@ class USGameplayAbility;
 class UGameplayEffect;
 
 UCLASS()
-class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface
+class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface
 {
 	GENERATED_BODY()
 
@@ -36,15 +37,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	USceneComponent* ProjectileSpawnPoint;
-
-	
-
 	// TEMP
 	// TODO: review after full merge with camera system
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* ForwardDirectionIndicatorMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UDynamicCameraComponent*  DynamicCamera;
@@ -64,23 +58,23 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* RotateAction;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* JumpAction;
 
 	// GAMEPLAY ABILITY SYSTEM
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* PrimaryAttackAction;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* SecondaryAttackAction;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* MovementAbilityAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* InteractionAbilityAction;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* UtilityAbilityAction;
 
@@ -92,7 +86,7 @@ protected:
 	UInputAction* SprintAction;
 
 	// FUNCTIONS AND VARIABLES
-	
+
 	void Move(const FInputActionValue& Value);
 	//void Rotate(const FInputActionValue& Value);
 	void RotateToTarget(const FVector LookAtTarget);
@@ -104,9 +98,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	int JumpCount;
-	
+
 	void CheckJump();
-	
+
 	void Jump(const FInputActionValue& Value);
 
 	float Speed;
@@ -122,12 +116,18 @@ protected:
 
 	void Sprint();
 
+	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
-	
+
+	void CheckAmmo();
 	void ShootProjectile();
 
+	int MaxAmmo;
+	int CurrentAmmo;
+
 	// TODO: UPDATE TEMPORARY SETUP USING GAS
+
 
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
@@ -135,25 +135,25 @@ protected:
 	void OnMovementAbility(const FInputActionValue& Value);
 	void OnInteractionAbility(const FInputActionValue& Value);
 	void OnUtilityAbility(const FInputActionValue& Value);
-	
+
 	virtual void SendAbilityLocalInput(const FInputActionValue& Value, int32 InputID);
 
 	UPROPERTY()
 	APlayerController* PlayerController;
 
-	
+
 	void SetNextCamera_Implementation(AActor* CameraActor) override;
 
 	void TransitionCamera_Implementation(const float TransitionTime) override;
-	
 
-public:	
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+
 	// Inherited via IAbilitySystemInterface
 	UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -174,7 +174,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GAS")
 	TArray<TSubclassOf<USGameplayAbility>> DefaultAbilities;
 	TArray<FGameplayAbilitySpecHandle> GivenAbilites;
-	
+
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "GAS")
 	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
 
