@@ -7,14 +7,19 @@
 #include "SRangedAICharacter.h"
 #include "S_SmartObject.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "SCharacter.h"
+#include "AIManager.h"	
+#include "unbread/unbread.h"
 
 ASRanged_AIController::ASRanged_AIController(FObjectInitializer const& ObjectInitializer)
 {
 	BBC = CreateDefaultSubobject<UBlackboardComponent>(TEXT("Blackboard Component"));
 	BTC = CreateDefaultSubobject<UBehaviorTreeComponent>(TEXT("BehaviourTree Component"));
+
 	AiPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComp"));
 
 	Sight = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sigth Config"));
@@ -47,7 +52,7 @@ void ASRanged_AIController::BeginPlay()
 			return;
 		}
 		Agent = character;
-		//Agent->ControllerRef = this;
+		Agent->ControllerRef = this;
 	}
 
 	if(Agent->SmartObject)
@@ -66,23 +71,101 @@ void ASRanged_AIController::OnPossess(APawn* InPawn)
 	if(aiCharacter != nullptr && aiCharacter->GetBehaviourTree() != nullptr)
 	{
 		Agent = aiCharacter;
-		//Agent->ControllerRef = this;
+		Agent->ControllerRef = this;
 		
 		BBC->InitializeBlackboard(*aiCharacter->GetBehaviourTree()->BlackboardAsset);
 
 		EnemyKeyID = BBC->GetKeyID("TargetActor");
 		LocationKeyID = BBC->GetKeyID("MoveToLocation");
+		ContactKeyID = BBC->GetKeyID("Contact");
 
 		BTC->StartTree(*aiCharacter->GetBehaviourTree());
 		
 	}
+	AiPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ASRanged_AIController::OnPerception);
 }
 
 void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 {
 	if(UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), stimulus) == UAISense_Sight::StaticClass())
 	{
-		
+		// might change here
+		ASCharacter* chr = Cast<ASCharacter>(actor);
+		if(chr)
+		{
+			BBC->SetValueAsBool("Contact", stimulus.WasSuccessfullySensed());
+			if(BBC->GetValueAsEnum("AIState") != (uint8_t)EAIState::Attack)
+			{
+				BBC->SetValueAsObject("TargetActor", actor);
+			}
+
+			Target = actor;
+			LastStimulusLocation = stimulus.StimulusLocation;
+			TimeStamp = UKismetSystemLibrary::GetGameTimeInSeconds(Agent);
+
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Time is: %f"), TimeStamp));
+
+			if(!GetWorldTimerManager().IsTimerActive(DetectionTimer) & BBC->GetValueAsBool("Contact") && BBC->GetValueAsEnum("AIState") == (uint8_t)EAIState::Idle)
+			{
+				DetectionLevel =0.0f;
+				Agent->UpdateWidgetVis(true);
+				GetWorldTimerManager().SetTimer(DetectionTimer, this, &ASRanged_AIController::SetDetectionLevel, Rate, true, 0.f);
+				
+			}
+			return;
+		}
 	}
-	
+	if(BBC->GetValueAsEnum(("AIState")) == (uint8_t)EAIState::Attack)
+	{
+		return;
+	}
+
+	// might change here
+	ASCharacter* chr = Cast<ASCharacter>(actor);
+	if(chr)
+	{
+		BBC->SetValueAsEnum("AIState", (uint8_t)EAIState::Investigate);
+		BBC->SetValueAsVector("MoveToLocation", stimulus.StimulusLocation);
+	}
 }
+
+void ASRanged_AIController::SetDetectionLevel()
+{
+	if(!Target || !BBC->GetValueAsBool("Contact"))
+	{
+		if(BBC->GetValueAsEnum("AIState") != (uint8_t)EAIState::Idle)
+		{
+			GetWorldTimerManager().ClearTimer(DetectionTimer);
+			Agent->UpdateWidgetVis(false);
+			return;
+		}
+
+		if(DetectionLevel > 0.0f)
+		{
+			DetectionLevel -= 1;
+			return;
+		}
+		GetWorldTimerManager().ClearTimer(DetectionTimer);
+		Agent->UpdateWidgetVis(false);
+
+		return;
+	}
+
+	const float Distance = GetPawn()->GetDistanceTo(Target);
+	Rate = (Distance <= 500.0f) ? 1.f : 2.f;
+	DetectionLevel +=1;
+	
+	if(DetectionLevel >= DetectionThreshold)
+	{
+		AIManager->NotifyAIState(EAIState::Attack);
+		GetWorldTimerManager().ClearTimer(DetectionTimer);
+		Agent->UpdateWidgetVis(false);
+		return;
+	}
+	if(DetectionLevel >= DetectionThreshold / 2)
+	{
+		BBC->SetValueAsEnum("AIState", (uint8_t)EAIState::Investigate);
+		BBC->SetValueAsVector("MoveToLocation", LastStimulusLocation);
+	}
+}
+

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AIController.h"
 #include "BehaviorTree/Blackboard/BlackboardKey.h"
+#include "Perception/AISightTargetInterface.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "SRanged_AIController.generated.h"
 
@@ -20,6 +21,9 @@ public:
 	ASRanged_AIController(FObjectInitializer const& ObjectInitializer);
 
 	void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadOnly)
+	class AAIManager* AIManager = nullptr;
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	
@@ -33,6 +37,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	float DetectionLevel = 0.0f;
+	
 	UPROPERTY(BlueprintReadWrite)
 	float TimeStamp = 0.0f;
 	
@@ -58,5 +63,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DetectionThreshold = 5.0f;
 	AActor* Target = nullptr;
-	FVector LastStimulus = FVector::ZeroVector;
+	FVector LastStimulusLocation = FVector::ZeroVector;
 };
