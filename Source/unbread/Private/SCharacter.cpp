@@ -145,7 +145,7 @@ void ASCharacter::CheckJump()
 		JumpCount++;
 		if (JumpCount == 2)
 		{
-			LaunchCharacter(FVector(0.f, 0.f, 400.f), false, true);
+			LaunchCharacter(FVector(0.f, 0.f, 600.f), false, true);
 		}
 	}
 }
