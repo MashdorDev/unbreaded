@@ -87,11 +87,12 @@ void ASRanged_AIController::OnPossess(APawn* InPawn)
 
 void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 {
-	if(UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), stimulus) == UAISense_Sight::StaticClass())
-	{
-		// might change here
-		ASCharacter* chr = Cast<ASCharacter>(actor);
-		if(chr)
+		if(UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), stimulus) == UAISense_Sight::StaticClass())
+		{
+			// might change here
+			ASCharacter* chr = Cast<ASCharacter>(actor);
+			ASRangedAICharacter* chr2 = Cast<ASRangedAICharacter>(actor);
+		if(chr || chr2 && (chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral))
 		{
 			BBC->SetValueAsBool("Contact", stimulus.WasSuccessfullySensed());
 			if(BBC->GetValueAsEnum("AIState") != (uint8_t)EAIState::Attack)
@@ -122,7 +123,8 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 
 	// might change here
 	ASCharacter* chr = Cast<ASCharacter>(actor);
-	if(chr)
+	ASRangedAICharacter* chr2 = Cast<ASRangedAICharacter>(actor);
+	if(chr || chr2 && (chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral))
 	{
 		BBC->SetValueAsEnum("AIState", (uint8_t)EAIState::Investigate);
 		BBC->SetValueAsVector("MoveToLocation", stimulus.StimulusLocation);

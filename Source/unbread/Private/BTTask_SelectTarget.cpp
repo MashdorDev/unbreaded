@@ -1,9 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
  
+#include "BTTask_SelectTarget.h"
 #include "SRanged_AIController.h"
 #include "SRangedAICharacter.h"
-#include "BTTask_SelectTarget.h"
-
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_SelectTarget::UBTTask_SelectTarget(const FObjectInitializer& ObjectInitializer)
@@ -18,37 +17,44 @@ EBTNodeResult::Type UBTTask_SelectTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 	if(Cntrl && EnemySeekerQuery)
 	{
 		EnemySeekerQueryRequest = FEnvQueryRequest(EnemySeekerQuery, Cntrl->Agent);
-		EnemySeekerQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &UBTTask_SelectTarget::EnemySeekerQueeyFinished);
+		EnemySeekerQueryRequest.Execute(EEnvQueryRunMode::AllMatching, this, &UBTTask_SelectTarget::EnemySeekerQueryFinished);
 		return EBTNodeResult::Succeeded;
 	}
 	return EBTNodeResult::Failed;
 }
 
-void UBTTask_SelectTarget::EnemySeekerQueeyFinished(TSharedPtr<FEnvQueryResult> res)
+void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> Result)
 {
+	if (!Result.IsValid() || !Cntrl || !Cntrl->BBC) return; // Safety check for null pointers
+
 	BestTarget = nullptr;
-	float CurrentBEstScore = 0.0f;
-	int32 Index = 0;
+	float CurrentBestScore = 0.0f;
 	TArray<AActor*> AllDetectedActors;
-	res->GetAllAsActors(AllDetectedActors);
-	Cntrl->BBC->SetValueAsObject("TargetActor", NULL);
+	Result->GetAllAsActors(AllDetectedActors);
 
-	for(auto& DetectedActor: AllDetectedActors)
+	for (int32 Index = 0; Index < AllDetectedActors.Num(); ++Index)
 	{
-		ASCharacter* chr = Cast<ASCharacter>(DetectedActor);
-		if(chr)
-		{
-			if(res->GetItemScore(Index) > CurrentBEstScore && res->GetItemScore(Index) > 0.0f)
-			{
-				BestTarget = chr;
-				CurrentBEstScore = res->GetItemScore(Index);
-			}
+		AActor* DetectedActor = AllDetectedActors[Index];
+		ASCharacter* Character = Cast<ASCharacter>(DetectedActor);
+		ASRangedAICharacter* RangedAICharacter = Cast<ASRangedAICharacter>(DetectedActor);
 
-			Index++;
+		if (Character)
+		{
+			// If it's an ASCharacter, prioritize it immediately without checking the score
+			BestTarget = Character;
+			break; // Breaks after finding the first ASCharacter
+		}
+		else if (RangedAICharacter && RangedAICharacter->faction != Cntrl->Agent->faction && !RangedAICharacter->Dead)
+		{
+			// For ASRangedAICharacter, check if it's the best target based on score
+			float Score = Result->GetItemScore(Index);
+			if (Score > CurrentBestScore && Score > 0.0f)
+			{
+				BestTarget = RangedAICharacter;
+				CurrentBestScore = Score;
+			}
 		}
 	}
-	if(BestTarget)
-	{
-		Cntrl->BBC->SetValueAsObject("TargetActor", BestTarget);
-	}
+
+	Cntrl->BBC->SetValueAsObject("TargetActor", BestTarget); // Set the target once after the loop
 }

@@ -25,9 +25,9 @@ public:
 
 	FEnvQueryRequest EnemySeekerQueryRequest;
 
-	void EnemySeekerQueeyFinished(TSharedPtr<FEnvQueryResult> res);
+	void EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> res);
 
 	class ASRanged_AIController* Cntrl;
 
-	class ASCharacter* BestTarget;
+	class ACharacter* BestTarget;
 };

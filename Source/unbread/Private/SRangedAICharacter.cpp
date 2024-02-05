@@ -58,7 +58,7 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		GetMesh()->bIgnoreRadialForce = true;
 		GetMesh()->SetSimulatePhysics(true);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Dead= true;
+		Dead = true;
 		if(ControllerRef)
 		{
 			ControllerRef->GetBrainComponent()->StopLogic("Agent is Dead");
