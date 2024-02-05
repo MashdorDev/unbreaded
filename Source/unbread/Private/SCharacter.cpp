@@ -183,9 +183,8 @@ void ASCharacter::CheckAmmo()
 
 void ASCharacter::ShootProjectile()
 {
-	// FTransform SpawnTM = FTransform(ProjectileSpawnPoint->GetComponentRotation(), ProjectileSpawnPoint->GetComponentLocation());
-	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn");
-	FRotator ProjectileSpawnRotation = GetActorForwardVector().Rotation();
+	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn") + FVector(0.f, 0.f, 150.f);
+	FRotator ProjectileSpawnRotation = GetMesh()->GetRelativeRotation() + FRotator(0.0f, 90.f, -10.f);
 	FTransform SpawnTM = FTransform(ProjectileSpawnRotation, ProjectileSpawnLocation);
 
 	FActorSpawnParameters SpawnParams;
