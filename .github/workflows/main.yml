@@ -16,4 +16,3 @@ jobs:
     
       - name: Build and Cook Unreal Engine project
         run: cmd.exe /C '"D:\Program Files\EpicGames\UE_5.3\Engine\Build\BatchFiles\RunUAT.bat" -project="D:\Dor\Projects\unbread\unbread.uproject" -noP4 -platform=Win64 -clientconfig=Release -cook -build -stage -archive -archivedirectory=".\Output"'
-        shell: bash
