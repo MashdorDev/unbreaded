@@ -9,9 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: self-hosted # Ensure this label matches your self-hosted runner's label
-    strategy:
-      matrix:
-        configuration: [Debug, Release] # Define configurations if needed
     steps:
     - uses: actions/checkout@v2
       with:
