@@ -8,18 +8,22 @@
 void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
 {
 	if(!HealthBar) return;
-	if(CurrentHealth < MaxHealth)
-	{
-		
-	}
+
 	BarPercentage = CurrentHealth / MaxHealth;
 	HealthBar->SetPercent(BarPercentage);
 	TimeSinceHit = 0.0f;
 }
 
+void USPlayerHealthBar::SetShield(float CurrentShield, float MaxShield)
+{
+	ShieldPercentage = CurrentShield / MaxShield;
+	ShieldBar->SetPercent(ShieldPercentage);
+}
+
 void USPlayerHealthBar::SetAmmunition(int CurrentAmmo, int MaxAmmo)
 {
-	Ammo = CurrentAmmo;	
+	Ammo = CurrentAmmo;
+	
 }
 
 void USPlayerHealthBar::OnTick(const float InDeltaTime)
@@ -69,8 +73,6 @@ void USPlayerHealthBar::LerpDelayedHPBar(const float& InDeltaTime)
 		// done lerp
 		IsLerping = false;
 		DelayBarLerpStart = DelayBarPercentage;
-		
-		
 	}
 }
 

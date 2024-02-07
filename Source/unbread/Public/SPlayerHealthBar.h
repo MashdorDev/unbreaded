@@ -21,6 +21,9 @@ class UNBREAD_API USPlayerHealthBar : public UCanvasPanel
 	void SetHealth(float CurrentHealth, float MaxHealth);
 
 	UFUNCTION(BlueprintCallable)
+	void SetShield(float CurrentShield, float MaxShield);
+
+	UFUNCTION(BlueprintCallable)
 	void SetAmmunition(int CurrentAmmo, int MaxAmmo = 3);
 
 	UFUNCTION(BlueprintCallable)
@@ -38,16 +41,20 @@ class UNBREAD_API USPlayerHealthBar : public UCanvasPanel
 	int Ammo;
 	
 	UPROPERTY(EditAnywhere, meta= (BindWidget))
-	class UProgressBar* HealthBar;
+	UProgressBar* HealthBar;
 
 	UPROPERTY(EditAnywhere, meta= (BindWidget))
-	class UProgressBar* DelayedHealthBar;
-
+	UProgressBar* DelayedHealthBar;
+	
 	UPROPERTY(EditAnywhere)
 	float HPDelayThreshold;
 
+	UPROPERTY(EditAnywhere, meta= (BindWidget))
+	UProgressBar* ShieldBar;
+	
 private:
 	float BarPercentage;
+	float ShieldPercentage;
 	float TimeSinceHit;
 	
 	float DelayBarPercentage;

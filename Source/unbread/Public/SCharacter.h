@@ -123,7 +123,10 @@ protected:
 	void CheckAmmo();
 	void ShootProjectile();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	int MaxAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	int CurrentAmmo;
 
 	// TODO: UPDATE TEMPORARY SETUP USING GAS
