@@ -62,6 +62,12 @@ void ASRanged_AIController::BeginPlay()
 	}
 }
 
+// Implement these in your .cpp file
+float ASRanged_AIController::GetDetectionLevel() const
+{
+	return DetectionLevel;
+}
+
 void ASRanged_AIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
@@ -87,15 +93,19 @@ void ASRanged_AIController::OnPossess(APawn* InPawn)
 
 void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 {
-		if(UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), stimulus) == UAISense_Sight::StaticClass())
-		{
-			// might change here
-			ASCharacter* chr = Cast<ASCharacter>(actor);
-			ASRangedAICharacter* chr2 = Cast<ASRangedAICharacter>(actor);
-		if(chr || chr2 && (chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral))
+	if (UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), stimulus) == UAISense_Sight::StaticClass())
+	{
+		ASCharacter* chr = Cast<ASCharacter>(actor);
+		ASRangedAICharacter* chr2 = Cast<ASRangedAICharacter>(actor);
+        
+		// Improve logical condition clarity and correctness
+		bool isEnemy = (chr || (chr2 && chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral));
+        
+		if (isEnemy)
 		{
 			BBC->SetValueAsBool("Contact", stimulus.WasSuccessfullySensed());
-			if(BBC->GetValueAsEnum("AIState") != (uint8_t)EAIState::Attack)
+            
+			if (BBC->GetValueAsEnum("AIState") != static_cast<uint8>(EAIState::Attack))
 			{
 				BBC->SetValueAsObject("TargetActor", actor);
 			}
@@ -106,12 +116,12 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 
 			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Time is: %f"), TimeStamp));
 
-			if(!GetWorldTimerManager().IsTimerActive(DetectionTimer) & BBC->GetValueAsBool("Contact") && BBC->GetValueAsEnum("AIState") == (uint8_t)EAIState::Idle)
+			// Correct the logical AND operator
+			if (!GetWorldTimerManager().IsTimerActive(DetectionTimer) && BBC->GetValueAsBool("Contact") && BBC->GetValueAsEnum("AIState") == static_cast<uint8>(EAIState::Idle))
 			{
-				DetectionLevel =0.0f;
+				DetectionLevel = 0.0f;
 				Agent->UpdateWidgetVis(true);
 				GetWorldTimerManager().SetTimer(DetectionTimer, this, &ASRanged_AIController::SetDetectionLevel, Rate, true, 0.f);
-				
 			}
 			return;
 		}

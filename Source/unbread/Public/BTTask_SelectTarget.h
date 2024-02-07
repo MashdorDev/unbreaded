@@ -29,5 +29,5 @@ public:
 
 	class ASRanged_AIController* Cntrl;
 
-	class ACharacter* BestTarget;
+	class ASRangedAICharacter* BestTarget;
 };

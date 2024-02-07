@@ -30,6 +30,9 @@ public:
 	UPROPERTY(transient)
 	class UBehaviorTreeComponent* BTC;
 
+	UFUNCTION(BlueprintCallable, Category="AI")
+	float GetDetectionLevel() const;
+	
 	UPROPERTY(transient)
 	class UBlackboardComponent*  BBC;
 
@@ -46,7 +49,8 @@ public:
 	FBlackboard::FKey LocationKeyID;
 	FBlackboard::FKey ContactKeyID;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DetectionThreshold = 5.0f;
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UAIPerceptionComponent* AiPerceptionComponent;
@@ -60,8 +64,7 @@ protected:
 	FTimerHandle DetectionTimer;
 	void SetDetectionLevel();
 	float Rate = 1.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DetectionThreshold = 5.0f;
+	
 	AActor* Target = nullptr;
 	FVector LastStimulusLocation = FVector::ZeroVector;
 };

@@ -39,6 +39,7 @@ void ASRangedAICharacter::MakeSound(FVector Locaiton)
 void ASRangedAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	UpdateWindgerRef();
 	
 }
 
