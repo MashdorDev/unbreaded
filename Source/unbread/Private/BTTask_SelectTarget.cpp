@@ -32,7 +32,7 @@ void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> 
 	}
 
 	BestTarget = nullptr;
-	float HighestScore = FLT_MIN; // Use FLT_MIN to ensure any positive score is higher.
+	float HighestScore = -1.0f; // Use FLT_MIN to ensure any positive score is higher.
 
 	// Directly iterating over the results, avoiding unnecessary array allocation.
 	for (int32 Index = 0; Index < Result->Items.Num(); ++Index)
@@ -42,7 +42,7 @@ void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> 
 		float Score = Result->GetItemScore(Index);
 
 		ASRangedAICharacter* Character = Cast<ASRangedAICharacter>(Actor);
-		if (Character && Character != Cntrl->Agent && Score > HighestScore)
+		if (Character && Character->faction != Cntrl->Agent->faction && Score > HighestScore)
 		{
 			// Update best target and highest score within the same condition.
 			BestTarget = Character;
