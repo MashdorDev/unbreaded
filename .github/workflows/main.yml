@@ -17,11 +17,6 @@ jobs:
       with:
         fetch-depth: 0 # Fetches the entire history for all branches and tags
 
-    - name: Setup dependencies
-      run: |
-        # Add steps to setup any dependencies your project might need
-        # Example: Install Visual Studio build tools, setup Python environment, etc.
-
-    - name: Build Project
-      run: |
-        "D:\Program Files\Epic Games\UE_5.3\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="D:\Dor\Projects\unbread\unbread.uproject" -noP4 -platform=Win64 -clientconfig=${{ matrix.configuration }} -cook -build -stage -archive -archivedirectory=".\Output"
+    
+    - name: Build and Cook Unreal Engine project
+      run: call "D:\Program Files\Epic Games\UE_5.3\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="D:\Dor\Projects\unbread\unbread.uproject" -noP4 -platform=Win64 -clientconfig=Release -cook -build -stage -archive -archivedirectory=".\Output"
