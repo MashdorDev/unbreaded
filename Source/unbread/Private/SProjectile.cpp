@@ -13,16 +13,16 @@ ASProjectile::ASProjectile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SphereComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
-	RootComponent = SphereComponent;
+	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComponent");
+	RootComponent = SphereComp;
 
-	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
-	StaticMeshComponent->SetupAttachment(RootComponent);
+	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>("BaseMesh");
+	BaseMesh->SetupAttachment(SphereComp);
 
-	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
-	ProjectileMovementComponent->InitialSpeed = 1000.f;
-	ProjectileMovementComponent->bRotationFollowsVelocity = true;
-	ProjectileMovementComponent->bInitialVelocityInLocalSpace = true;
+	ProjectileMovementComp = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
+	ProjectileMovementComp->InitialSpeed = 1000.f;
+	ProjectileMovementComp->bRotationFollowsVelocity = true;
+	ProjectileMovementComp->bInitialVelocityInLocalSpace = true;
 	
 }
 
