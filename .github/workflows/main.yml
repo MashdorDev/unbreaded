@@ -2,18 +2,18 @@ name: UE5 Build and Test Workflow
 
 on:
   push:
-    branches: [ dev ]
+    branches: [dev]
   pull_request:
-    branches: [ dev ]
+    branches: [dev]
 
 jobs:
   build-and-test:
-    runs-on: self-hosted # Ensure this label matches your self-hosted runner's label
+    runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # Fetches the entire history for all branches and tags
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    
-    - name: Build and Cook Unreal Engine project
-      run: "D:\Program Files\EpicGames\UE_5.3\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="D:\Dor\Projects\unbread\unbread.uproject" -noP4 -platform=Win64 -clientconfig=Release -cook -build -stage -archive -archivedirectory=".\Output"
+      - name: Build and Cook Unreal Engine project
+        run: |
+          "D:\Program Files\EpicGames\UE_5.3\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="D:\Dor\Projects\unbread\unbread.uproject" -noP4 -platform=Win64 -clientconfig=Release -cook -build -stage -archive -archivedirectory=".\Output"
