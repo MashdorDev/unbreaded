@@ -44,7 +44,7 @@ ASCharacter::ASCharacter()
 	SprintSpeed = 1.0f;
 	Speed = WalkSpeed;
 	bIsWalking = true;
-
+	
 	MaxAmmo = 3;
 	CurrentAmmo = 3;
 
@@ -81,15 +81,15 @@ void ASCharacter::BeginPlay()
 void ASCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MoveVector = Value.Get<FVector2D>();
-
+	FVector2d NormalizedMoveVector = MoveVector.GetSafeNormal();
 	// Forward / Backward
 	const FVector Forward = FVector(1.f, 0.f, 0.f);
-	AddMovementInput(Forward, MoveVector.Y * Speed);
+	AddMovementInput(Forward, NormalizedMoveVector.Y * Speed);
 
 
 	// Right / Left
 	const FVector Right = FVector(0.f, 1.f, 0.f);
-	AddMovementInput(Right, MoveVector.X * Speed);
+	AddMovementInput(Right, NormalizedMoveVector.X * Speed);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
 	//
