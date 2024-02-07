@@ -1,0 +1,17 @@
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Unreal Engine environment
+        run: .\Engine\Build\BatchFiles\RunUAT.bat BuildCookRun -project="unbread.uproject" -noP4 -platform=Win64 -clientconfig=Development -cook -build -stage -archive -archivedirectory=".\Output"
+
+      - name: Check if project is good to merge
+        run: .\Engine\Build\BatchFiles\RunUAT.bat RunAutomationTests -project="unbread.uproject"
