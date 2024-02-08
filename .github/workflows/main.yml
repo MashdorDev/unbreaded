@@ -15,7 +15,7 @@ jobs:
     # Set up environment variables, if necessary
     - name: Set up Environment Variables
       run: |
-        echo "UE_ROOT_DIR=D:\UnrealEngine" >> $GITHUB_ENV
+        echo "UE_ROOT_DIR=D:\Program Files\EpicGames" >> $GITHUB_ENV
         echo "PROJECT_DIR=D:\Dor\Projects\unbread" >> $GITHUB_ENV
         echo "PROJECT_NAME=unbread" >> $GITHUB_ENV
 
