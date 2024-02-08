@@ -16,6 +16,8 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "Camera/CameraActor.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -82,13 +84,35 @@ void ASCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MoveVector = Value.Get<FVector2D>();
 	FVector2d NormalizedMoveVector = MoveVector.GetSafeNormal();
+
+	FVector Forward, Right;
+	
+	// Get the camera transform
+	if(DynamicCamera->CurrentCameraActor)
+	{
+		//const auto Camera = Cast<ACameraActor>(DynamicCamera->CurrentCameraActor);
+		//Right = FVector(1.f, 0.f, 0.f);
+		//Forward = FVector(0.f, 1.f, 0.f);
+
+		const FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetRelativeRotation() + DynamicCamera->CurrentCameraActor->GetActorRotation();
+		
+		//Forward = UKismetMathLibrary::GetForwardVector(CameraWorldRotation);
+		Right = UKismetMathLibrary::GetRightVector(CameraWorldRotation); //Forward.RotateAngleAxis(90.f, FVector(0.f, 0.f, 1.f));
+		Forward = Right.RotateAngleAxis(-90.f, FVector(0.f, 0.f, 1.f));
+	}
+
+	else
+	{
+		Forward = FVector(1.f, 0.f, 0.f);
+		Right = FVector(0.f, 1.f, 0.f);
+	}
+	
 	// Forward / Backward
-	const FVector Forward = FVector(1.f, 0.f, 0.f);
+
 	AddMovementInput(Forward, NormalizedMoveVector.Y * Speed);
 
 
 	// Right / Left
-	const FVector Right = FVector(0.f, 1.f, 0.f);
 	AddMovementInput(Right, NormalizedMoveVector.X * Speed);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
@@ -158,6 +182,11 @@ void ASCharacter::Jump(const FInputActionValue& Value)
 
 void ASCharacter::Sprint()
 {
+	if(bIsHeadForm)
+	{
+		return;
+	}
+	
 	bIsWalking = !bIsWalking;
 	if (bIsWalking)
 	{
@@ -183,6 +212,11 @@ void ASCharacter::CheckAmmo()
 
 void ASCharacter::ShootProjectile()
 {
+	if(bIsHeadForm)
+	{
+		return;
+	}
+	
 	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn") + FVector(0.f, 0.f, 150.f);
 	FRotator ProjectileSpawnRotation = GetMesh()->GetRelativeRotation() + FRotator(0.0f, 90.f, -10.f);
 	FTransform SpawnTM = FTransform(ProjectileSpawnRotation, ProjectileSpawnLocation);
