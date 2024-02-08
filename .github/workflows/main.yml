@@ -1,18 +1,34 @@
-name: UE5 Build and Test Workflow
+name: Unreal Engine Build and Package Workflow
 
 on:
   push:
-    branches: [dev]
+    branches: [ main, dev ]
   pull_request:
-    branches: [dev]
+    branches: [ main, dev ]
 
 jobs:
-  build-and-test:
+  build-and-package:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-    
-      - name: Build and Cook Unreal Engine project
-        run: cmd.exe /C '"D:\Program Files\EpicGames\UE_5.3\Engine\Build\BatchFiles\RunUAT.bat" -project="D:\Dor\Projects\unbread\unbread.uproject" -noP4 -platform=Win64 -clientconfig=Release -cook -build -stage -archive -archivedirectory=".\Output"'
+    - uses: actions/checkout@v2
+
+    # Set up environment variables, if necessary
+    - name: Set up Environment Variables
+      run: |
+        echo "UE_ROOT_DIR=D:\UnrealEngine" >> $GITHUB_ENV
+        echo "PROJECT_DIR=D:\Dor\Projects\unbread" >> $GITHUB_ENV
+        echo "PROJECT_NAME=unbread" >> $GITHUB_ENV
+
+    # Build the game using Unreal Automation Tool
+    - name: Build Game
+      run: |
+        & "$Env:UE_ROOT_DIR\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="$Env:PROJECT_DIR\$Env:PROJECT_NAME.uproject" -noP4 -platform=Win64 -clientconfig=Development -cook -build -stage -archive -archivedirectory="$Env:PROJECT_DIR\ArchivedBuilds"
+
+
+    # Add additional steps for testing, if necessary
+
+    # Example: Packaging the game
+    - name: Package Game
+      run: |
+        & "$Env:UE_ROOT_DIR\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="$Env:PROJECT_DIR\$Env:PROJECT_NAME.uproject" -noP4 -platform=Win64 -clientconfig=Shipping -cook -stage -package -archive -archivedirectory="$Env:PROJECT_DIR\PackagedBuilds"
+
