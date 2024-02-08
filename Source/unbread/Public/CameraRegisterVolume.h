@@ -22,6 +22,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	float CameraTransitionTime = 0.5f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	bool bResetCameraOnExit = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -115,6 +115,9 @@ protected:
 	bool bIsWalking;
 
 	void Sprint();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsHeadForm = false;
 
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
