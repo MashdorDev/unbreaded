@@ -31,4 +31,7 @@ public:
 	void BeginFocus();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")
 	void EndFocus();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interact")
+	void CrumbleInteraction(AActor* InstigatingActor);
 };
