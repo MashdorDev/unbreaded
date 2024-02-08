@@ -1,0 +1,38 @@
+name: Unreal Engine Build and Package Workflow
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  build-and-package:
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+    - uses: actions/checkout@v2
+
+    # Set up environment variables, if necessary
+    - name: Set up Environment Variables
+      run: |
+        echo "UE_ROOT_DIR=D:\Program Files\EpicGames" >> $GITHUB_ENV
+        echo "PROJECT_DIR=D:\Dor\Projects\unbread" >> $GITHUB_ENV
+        echo "PROJECT_NAME=unbread" >> $GITHUB_ENV
+      shell: pwsh
+
+    # Build the game using Unreal Automation Tool
+    - name: Build Game
+      run: | 
+        run & "$Env:UE_ROOT_DIR\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="$Env:PROJECT_DIR\$Env:PROJECT_NAME.uproject" -noP4 -platform=Win64 -clientconfig=Development -cook -build -stage -archive -archivedirectory="$Env:PROJECT_DIR\ArchivedBuilds"
+      shell: pwsh
+
+    # Add additional steps for testing, if necessary
+
+    # Example: Packaging the game
+    - name: Package Game
+      run: |
+        & "$Env:UE_ROOT_DIR\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="$Env:PROJECT_DIR\$Env:PROJECT_NAME.uproject" -noP4 -platform=Win64 -clientconfig=Shipping -cook -stage -package -archive -archivedirectory="$Env:PROJECT_DIR\PackagedBuilds"
+      shell: pwsh
