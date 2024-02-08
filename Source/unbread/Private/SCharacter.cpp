@@ -90,13 +90,7 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	// Get the camera transform
 	if(DynamicCamera->CurrentCameraActor)
 	{
-		//const auto Camera = Cast<ACameraActor>(DynamicCamera->CurrentCameraActor);
-		//Right = FVector(1.f, 0.f, 0.f);
-		//Forward = FVector(0.f, 1.f, 0.f);
-
 		const FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetRelativeRotation() + DynamicCamera->CurrentCameraActor->GetActorRotation();
-		
-		//Forward = UKismetMathLibrary::GetForwardVector(CameraWorldRotation);
 		Right = UKismetMathLibrary::GetRightVector(CameraWorldRotation); //Forward.RotateAngleAxis(90.f, FVector(0.f, 0.f, 1.f));
 		Forward = Right.RotateAngleAxis(-90.f, FVector(0.f, 0.f, 1.f));
 	}
@@ -108,10 +102,8 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	}
 	
 	// Forward / Backward
-
 	AddMovementInput(Forward, NormalizedMoveVector.Y * Speed);
-
-
+	
 	// Right / Left
 	AddMovementInput(Right, NormalizedMoveVector.X * Speed);
 
@@ -120,10 +112,13 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	//
 }
 
-/*void ASCharacter::Rotate(const FInputActionValue& Value)
+void ASCharacter::Rotate(const FInputActionValue& Value)
 {
-
-}*/
+	const FVector2D RotVector = Value.Get<FVector2D>();
+	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
+	const FRotator NewRotation = FRotator(0.0f, Angle - 180.0f, 0.0f);
+	GetMesh()->SetRelativeRotationExact(NewRotation);
+}
 
 void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 {
@@ -149,11 +144,15 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 
 	// METHOD 3
 
-	const FVector ToTarget = LookAtTarget - GetMesh()->GetComponentLocation(); // this is a world rotation
+	/*const FVector ToTarget = LookAtTarget - GetMesh()->GetComponentLocation(); // this is a world rotation
 	const FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
 
-	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(), LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
+	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(), LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));*/
 
+	// METHOD 4
+
+
+	
 	// TODO: Update rotation according to camera, lerp as tank
 }
 
@@ -254,14 +253,14 @@ void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	// Using APlayerController::GetHitResultUnderCursor to line trace to mouse cursor and getting hit information
-	if (PlayerController)
+	/*if (PlayerController)
 	{
 		// We're passing the FHitResult as reference but not const, because we need to change the information on HitResult with every hit.
-		FHitResult HitResult;
+		/*FHitResult HitResult;
 		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Blue, false, -1.f);
-		RotateToTarget(HitResult.ImpactPoint);
-	}
+		RotateToTarget(HitResult.ImpactPoint);#1#
+	}*/
 
 	if (bIsJumping)
 	{
@@ -278,7 +277,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
-		//EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
+		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckJump);
 
 		// TEMPORARY
