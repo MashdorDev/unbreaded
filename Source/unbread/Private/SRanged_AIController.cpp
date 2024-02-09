@@ -60,6 +60,7 @@ void ASRanged_AIController::BeginPlay()
 		FGameplayTag SubTag;
 		BTC->SetDynamicSubtree(SubTag, Agent->SmartObject->SubTree);
 	}
+	BBC->SetValueAsEnum("CombatRole", static_cast<uint8>(Agent->CombatRole));
 }
 
 // Implement these in your .cpp file
@@ -84,6 +85,7 @@ void ASRanged_AIController::OnPossess(APawn* InPawn)
 		EnemyKeyID = BBC->GetKeyID("TargetActor");
 		LocationKeyID = BBC->GetKeyID("MoveToLocation");
 		ContactKeyID = BBC->GetKeyID("Contact");
+		DamagedKeyID = BBC->GetKeyID("Damaged");
 
 		BTC->StartTree(*aiCharacter->GetBehaviourTree());
 		
@@ -165,7 +167,7 @@ void ASRanged_AIController::SetDetectionLevel()
 
 	const float Distance = GetPawn()->GetDistanceTo(Target);
 	Rate = (Distance <= 500.0f) ? 1.f : 2.f;
-	DetectionLevel +=1;
+	DetectionLevel += 1;
 	
 	if(DetectionLevel >= DetectionThreshold)
 	{

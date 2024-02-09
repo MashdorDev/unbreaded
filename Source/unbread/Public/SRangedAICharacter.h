@@ -47,7 +47,14 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	class ASRanged_AIController* ControllerRef = nullptr;
+	
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	float FireRate = 0.1f;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	ECombatRole CombatRole;
+	
+	
 	virtual bool CanBeSeenFrom
 (
 	const FVector & ObserverLocation,
@@ -85,7 +92,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 	float CrouchedWalkSpeed = 100.f;
 
-
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	float BaseDamage = 0.01f;
 	
 	// might change this
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
@@ -103,16 +111,28 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateWidgetVis(bool NewBool);
 
+	UFUNCTION()
+	FHitResult CapsuleTrace();
+	FHitResult TraceProvider(FVector Start, FVector End);
+
+	UFUNCTION(BlueprintCallable)
+	void StartWaponFire();
+
+	UFUNCTION(BlueprintCallable)
+	void StopWeaponFire();
+
 	UFUNCTION(BlueprintCallable)
 	void MakeSound(FVector Location);
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
+	FTimerHandle FireHandle;
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
-	float Health;
+	float Health = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PartickleEmitter")
 	UParticleSystem* BloodFX;

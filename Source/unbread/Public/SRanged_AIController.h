@@ -48,6 +48,8 @@ public:
 	FBlackboard::FKey EnemyKeyID;
 	FBlackboard::FKey LocationKeyID;
 	FBlackboard::FKey ContactKeyID;
+	FBlackboard::FKey DamagedKeyID;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DetectionThreshold = 5.0f;

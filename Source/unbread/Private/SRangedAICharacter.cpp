@@ -5,18 +5,19 @@
 
 #include "AIManager.h"
 #include "SRanged_AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "IO/IoDispatcher.h"
 
 // Sets default values
 ASRangedAICharacter::ASRangedAICharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // might change this
@@ -30,6 +31,77 @@ bool ASRangedAICharacter::IsHostile(ASCharacter* character)
 }
 
 
+FHitResult ASRangedAICharacter::CapsuleTrace()
+{
+	FHitResult OutHit;
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+	FVector EyesLoc;
+	FRotator EyesRot;
+	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
+
+	const FVector End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHit, true, FColor::Green);
+	return OutHit;
+}
+
+FHitResult ASRangedAICharacter::TraceProvider(FVector Start, FVector End)
+{
+	FHitResult OutHit;
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+	FVector EyesLoc;
+	FRotator EyesRot;
+	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
+
+	End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHit, true, FColor::Green);
+	return OutHit;
+}
+
+void ASRangedAICharacter::StartWaponFire()
+{
+	if(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+	{
+		return;
+	}
+	if(!AnimValues.bIsInCombat)
+	{
+		return;
+	}
+
+	ToggleADS(true);
+	AnimValues.bIsShooting = true;
+
+	FVector EyesLoc;
+	FRotator EyesRot;
+	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
+
+	const FVector End = EyesRot.Vector() * 2000.0f + EyesLoc;
+
+	FHitResult HitInfo = TraceProvider(EyesLoc, End);
+
+	if (!HitInfo.bBlockingHit)
+		return;
+
+	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
+
+	//DrawDebugLine(GetWorld(), EyesLoc, End, FColor::Green, false, 1.0f, 0, 1.0f);
+
+	
+	if(FireHandle.IsValid())
+	{
+		return;
+	}
+	GetWorldTimerManager().SetTimer(FireHandle, this, &ASRangedAICharacter::StartWaponFire, FireRate, true, 0.0f);
+}
+
+void ASRangedAICharacter::StopWeaponFire()
+{
+	GetWorldTimerManager().ClearTimer(FireHandle);
+	AnimValues.bIsShooting = false;
+}
+
 void ASRangedAICharacter::MakeSound(FVector Locaiton)
 {
 	MakeNoise(1.0f, nullptr, Locaiton, 0.0f, "");
@@ -40,7 +112,6 @@ void ASRangedAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	UpdateWindgerRef();
-	
 }
 
 float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -48,6 +119,11 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	const float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
     
 	Health -= DamageApplied;
+
+	if(ControllerRef)
+	{
+		ControllerRef->BBC->SetValueAsBool("Damaged", true);
+	}
 
 	if (DamageApplied > 0)
 	{

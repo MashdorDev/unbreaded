@@ -16,12 +16,12 @@ public:
 	// Sets default values for this actor's properties
 	AAIManager();
 
+	UPROPERTY(BlueprintReadOnly)
+	TArray<class ASRanged_AIController*> Agents;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	UPROPERTY(BlueprintReadOnly)
-	TArray<class ASRanged_AIController*> Agents;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
 	EFaction Faction;
