@@ -22,3 +22,29 @@ enum class EAbilityInputID : uint8
 	AllyUtilityAbility*/
 };
 
+UENUM(BlueprintType)
+enum class EAIState : uint8 
+{
+	Idle		UMETA(DisplayName = "Idle"),
+	ManDown		UMETA(DisplayName = "Man Down"),
+	Investigate UMETA(DisplayName = "Investigate"),
+	LostEnemy	UMETA(DisplayName = "LostEnemy"),
+	Search		UMETA(DisplayName = "Search"),
+	Attack		UMETA(DisplayName = "Attack"),
+};
+
+UENUM(BlueprintType)
+enum class EFaction : uint8 
+{
+	Enemy		UMETA(DisplayName = "Enemy"),
+	Friendly	UMETA(DisplayName = "Friendly"),
+	Neutral		UMETA(DisplayName = "Neutral"),
+};
+
+UENUM(BlueprintType)
+enum class ECombatRole : uint8 
+{
+	Engager		UMETA(DisplayName = "Engager"),
+	Defender	UMETA(DisplayName = "Defender"),
+	Sniper		UMETA(DisplayName = "Sniper"),
+};
