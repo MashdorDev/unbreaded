@@ -55,7 +55,10 @@ void ACameraRegisterVolume::OnEnterVolume(UPrimitiveComponent* OverlappedComp, A
 void ACameraRegisterVolume::OnExitVolume(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if(OtherActor->GetClass()->ImplementsInterface(UDynamicCameraInterface::StaticClass()))	{
-		IDynamicCameraInterface::Execute_SetNextCamera(OtherActor, nullptr);
+		if(bResetCameraOnExit)
+		{
+			IDynamicCameraInterface::Execute_SetNextCamera(OtherActor, nullptr);
+		}
 		IDynamicCameraInterface::Execute_TransitionCamera(OtherActor, CameraTransitionTime);
 	}
 }

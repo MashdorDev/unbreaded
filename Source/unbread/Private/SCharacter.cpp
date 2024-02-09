@@ -16,6 +16,8 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "Camera/CameraActor.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -86,13 +88,27 @@ void ASCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MoveVector = Value.Get<FVector2D>();
 	FVector2d NormalizedMoveVector = MoveVector.GetSafeNormal();
+
+	FVector Forward, Right;
+	
+	// Get the camera transform
+	if(DynamicCamera->CurrentCameraActor)
+	{
+		const FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetRelativeRotation() + DynamicCamera->CurrentCameraActor->GetActorRotation();
+		Right = UKismetMathLibrary::GetRightVector(CameraWorldRotation); //Forward.RotateAngleAxis(90.f, FVector(0.f, 0.f, 1.f));
+		Forward = Right.RotateAngleAxis(-90.f, FVector(0.f, 0.f, 1.f));
+	}
+
+	else
+	{
+		Forward = FVector(1.f, 0.f, 0.f);
+		Right = FVector(0.f, 1.f, 0.f);
+	}
+	
 	// Forward / Backward
-	const FVector Forward = FVector(1.f, 0.f, 0.f);
 	AddMovementInput(Forward, NormalizedMoveVector.Y * Speed);
-
-
+	
 	// Right / Left
-	const FVector Right = FVector(0.f, 1.f, 0.f);
 	AddMovementInput(Right, NormalizedMoveVector.X * Speed);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
@@ -100,10 +116,13 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	//
 }
 
-/*void ASCharacter::Rotate(const FInputActionValue& Value)
+void ASCharacter::Rotate(const FInputActionValue& Value)
 {
-
-}*/
+	const FVector2D RotVector = Value.Get<FVector2D>();
+	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
+	const FRotator NewRotation = FRotator(0.0f, Angle - 180.0f, 0.0f);
+	GetMesh()->SetRelativeRotationExact(NewRotation);
+}
 
 void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 {
@@ -129,11 +148,15 @@ void ASCharacter::RotateToTarget(const FVector LookAtTarget)
 
 	// METHOD 3
 
-	const FVector ToTarget = LookAtTarget - GetMesh()->GetComponentLocation(); // this is a world rotation
+	/*const FVector ToTarget = LookAtTarget - GetMesh()->GetComponentLocation(); // this is a world rotation
 	const FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
 
-	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(), LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));
+	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(), LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));*/
 
+	// METHOD 4
+
+
+	
 	// TODO: Update rotation according to camera, lerp as tank
 }
 
@@ -162,6 +185,11 @@ void ASCharacter::Jump(const FInputActionValue& Value)
 
 void ASCharacter::Sprint()
 {
+	if(bIsHeadForm)
+	{
+		return;
+	}
+	
 	bIsWalking = !bIsWalking;
 	if (bIsWalking)
 	{
@@ -187,6 +215,11 @@ void ASCharacter::CheckAmmo()
 
 void ASCharacter::ShootProjectile()
 {
+	if(bIsHeadForm)
+	{
+		return;
+	}
+	
 	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn") + FVector(0.f, 0.f, 150.f);
 	FRotator ProjectileSpawnRotation = GetMesh()->GetRelativeRotation() + FRotator(0.0f, 90.f, -10.f);
 	FTransform SpawnTM = FTransform(ProjectileSpawnRotation, ProjectileSpawnLocation);
@@ -224,14 +257,14 @@ void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	// Using APlayerController::GetHitResultUnderCursor to line trace to mouse cursor and getting hit information
-	if (PlayerController)
+	/*if (PlayerController)
 	{
 		// We're passing the FHitResult as reference but not const, because we need to change the information on HitResult with every hit.
-		FHitResult HitResult;
+		/*FHitResult HitResult;
 		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
 		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Blue, false, -1.f);
-		RotateToTarget(HitResult.ImpactPoint);
-	}
+		RotateToTarget(HitResult.ImpactPoint);#1#
+	}*/
 
 	if (bIsJumping)
 	{
@@ -248,7 +281,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
-		//EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
+		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckJump);
 
 		// TEMPORARY

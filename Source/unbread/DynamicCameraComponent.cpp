@@ -50,16 +50,28 @@ void UDynamicCameraComponent::SetNextCamera(AActor* CameraActor)
 // Transitions to the next camera
 void UDynamicCameraComponent::TransitionCamera(const float TransitionTime)
 {
+
+	
 	// Do nothing if there is no camera actor to transition to
 	if(NextCameraActor == nullptr)
 	{
-		return;
+		if(DefaultCameraActor == nullptr)
+		{
+			return;
+		}
+		
+		NextCameraActor = DefaultCameraActor;
 	}
+
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
 	// Transition to the NextCameraActor 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetViewTargetWithBlend(NextCameraActor, TransitionTime);
 	CurrentCameraActor = NextCameraActor;
+	//NextCameraActor = nullptr;
 
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->EnableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	
 	if(DefaultCameraActor == nullptr) DefaultCameraActor = CurrentCameraActor;
 
 	return;

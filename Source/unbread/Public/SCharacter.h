@@ -88,7 +88,7 @@ protected:
 	// FUNCTIONS AND VARIABLES
 
 	void Move(const FInputActionValue& Value);
-	//void Rotate(const FInputActionValue& Value);
+	void Rotate(const FInputActionValue& Value);
 	void RotateToTarget(const FVector LookAtTarget);
 
 	// TEMPORARY CHARACTER SETUP
@@ -115,11 +115,15 @@ protected:
 	bool bIsWalking;
 
 	void Sprint();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsHeadForm = false;
 
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
 
+	UFUNCTION(BlueprintCallable, Category = "Combat")
 	void CheckAmmo();
 	void ShootProjectile();
 
