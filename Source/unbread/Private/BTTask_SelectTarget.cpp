@@ -32,24 +32,28 @@ void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> 
 	}
 
 	BestTarget = nullptr;
-	float HighestScore = -1.0f; // Use FLT_MIN to ensure any positive score is higher.
-
-	// Directly iterating over the results, avoiding unnecessary array allocation.
+	float HighestScore = -1.0f;
+	
 	for (int32 Index = 0; Index < Result->Items.Num(); ++Index)
 	{
-		// Get the actor and score in a single loop to minimize calls and checks.
+		
 		AActor* Actor = Result->GetItemAsActor(Index);
 		float Score = Result->GetItemScore(Index);
 
+		ASCharacter* player = Cast<ASCharacter>(Actor);
 		ASRangedAICharacter* Character = Cast<ASRangedAICharacter>(Actor);
+		if(player)
+		{
+			BestTarget = player;
+			HighestScore = Score;
+			break;
+		}
 		if (Character && Character->faction != Cntrl->Agent->faction && Score > HighestScore)
 		{
-			// Update best target and highest score within the same condition.
 			BestTarget = Character;
 			HighestScore = Score;
 		}
 	}
-
-	// Update the blackboard only if a best target was found.
-	Cntrl->BBC->SetValueAsObject("TargetActor", BestTarget); // It's safe to set nullptr if no target is found.
+	
+	Cntrl->BBC->SetValueAsObject("TargetActor", BestTarget); 
 }
