@@ -45,7 +45,6 @@ void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> 
 		if(player)
 		{
 			BestTarget = player;
-			HighestScore = Score;
 			break;
 		}
 		if (Character && Character->faction != Cntrl->Agent->faction && Score > HighestScore)

@@ -11,6 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "SProjectile.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "IO/IoDispatcher.h"
 
 // Sets default values
@@ -41,7 +43,7 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
 
 	const FVector End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
-	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHit, true, FColor::Green);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
 	return OutHit;
 }
 
@@ -55,7 +57,7 @@ FHitResult ASRangedAICharacter::TraceProvider(FVector Start, FVector End)
 	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
 
 	End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
-	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHit, true, FColor::Green);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
 	return OutHit;
 }
 
@@ -81,13 +83,22 @@ void ASRangedAICharacter::StartWaponFire()
 
 	FHitResult HitInfo = TraceProvider(EyesLoc, End);
 
-	if (!HitInfo.bBlockingHit)
-		return;
+	const FVector StartLocation = EyesLoc;
+	FVector EndLocation = HitInfo.ImpactPoint;
+	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
 
-	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
+
+	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
+	pr->SetInstigator(this);
+	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
+	
+	// if (!HitInfo.bBlockingHit)
+	// 	return;
+
+	//UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
 
 	//DrawDebugLine(GetWorld(), EyesLoc, End, FColor::Green, false, 1.0f, 0, 1.0f);
-
+	
 	
 	if(FireHandle.IsValid())
 	{
