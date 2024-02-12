@@ -35,7 +35,8 @@ void ASRespawnGameMode::SpawnPlayer()
 void ASRespawnGameMode::RespawnPlayer(AActor* Destroyed)
 {
 	CurLives--;
-	CheckLoss();
+
+	if (CheckLoss()) return;
 	
 	// spawn player with delay, or no delay if 0.
 	if(SpawnDelay > 0.0f)
@@ -48,12 +49,19 @@ void ASRespawnGameMode::RespawnPlayer(AActor* Destroyed)
 	
 }
 
-void ASRespawnGameMode::CheckLoss()
+bool ASRespawnGameMode::CheckLoss()
 {
 	if(CurLives <= 0)
 	{
-		UGameplayStatics::OpenLevel(GetWorld(), "MainMenu");
+		EndGame();
+		return true;
 	}
+	return false;
+}
+
+void ASRespawnGameMode::EndGame()
+{
+	GameOver.Broadcast(false);
 }
 
 void ASRespawnGameMode::SetSpawnLocation(FTransform Location)

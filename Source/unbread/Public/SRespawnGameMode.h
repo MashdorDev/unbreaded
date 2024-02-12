@@ -10,6 +10,7 @@
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameOver, bool, Won);
 
 
 UCLASS()
@@ -30,6 +31,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int MaxLives = 3;
 	
+	UPROPERTY(BlueprintAssignable)
+	FGameOver GameOver;
+
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
@@ -39,7 +43,10 @@ protected:
 	void RespawnPlayer(AActor* Destroyed);
 
 	UFUNCTION()
-	void CheckLoss();
+	bool CheckLoss();
+
+	UFUNCTION()
+	void EndGame();
 
 public:
 	UFUNCTION(BlueprintCallable)
