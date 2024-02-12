@@ -3,6 +3,7 @@
 
 #include "SRespawnGameMode.h"
 
+#include "Chaos/SpatialAccelerationCollection.h"
 #include "GameFramework/DefaultPawn.h"
 
 
@@ -19,26 +20,15 @@ void ASRespawnGameMode::BeginPlay()
 
 void ASRespawnGameMode::SpawnPlayer()
 {
-	// converting to Fvector and Frotator
-	const FVector Pos = SpawnLocation.GetLocation();
-	const FRotator* Rot = new FRotator(SpawnLocation.GetRotation().Rotator());
-
-
-	// spawn actor and bind on destroy
-	UClass* PawnClass = DefaultPawnClass;
-	APawn* SpawnedPlayer = GetWorld()->SpawnActor<APawn>(PawnClass, SpawnLocation);
-	SpawnedPlayer->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
-
-	// possess spawned player
-	if(APawn* SpawnedPawn = dynamic_cast<APawn*>(SpawnedPlayer))
+	// spawn and possess player
+	if(APawn* SpawnedPlayer = GetWorld()->SpawnActor<APawn>(DefaultPawnClass, SpawnLocation))
 	{
-		UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess(SpawnedPawn);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Possessed player"));
-
+		SpawnedPlayer->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
+		UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess(SpawnedPlayer);
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cannot cast AActor to APawn"));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Could not spawn player"));
 	}
 }
 
