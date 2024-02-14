@@ -11,10 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "SProjectile.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "IO/IoDispatcher.h"
-#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ASRangedAICharacter::ASRangedAICharacter()
@@ -38,16 +35,27 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 {
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
-
-	TArray<AActor*> IgnoredActors;
 	ActorsToIgnore.AddUnique(this);
-
 	FVector EyesLoc;
 	FRotator EyesRot;
 	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
 
-	const FVector End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f, 120.0f);
-	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForOneFrame, OutHit, true, FColor::Green);
+	const FVector End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHit, true, FColor::Green);
+	return OutHit;
+}
+
+FHitResult ASRangedAICharacter::TraceProvider(FVector Start, FVector End)
+{
+	FHitResult OutHit;
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+	FVector EyesLoc;
+	FRotator EyesRot;
+	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
+
+	End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForDuration, OutHit, true, FColor::Green);
 	return OutHit;
 }
 
@@ -65,20 +73,22 @@ void ASRangedAICharacter::StartWaponFire()
 	ToggleADS(true);
 	AnimValues.bIsShooting = true;
 
-	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+	FVector EyesLoc;
+	FRotator EyesRot;
+	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
 
-	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
-	pr->SetInstigator(this);
-	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
+	const FVector End = EyesRot.Vector() * 2000.0f + EyesLoc;
 
-	// if (!HitInfo.bBlockingHit)
-	// 	return;
+	FHitResult HitInfo = TraceProvider(EyesLoc, End);
 
-	//UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
+	if (!HitInfo.bBlockingHit)
+		return;
+
+	UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
 
 	//DrawDebugLine(GetWorld(), EyesLoc, End, FColor::Green, false, 1.0f, 0, 1.0f);
 
-
+	
 	if(FireHandle.IsValid())
 	{
 		return;
@@ -106,16 +116,8 @@ void ASRangedAICharacter::BeginPlay()
 
 float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-
 	const float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	const ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(DamageCauser->GetInstigator());
-
-	if(chr && (chr == this || chr->faction == faction))
-	{
-		return 0.0f;
-	}
-
+    
 	Health -= DamageApplied;
 
 	if(ControllerRef)
@@ -125,16 +127,14 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	if (DamageApplied > 0)
 	{
-		auto* a = UGameplayStatics::SpawnEmitterAtLocation(this, BloodFX, GetActorLocation());
+		UGameplayStatics::SpawnEmitterAtLocation(this, BloodFX, GetActorLocation());
 	}
 
 	if (Health <= 0)
 	{
 		GetMesh()->bIgnoreRadialForce = true;
 		GetMesh()->SetSimulatePhysics(true);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		StopWeaponFire();
 		Dead = true;
 		if(ControllerRef)
 		{
@@ -142,7 +142,6 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 			ControllerRef->ClearFocus(EAIFocusPriority::LastFocusPriority);
 			ControllerRef->GetAIPerceptionComponent()->DestroyComponent(true);
 			ControllerRef->AIManager->RemoveAgent(ControllerRef);
-			SetLifeSpan(10);
 		}
 		return 0.0f;
 	}
@@ -157,7 +156,7 @@ bool ASRangedAICharacter::CanBeSeenFrom(const FVector& ObserverLocation, FVector
                                         int32* UserData) const
 {
 	static const FName NAME_AILineOfSight = FName(TEXT("TestPawnLineOfSight"));
-
+	
 	FHitResult HitResult;
 	FVector SocketLocaiton = GetMesh()->GetSocketLocation(PerceptionTarget);
 
@@ -180,7 +179,7 @@ bool ASRangedAICharacter::CanBeSeenFrom(const FVector& ObserverLocation, FVector
 		FCollisionQueryParams(NAME_AILineOfSight, true, IgnoreActor));
 
 	NumberOfLoSChecksPerformed++;
-
+	
 	if(bHitSocket == false || (HitResult.GetActor()->IsOwnedBy(this)))
 	{
 		OutSeenLocation = GetActorLocation();
@@ -189,7 +188,7 @@ bool ASRangedAICharacter::CanBeSeenFrom(const FVector& ObserverLocation, FVector
 		return true;
 	}
 	OutSightStrength = 0;
-
+	
 	return false;
 }
 

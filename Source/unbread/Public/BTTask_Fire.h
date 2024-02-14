@@ -5,15 +5,15 @@
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlackboardBase.h"
 #include "BTTask_Fire.generated.h"
- 
+
 /**
- * 
+ *
  */
 UCLASS()
 class UNBREAD_API UBTTask_Fire : public UBTTask_BlackboardBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	UBTTask_Fire(const FObjectInitializer& ObjectInitializer);
 
