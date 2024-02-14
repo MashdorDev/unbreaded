@@ -120,8 +120,15 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 {
 	const FVector2D RotVector = Value.Get<FVector2D>();
 	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
-	const FRotator NewRotation = FRotator(0.0f, -1* Angle, 0.0f);
-	GetMesh()->SetRelativeRotationExact(NewRotation);
+
+	// !!Safak please check if this change is okay with you!!
+
+	// Rotate the character relative to the current camera
+	FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetRelativeRotation() + DynamicCamera->CurrentCameraActor->GetActorRotation();
+	CameraWorldRotation.Roll = 0.f;
+	CameraWorldRotation.Pitch = 0.f;	
+	const FRotator NewRotation = FRotator(0.0f, -1* Angle, 0.0f) + CameraWorldRotation;
+	GetMesh()->SetWorldRotation(NewRotation);
 }
 
 void ASCharacter::RotateToTarget(const FVector LookAtTarget)
