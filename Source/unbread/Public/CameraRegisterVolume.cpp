@@ -12,6 +12,7 @@ ACameraRegisterVolume::ACameraRegisterVolume()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	// Create and set the Root component
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -39,7 +40,7 @@ void ACameraRegisterVolume::BeginPlay()
 // Called every frame
 void ACameraRegisterVolume::Tick(float DeltaTime)
 {
-	Super::BeginPlay();
+	Super::Tick(DeltaTime);
 }
 
 void ACameraRegisterVolume::OnEnterVolume(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
