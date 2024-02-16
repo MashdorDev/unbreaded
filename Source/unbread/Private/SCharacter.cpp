@@ -120,8 +120,20 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 {
 	const FVector2D RotVector = Value.Get<FVector2D>();
 	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
-	const FRotator NewRotation = FRotator(0.0f, Angle - 180.0f, 0.0f);
-	GetMesh()->SetRelativeRotationExact(NewRotation);
+
+	// !!Safak please check if this change is okay with you!!
+
+	// Rotate the character relative to the current camera
+	FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetRelativeRotation() + DynamicCamera->CurrentCameraActor->GetActorRotation();
+	CameraWorldRotation.Roll = 0.f;
+	CameraWorldRotation.Pitch = 0.f;	
+	const FRotator TargetRotation = FRotator(0.0f, -1* Angle, 0.0f) + CameraWorldRotation;
+
+	const float LerpSpeed = 0.1f;
+
+	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetRelativeTransform().GetRotation().Rotator(), TargetRotation, LerpSpeed);
+	
+	GetMesh()->SetWorldRotation(LerpedRotation);
 }
 
 void ASCharacter::RotateToTarget(const FVector LookAtTarget)
@@ -282,7 +294,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckJump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 
 		// TEMPORARY
 		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckAmmo);
