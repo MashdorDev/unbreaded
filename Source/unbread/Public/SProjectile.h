@@ -18,7 +18,9 @@ class UNBREAD_API ASProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ASProjectile();
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UProjectileMovementComponent* ProjectileMovementComp;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -28,9 +30,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* BaseMesh;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UProjectileMovementComponent* ProjectileMovementComp;
 
 public:	
 	// Called every frame

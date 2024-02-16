@@ -27,17 +27,20 @@ EBTNodeResult::Type UBTTask_Fire::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	const UBlackboardComponent* MyBlackboard = OwnerComp.GetBlackboardComponent();
 	auto myID = MyBlackboard->GetKeyID(BlackboardKey.SelectedKeyName);
 
-	ASRangedAICharacter* EnemyActor = Cast<ASRangedAICharacter>(MyBlackboard->GetValue<UBlackboardKeyType_Object>(myID));
-	if(!EnemyActor || EnemyActor->Dead || !ShouldFire)
+	const ASCharacter* player = Cast<ASCharacter>(MyBlackboard->GetValue<UBlackboardKeyType_Object>(myID));
+	const ASRangedAICharacter* EnemyActor = Cast<ASRangedAICharacter>(MyBlackboard->GetValue<UBlackboardKeyType_Object>(myID));
+	if(!player && (!EnemyActor || EnemyActor->Dead || !ShouldFire))
 	{
 		Shoot(false);
 		return EBTNodeResult::Succeeded;
 	}
 
 	FHitResult OutHit = MyController->Agent->CapsuleTrace();
-	ASRangedAICharacter* HitActor = Cast<ASRangedAICharacter>(OutHit.GetActor());
+	
+	const ASCharacter* PlayerHitActor = Cast<ASCharacter>(OutHit.GetActor());
+	const ASRangedAICharacter* HitActor = Cast<ASRangedAICharacter>(OutHit.GetActor());
 
-	if(!HitActor || HitActor->faction == MyController->Agent->faction)
+	if(!PlayerHitActor && (!HitActor || HitActor->faction == MyController->Agent->faction))
 	{
 		Shoot(false);
 		MyController->BBC->SetValueAsBool("Move", true);
