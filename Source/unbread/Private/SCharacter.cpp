@@ -127,8 +127,13 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetRelativeRotation() + DynamicCamera->CurrentCameraActor->GetActorRotation();
 	CameraWorldRotation.Roll = 0.f;
 	CameraWorldRotation.Pitch = 0.f;	
-	const FRotator NewRotation = FRotator(0.0f, -1* Angle, 0.0f) + CameraWorldRotation;
-	GetMesh()->SetWorldRotation(NewRotation);
+	const FRotator TargetRotation = FRotator(0.0f, -1* Angle, 0.0f) + CameraWorldRotation;
+
+	const float LerpSpeed = 0.1f;
+
+	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetRelativeTransform().GetRotation().Rotator(), TargetRotation, LerpSpeed);
+	
+	GetMesh()->SetWorldRotation(LerpedRotation);
 }
 
 void ASCharacter::RotateToTarget(const FVector LookAtTarget)
