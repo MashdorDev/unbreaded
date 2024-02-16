@@ -14,6 +14,7 @@
 #include "SProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "IO/IoDispatcher.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ASRangedAICharacter::ASRangedAICharacter()
@@ -131,6 +132,8 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
     
 	Health -= DamageApplied;
 
+	
+
 	if(ControllerRef)
 	{
 		ControllerRef->BBC->SetValueAsBool("Damaged", true);
@@ -138,14 +141,16 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	if (DamageApplied > 0)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, BloodFX, GetActorLocation());
+		auto* a = UGameplayStatics::SpawnEmitterAtLocation(this, BloodFX, GetActorLocation());
 	}
 
 	if (Health <= 0)
 	{
 		GetMesh()->bIgnoreRadialForce = true;
 		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		StopWeaponFire();
 		Dead = true;
 		if(ControllerRef)
 		{
@@ -153,6 +158,7 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 			ControllerRef->ClearFocus(EAIFocusPriority::LastFocusPriority);
 			ControllerRef->GetAIPerceptionComponent()->DestroyComponent(true);
 			ControllerRef->AIManager->RemoveAgent(ControllerRef);
+			SetLifeSpan(10);
 		}
 		return 0.0f;
 	}
