@@ -38,15 +38,19 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 {
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
+	
+	TArray<AActor*> IgnoredActors;
 	ActorsToIgnore.AddUnique(this);
+	
 	FVector EyesLoc;
 	FRotator EyesRot;
 	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
 
-	const FVector End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
-	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+	const FVector End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f, 120.0f);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForOneFrame, OutHit, true, FColor::Green);
 	return OutHit;
 }
+
 
 FHitResult ASRangedAICharacter::TraceProvider(FVector Start, FVector End)
 {
@@ -86,13 +90,13 @@ void ASRangedAICharacter::StartWaponFire()
 
 	const FVector StartLocation = EyesLoc;
 	FVector EndLocation = HitInfo.ImpactPoint;
-	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 100.0f;
-
+	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 	pr->SetInstigator(this);
+	pr->MoveIgnoreActorAdd(this);	
 	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
-	
+
 	// if (!HitInfo.bBlockingHit)
 	// 	return;
 
@@ -128,11 +132,17 @@ void ASRangedAICharacter::BeginPlay()
 
 float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	const float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-    
-	Health -= DamageApplied;
-
 	
+	const float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	const ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(DamageCauser->GetInstigator());
+	
+	if(chr && (chr == this || chr->faction == faction)) 
+	{
+		return 0.0f;
+	}
+	
+	Health -= DamageApplied;
 
 	if(ControllerRef)
 	{

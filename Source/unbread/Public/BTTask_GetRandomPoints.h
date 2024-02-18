@@ -19,5 +19,7 @@ public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	int32 Index = 0;
+private:
 	
+	int32_t GetNextPoint(int32 MaxNum);
 };

@@ -75,9 +75,9 @@ void AAIManager::RunSearchTimer()
 // might change here
 void AAIManager::CreateAgentsList()
 {
-	TSubclassOf<ASRanged_AIController> classToFind = ASRanged_AIController::StaticClass();
+	const TSubclassOf<ASRanged_AIController> ClassToFind = ASRanged_AIController::StaticClass();
 	TArray<AActor*> actors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), classToFind, actors);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, actors);
 
 	for(auto & Cntrl : actors)
 	{
