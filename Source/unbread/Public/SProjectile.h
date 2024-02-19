@@ -11,7 +11,7 @@ class UProjectileMovementComponent;
 class UStaticMeshComponent;
 
 UCLASS()
-class UNBREAD_API ASProjectile : public AActor
+class UNBREAD_API ASProjectile : public APawn
 {
 	GENERATED_BODY()
 	

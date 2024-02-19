@@ -23,6 +23,7 @@ ASProjectile::ASProjectile()
 	ProjectileMovementComp->InitialSpeed = 1000.f;
 	ProjectileMovementComp->bRotationFollowsVelocity = true;
 	ProjectileMovementComp->bInitialVelocityInLocalSpace = true;
+
 	
 }
 
