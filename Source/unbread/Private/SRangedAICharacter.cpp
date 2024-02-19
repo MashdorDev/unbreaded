@@ -55,11 +55,11 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 
 void ASRangedAICharacter::StartWaponFire()
 {
-	if(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
 		return;
 	}
-	if(!AnimValues.bIsInCombat)
+	if (!AnimValues.bIsInCombat)
 	{
 		return;
 	}
@@ -71,16 +71,9 @@ void ASRangedAICharacter::StartWaponFire()
 
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 	pr->SetInstigator(this);
-	pr->MoveIgnoreActorAdd(this);
-	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
+	pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
 
-	// if (!HitInfo.bBlockingHit)
-	// 	return;
-
-	//UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
-
-	//DrawDebugLine(GetWorld(), EyesLoc, End, FColor::Green, false, 1.0f, 0, 1.0f);
-	if(FireHandle.IsValid())
+	if (FireHandle.IsValid())
 	{
 		return;
 	}
