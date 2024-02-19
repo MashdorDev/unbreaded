@@ -39,8 +39,10 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
 
+
 	TArray<AActor*> IgnoredActors;
 	ActorsToIgnore.AddUnique(this);
+
 
 	FVector EyesLoc;
 	FRotator EyesRot;
@@ -69,6 +71,7 @@ void ASRangedAICharacter::StartWaponFire()
 
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 	pr->SetInstigator(this);
+	pr->MoveIgnoreActorAdd(this);
 	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
 
 	// if (!HitInfo.bBlockingHit)
@@ -77,12 +80,6 @@ void ASRangedAICharacter::StartWaponFire()
 	//UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
 
 	//DrawDebugLine(GetWorld(), EyesLoc, End, FColor::Green, false, 1.0f, 0, 1.0f);
-<<<<<<< HEAD
-
-
-=======
-
->>>>>>> c7d953f (merged dev with branch)
 	if(FireHandle.IsValid())
 	{
 		return;
@@ -110,28 +107,19 @@ void ASRangedAICharacter::BeginPlay()
 
 float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-<<<<<<< HEAD
-=======
-	const float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	Health -= DamageApplied;
-
-<<<<<<< HEAD
->>>>>>> 4f4ce76 ( updated BTMeleeAi, deleted BT.Uasset,and BTTaskMelle.h)
-
 	const float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	const ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(DamageCauser->GetInstigator());
+
+	if(chr && (chr == this || chr->faction == faction))
 
 	if(chr && (chr == this || chr->faction == faction))
 	{
 		return 0.0f;
 	}
 
-	Health -= DamageApplied;
-=======
 
->>>>>>> c7d953f (merged dev with branch)
+	Health -= DamageApplied;
 
 	if(ControllerRef)
 	{
