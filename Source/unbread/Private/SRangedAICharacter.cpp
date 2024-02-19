@@ -65,7 +65,7 @@ void ASRangedAICharacter::StartWaponFire()
 	ToggleADS(true);
 	AnimValues.bIsShooting = true;
 	
-	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 240.0f;
 	
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 	pr->SetInstigator(this);
