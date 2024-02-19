@@ -45,8 +45,8 @@ protected:
 	UFUNCTION()
 	bool CheckLoss();
 
-	UFUNCTION()
-	void EndGame();
+	UFUNCTION(BlueprintCallable)
+	void EndGame(bool Won);
 
 public:
 	UFUNCTION(BlueprintCallable)
