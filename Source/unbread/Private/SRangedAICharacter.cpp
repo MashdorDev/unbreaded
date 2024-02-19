@@ -51,21 +51,6 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 	return OutHit;
 }
 
-
-FHitResult ASRangedAICharacter::TraceProvider(FVector Start, FVector End)
-{
-	FHitResult OutHit;
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.AddUnique(this);
-	FVector EyesLoc;
-	FRotator EyesRot;
-	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
-
-	End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f,120.0f);
-	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
-	return OutHit;
-}
-
 void ASRangedAICharacter::StartWaponFire()
 {
 	if(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
@@ -79,31 +64,12 @@ void ASRangedAICharacter::StartWaponFire()
 
 	ToggleADS(true);
 	AnimValues.bIsShooting = true;
-
-	FVector EyesLoc;
-	FRotator EyesRot;
-	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
-
-	const FVector End = EyesRot.Vector() * 2000.0f + EyesLoc;
-
-	FHitResult HitInfo = TraceProvider(EyesLoc, End);
-
-	const FVector StartLocation = EyesLoc;
-	FVector EndLocation = HitInfo.ImpactPoint;
-	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
-
+	
+	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+	
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 	pr->SetInstigator(this);
-	pr->MoveIgnoreActorAdd(this);	
 	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
-
-	// if (!HitInfo.bBlockingHit)
-	// 	return;
-
-	//UGameplayStatics::ApplyPointDamage(HitInfo.GetActor(), BaseDamage, HitInfo.ImpactPoint, HitInfo, this->GetController(), this, nullptr);
-
-	//DrawDebugLine(GetWorld(), EyesLoc, End, FColor::Green, false, 1.0f, 0, 1.0f);
-	
 	
 	if(FireHandle.IsValid())
 	{
