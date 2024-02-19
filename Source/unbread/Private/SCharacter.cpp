@@ -47,8 +47,8 @@ ASCharacter::ASCharacter()
 	Speed = WalkSpeed;
 	bIsWalking = true;
 	
-	MaxAmmo = 3;
-	CurrentAmmo = 3;
+	MaxAmmo = 300;
+	CurrentAmmo = 300;
 
 }
 
