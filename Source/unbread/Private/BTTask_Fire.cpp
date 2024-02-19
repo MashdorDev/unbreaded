@@ -2,7 +2,7 @@
 
 
 #include "BTTask_Fire.h"
-
+#include "SProjectile.h"
 #include "SRanged_AIController.h"
 #include "SRangedAICharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -36,13 +36,15 @@ EBTNodeResult::Type UBTTask_Fire::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	}
 
 	FHitResult OutHit = MyController->Agent->CapsuleTrace();
+	const AActor* actor = OutHit.GetActor();
 	
-	const ASCharacter* PlayerHitActor = Cast<ASCharacter>(OutHit.GetActor());
-	const ASRangedAICharacter* HitActor = Cast<ASRangedAICharacter>(OutHit.GetActor());
+	const ASCharacter* PlayerHitActor = Cast<ASCharacter>(actor);
+	const ASRangedAICharacter* HitActor = Cast<ASRangedAICharacter>(actor);
+	const ASProjectile* Projectile = Cast<ASProjectile>(actor);
 
-	if(!PlayerHitActor && (!HitActor || HitActor->faction == MyController->Agent->faction))
+	if(!PlayerHitActor && (!HitActor || HitActor->faction == MyController->Agent->faction) && !Projectile)
 	{
-		Shoot(false);
+ 		Shoot(false);
 		MyController->BBC->SetValueAsBool("Move", true);
 		return EBTNodeResult::Succeeded;
 	}
@@ -62,5 +64,5 @@ void UBTTask_Fire::Shoot(bool NewBool)
 		}
 		return;
 	}
-	Chr->StopWeaponFire();
+		Chr->StopWeaponFire();
 }
