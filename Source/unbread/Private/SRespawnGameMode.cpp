@@ -53,15 +53,15 @@ bool ASRespawnGameMode::CheckLoss()
 {
 	if(CurLives <= 0)
 	{
-		EndGame();
+		EndGame(false);
 		return true;
 	}
 	return false;
 }
 
-void ASRespawnGameMode::EndGame()
+void ASRespawnGameMode::EndGame(bool Won)
 {
-	GameOver.Broadcast(false);
+	GameOver.Broadcast(Won);
 }
 
 void ASRespawnGameMode::SetSpawnLocation(FTransform Location)
