@@ -7,13 +7,13 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayEffectTypes.h"
 
-#include "SDestructable.generated.h"
+#include "SDestructible.generated.h"
 
 class UAbilitySystemComponent;
 class USHealthAttributeSet;
 
 UCLASS()
-class UNBREAD_API ASDestructable : public AActor, public IAbilitySystemInterface
+class UNBREAD_API ASDestructible : public AActor, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -28,7 +28,7 @@ class UNBREAD_API ASDestructable : public AActor, public IAbilitySystemInterface
 	
 public:	
 	// Sets default values for this actor's properties
-	ASDestructable();
+	ASDestructible();
 
 protected:
 	// Called when the game starts or when spawned

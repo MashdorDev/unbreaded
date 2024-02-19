@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SDestructable.h"
+#include "SDestructible.h"
 
 #include "AbilitySystemComponent.h"
 #include "SHealthAttributeSet.h"
 
 // Sets default values
-ASDestructable::ASDestructable()
+ASDestructible::ASDestructible()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -23,7 +23,7 @@ ASDestructable::ASDestructable()
 }
 
 // Called when the game starts or when spawned
-void ASDestructable::BeginPlay()
+void ASDestructible::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -32,23 +32,23 @@ void ASDestructable::BeginPlay()
 		return;
 	}
 
-	AbilitySystemComp->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASDestructable::OnHealthAttributeChanged);
+	AbilitySystemComp->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASDestructible::OnHealthAttributeChanged);
 	
 }
 
 // Called every frame
-void ASDestructable::Tick(float DeltaTime)
+void ASDestructible::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-UAbilitySystemComponent* ASDestructable::GetAbilitySystemComponent() const
+UAbilitySystemComponent* ASDestructible::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComp;
 }
 
-void ASDestructable::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
+void ASDestructible::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
 {
 	OnHealthChanged(Data.OldValue, Data.NewValue);
 }
