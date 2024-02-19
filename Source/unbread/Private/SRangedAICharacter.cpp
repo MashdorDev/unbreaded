@@ -65,11 +65,10 @@ void ASRangedAICharacter::StartWaponFire()
 	ToggleADS(true);
 	AnimValues.bIsShooting = true;
 	
-	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
 	
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 	pr->SetInstigator(this);
-	pr->MoveIgnoreActorAdd(this);
 	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
 	
 	if(FireHandle.IsValid())
