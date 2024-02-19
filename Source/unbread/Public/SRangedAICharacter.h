@@ -113,7 +113,6 @@ public:
 
 	UFUNCTION()
 	FHitResult CapsuleTrace();
-	FHitResult TraceProvider(FVector Start, FVector End);
 
 	UFUNCTION(BlueprintCallable)
 	void StartWaponFire();
@@ -128,7 +127,7 @@ public:
 	FTimerHandle FireHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
-	TSubclassOf<class ASProjectile>  Projectile;
+	TSubclassOf<class ASProjectile> Projectile;
 	
 	
 protected:
