@@ -15,6 +15,8 @@ void ASRespawnGameMode::BeginPlay()
 
 	SetSpawnLocation(FindPlayerStart(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetTransform());
 	UGameplayStatics::GetPlayerPawn(GetWorld(),0)->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
+
+	// Temp code for testing pause game
 	/*FTimerHandle UnusedHandle;
 	GetWorldTimerManager().SetTimer(
 	UnusedHandle, this, &ASRespawnGameMode::PauseGame, 2.0f, false);*/
@@ -80,7 +82,6 @@ void ASRespawnGameMode::PauseGame()
 	GamePaused.Broadcast(true);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Paused"));
 
-	UnpauseGame();
 	
 }
 
