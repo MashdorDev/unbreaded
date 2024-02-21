@@ -17,9 +17,9 @@ void ASRespawnGameMode::BeginPlay()
 	UGameplayStatics::GetPlayerPawn(GetWorld(),0)->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
 
 	// Temp code for testing pause game
-	FTimerHandle UnusedHandle;
+	/*FTimerHandle UnusedHandle;
 	GetWorldTimerManager().SetTimer(
-	UnusedHandle, this, &ASRespawnGameMode::PauseGame, 2.0f, false);
+	UnusedHandle, this, &ASRespawnGameMode::PauseGame, 2.0f, false);*/
 	
 	
 }
