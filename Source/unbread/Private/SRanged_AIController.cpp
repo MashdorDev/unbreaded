@@ -171,13 +171,13 @@ void ASRanged_AIController::SetDetectionLevel()
 	
 	const float Distance = GetPawn()->GetDistanceTo(Target);
 
-	if (Distance <= 500.0f) {
-		Rate =  (Distance / 500.0f);
+	if (Distance <= 2000.0f) {
+		Rate =  Distance / 2000.0f;
 	} else {
-		Rate = 1.f;
+		Rate = 1.0f;
 	}
 
-	DetectionLevel += (1 / Rate);
+	DetectionLevel += 0.5f / Rate;
 	
 	if(DetectionLevel >= DetectionThreshold)
 	{
