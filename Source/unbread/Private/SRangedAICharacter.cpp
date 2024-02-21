@@ -38,10 +38,12 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 {
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
-	
+
+
 	TArray<AActor*> IgnoredActors;
 	ActorsToIgnore.AddUnique(this);
-	
+
+
 	FVector EyesLoc;
 	FRotator EyesRot;
 	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
@@ -53,25 +55,27 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 
 void ASRangedAICharacter::StartWaponFire()
 {
-	if(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
 		return;
 	}
-	if(!AnimValues.bIsInCombat)
+	if (!AnimValues.bIsInCombat)
 	{
 		return;
 	}
 
 	ToggleADS(true);
 	AnimValues.bIsShooting = true;
-	
-	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 240.0f;
-	
+
+	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
+	if (pr){
 	pr->SetInstigator(this);
-	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
-	
-	if(FireHandle.IsValid())
+	pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
+	}
+
+	if (FireHandle.IsValid())
 	{
 		return;
 	}
@@ -98,16 +102,18 @@ void ASRangedAICharacter::BeginPlay()
 
 float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	
 	const float DamageApplied = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	const ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(DamageCauser->GetInstigator());
-	
-	if(chr && (chr == this || chr->faction == faction)) 
+
+	if(chr && (chr == this || chr->faction == faction))
+
+	if(chr && (chr == this || chr->faction == faction))
 	{
 		return 0.0f;
 	}
-	
+
+
 	Health -= DamageApplied;
 
 	if(ControllerRef)
@@ -149,7 +155,7 @@ bool ASRangedAICharacter::CanBeSeenFrom(const FVector& ObserverLocation, FVector
                                         int32* UserData) const
 {
 	static const FName NAME_AILineOfSight = FName(TEXT("TestPawnLineOfSight"));
-	
+
 	FHitResult HitResult;
 	FVector SocketLocaiton = GetMesh()->GetSocketLocation(PerceptionTarget);
 
@@ -172,7 +178,7 @@ bool ASRangedAICharacter::CanBeSeenFrom(const FVector& ObserverLocation, FVector
 		FCollisionQueryParams(NAME_AILineOfSight, true, IgnoreActor));
 
 	NumberOfLoSChecksPerformed++;
-	
+
 	if(bHitSocket == false || (HitResult.GetActor()->IsOwnedBy(this)))
 	{
 		OutSeenLocation = GetActorLocation();
@@ -181,7 +187,7 @@ bool ASRangedAICharacter::CanBeSeenFrom(const FVector& ObserverLocation, FVector
 		return true;
 	}
 	OutSightStrength = 0;
-	
+
 	return false;
 }
 
