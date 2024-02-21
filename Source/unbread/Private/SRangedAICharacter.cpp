@@ -70,8 +70,10 @@ void ASRangedAICharacter::StartWaponFire()
 	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
 
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
+	if (pr){
 	pr->SetInstigator(this);
 	pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
+	}
 
 	if (FireHandle.IsValid())
 	{
