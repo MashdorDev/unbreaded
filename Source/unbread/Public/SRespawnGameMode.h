@@ -11,6 +11,8 @@
  * 
  */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGameOver, bool, Won);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGamePaused, bool, Paused);
+
 
 
 UCLASS()
@@ -34,6 +36,9 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 	FGameOver GameOver;
 
+	UPROPERTY(BlueprintAssignable)
+	FGamePaused GamePaused;
+	
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
@@ -51,5 +56,10 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetSpawnLocation(FTransform Location);
-	
+
+	UFUNCTION(BlueprintCallable)
+	void PauseGame();
+
+	UFUNCTION(BlueprintCallable)
+	void UnpauseGame();
 };

@@ -15,6 +15,10 @@ void ASRespawnGameMode::BeginPlay()
 
 	SetSpawnLocation(FindPlayerStart(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetTransform());
 	UGameplayStatics::GetPlayerPawn(GetWorld(),0)->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
+	/*FTimerHandle UnusedHandle;
+	GetWorldTimerManager().SetTimer(
+	UnusedHandle, this, &ASRespawnGameMode::PauseGame, 2.0f, false);*/
+	
 	
 }
 
@@ -24,6 +28,7 @@ void ASRespawnGameMode::SpawnPlayer()
 	if(APawn* SpawnedPlayer = GetWorld()->SpawnActor<APawn>(DefaultPawnClass, SpawnLocation))
 	{
 		SpawnedPlayer->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
+		
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess(SpawnedPlayer);
 	}
 	else
@@ -67,4 +72,23 @@ void ASRespawnGameMode::EndGame(bool Won)
 void ASRespawnGameMode::SetSpawnLocation(FTransform Location)
 {
 	SpawnLocation = Location;
+}
+
+void ASRespawnGameMode::PauseGame()
+{
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
+	GamePaused.Broadcast(true);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Paused"));
+
+	UnpauseGame();
+	
+}
+
+void ASRespawnGameMode::UnpauseGame()
+{
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	GamePaused.Broadcast(false);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Unpaused"));
+
+
 }
