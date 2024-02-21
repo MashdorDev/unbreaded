@@ -1,9 +1,3 @@
-Creating a custom proprietary license for your project involves a complex process that requires careful consideration of various legal aspects, including copyright, usage rights, distribution limitations, and liability issues. Given the complexity and the importance of ensuring that your license accurately protects your interests while complying with the law, it is highly recommended to work with a legal professional to draft this document.
-
-However, to get you started and to give you an idea of what a simple proprietary license might look like, I can outline a basic structure and key elements typically included in such agreements. Please note, this is a very simplified example and should not be used as a legal document without consulting a lawyer.
-
----
-
 **Software License Agreement**
 
 This Software License Agreement ("Agreement") is made between Dor Zairi, ("Licensor") and the user ("Licensee") of the Unbread game software ("Software").
