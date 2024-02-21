@@ -18,7 +18,6 @@ Unbread narrates the adventurous tale of a gingerbread man brought to life by a 
   - [Writers](#writers)
   - [Audio](#audio)
   - [3d artists](#3d-artists)
-  - [License](#license)
 
 ## Installation
 
@@ -98,9 +97,5 @@ Unbread is brought to life thanks to the dedication and passion of a talented te
 |---|---|
 |Sonia |  |
 |Yulia |  |
-
-## License
-
-<!-- TODO: add good licences to the game that is ours -->
 
 ---
