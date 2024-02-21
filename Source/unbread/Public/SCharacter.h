@@ -11,6 +11,7 @@
 #include "InteractInterface.h"
 #include "SCharacter.generated.h"
 
+class ASExplodingBody;
 class UDynamicCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -115,9 +116,27 @@ protected:
 	bool bIsWalking;
 
 	void Sprint();
+
+	// Splitting Variables
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsHeadForm = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<ASExplodingBody*> ActiveBodies;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<APawn> BodyClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* CharacterMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* HeadMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadLaunchVelocityMultiplier = 1000.f;
+	
 
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
@@ -152,6 +171,14 @@ protected:
 	void SetNextCamera_Implementation(AActor* CameraActor) override;
 
 	void TransitionCamera_Implementation(const float TransitionTime) override;
+
+	// Splitting Mechanic
+
+	void LaunchHead();
+
+	void DestroyBodyAndSpawnCrumbles();
+
+	void ReformBody();
 
 
 public:
