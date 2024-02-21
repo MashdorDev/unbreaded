@@ -10,18 +10,20 @@ Unbread narrates the adventurous tale of a gingerbread man brought to life by a 
   - [Description](#description)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
-  - [GamePlay](#Gameplay)
-  - [Link](#link)
+  - [Gameplay](#gameplay)
   - [Features](#features)
-  - [How to Contribute](#how-to-contribute)
+  - [Links](#links)
   - [Credits](#credits)
+  - [Programmers](#programmers)
+  - [Writers](#writers)
+  - [Audio](#audio)
+  - [3d artists](#3d-artists)
   - [License](#license)
 
 ## Installation
 
 <!-- TODO -->
 <!-- write good  instaltion when we have a package to install -->
-
 
 ## Gameplay
 
@@ -35,7 +37,7 @@ Navigate through diverse environments, from a cozy café to a perilous industria
 - **Combat Mechanics:** Unique battles against animated evil pastries.
 - **Environmental Storytelling:** A world rich in detail, highlighting the clash between tradition and industrialization.
 
-## How to Contribute
+<!-- ## How to Contribute
 
 We welcome contributions! If you're interested in helping with bug fixes, adding features, or improving documentation, please follow these steps:
 
@@ -43,17 +45,62 @@ We welcome contributions! If you're interested in helping with bug fixes, adding
 2. Create a new branch for your feature (`git checkout -b feature/AmazingFeature`).
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
 4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a pull request.
+5. Open a pull request. -->
+
+## Links
+
+Notion: [Unbread Notion](https://dorzairi.notion.site/Unbread-4bcd51b61a244d69b949aa4b139d1fb7?pvs=4)
+
+Documentation: [Unbread BookStack](https://bookstack.idanservers.com/books/unbread)
+
+<!-- Discord: [Unbread Discord](https://discord.gg/Unbread) -->
+
+<!-- TODO: Get a  steam store page -->
+<!-- Steam: [Unbread Steam](https://store.steampowered.com/app/Unbread) -->
 
 ## Credits
 
 Unbread is brought to life thanks to the dedication and passion of a talented team:
 
+## Programmers
 
+| Name               | Link                         |
+| ------------------ | ----------------------------- |
+| Safak Onol         |   |
+| Dor Zairi          |   |
+| Ryler Bleau        |   |
+| Volodymyr Antoniuk |  |
+| Gage Morash        |   |
+
+---
+
+## Writers
+
+| Name           |         Link            |
+| -------------- | ------------------------------- |
+| Arthur Bullock |     |
+| Jorge Lavalle  |     |
+| Maddy          |     |
+
+---
+
+## Audio
+
+|Name|Link|
+|---|---|
+|Zane Kismet |      |
+|Nadav Shelly | <Email>|
+
+---
+
+## 3d artists
+|Name|Link|
+|---|---|
+|Sonia |  |
+|Yulia |  |
 
 ## License
 
 <!-- TODO: add good licences to the game that is ours -->
 
 ---
-
