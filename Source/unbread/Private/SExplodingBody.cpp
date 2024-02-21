@@ -30,6 +30,7 @@ ASExplodingBody::ASExplodingBody()
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
 	Mesh->SetupAttachment(Capsule);
 	Mesh->SetRelativeScale3D(FVector(0.465f, 0.465f, 0.465f));
+	Mesh->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 
 }
 

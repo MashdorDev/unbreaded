@@ -174,10 +174,13 @@ protected:
 
 	// Splitting Mechanic
 
+	UFUNCTION(BlueprintCallable)
 	void LaunchHead();
 
+	UFUNCTION(BlueprintCallable)
 	void DestroyBodyAndSpawnCrumbles();
 
+	UFUNCTION(BlueprintCallable)
 	void ReformBody();
 
 
