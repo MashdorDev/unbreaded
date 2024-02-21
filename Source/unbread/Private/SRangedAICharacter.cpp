@@ -107,12 +107,14 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	const ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(DamageCauser->GetInstigator());
 
 	if(chr && (chr == this || chr->faction == faction))
-
-	if(chr && (chr == this || chr->faction == faction))
 	{
 		return 0.0f;
 	}
 
+	if(ControllerRef->BBC->GetValueAsEnum("EAIState") != static_cast<uint8_t>(EAIState::Attack))
+	{
+		ControllerRef->AIManager->NotifyAIState(EAIState::Attack);
+	}
 
 	Health -= DamageApplied;
 
@@ -124,6 +126,7 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	if (DamageApplied > 0)
 	{
 		auto* a = UGameplayStatics::SpawnEmitterAtLocation(this, BloodFX, GetActorLocation());
+		a->Deactivate();
 	}
 
 	if (Health <= 0)
@@ -213,6 +216,7 @@ UBehaviorTree* ASRangedAICharacter::GetBehaviourTree() const
 void ASRangedAICharacter::ToggleCombat(const bool Newbool)
 {
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.2f);
+	bool isPlaying = 	GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
 	AnimValues.bIsInCombat = Newbool;
 	bUseControllerRotationYaw = Newbool;
 	GetCharacterMovement()->bOrientRotationToMovement = !Newbool;
