@@ -13,10 +13,13 @@
 #include "unbread/DynamicCameraComponent.h"
 #include "../unbread.h"
 #include "AbilitySystemComponent.h"
+#include "SCrumbles.h"
+#include "SExplodingBody.h"
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
 #include "Camera/CameraActor.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
 
@@ -135,6 +138,7 @@ void ASCharacter::Move(const FInputActionValue& Value)
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
 	const FVector2D RotVector = Value.Get<FVector2D>();
+	
 	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
 
 	// Rotate the character relative to the current camera
@@ -143,9 +147,9 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	CameraWorldRotation.Pitch = 0.f;	
 	const FRotator TargetRotation = UKismetMathLibrary::ComposeRotators(FRotator(0.0f, -1* Angle, 0.0f), CameraWorldRotation);
 
-	const float LerpSpeed = 0.1f;
 
-	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetRelativeTransform().GetRotation().Rotator(), TargetRotation, LerpSpeed);
+
+	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
 	GetMesh()->SetWorldRotation(LerpedRotation);
 }
@@ -209,6 +213,74 @@ void ASCharacter::TransitionCamera_Implementation(const float TransitionTime)
 	IDynamicCameraInterface::TransitionCamera_Implementation(TransitionTime);
 	DynamicCamera->TransitionCamera(TransitionTime);
 }
+
+void ASCharacter::SetNearestCrumblePile_Implementation(AActor* CrumblesActor)
+{
+	ICookieInterface::SetNearestCrumblePile_Implementation(CrumblesActor);
+	NearestCrumbles = CrumblesActor;
+}
+
+void ASCharacter::LaunchHead()
+{
+	bIsHeadForm = true;
+	
+	// Store the current location and rotation of the character
+	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation();
+	const FRotator BodySpawnRotation = GetMesh()->GetComponentRotation();
+
+	// Swap the mesh and launch the head
+	GetMesh()->SetSkeletalMeshAsset(HeadMesh);
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -150.f));
+	GetCapsuleComponent()->SetCapsuleHalfHeight(34.f);
+
+	const FVector LaunchVelocity = GetMesh()->GetRightVector() * HeadLaunchVelocityMultiplier;
+	
+	GetCharacterMovement()->Velocity = LaunchVelocity;
+
+	// Spawn the body and add it to ActiveBodies
+	ActiveBodies.AddUnique(GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation));
+	
+}
+
+void ASCharacter::DestroyBodyAndSpawnCrumbles()
+{
+	for (auto& Body : ActiveBodies)
+	{
+		Body->Explode();
+	}
+	ActiveBodies.Empty();
+}
+
+void ASCharacter::ReformBody()
+{
+	// If there is not a crumble pile nearby return
+	if(!bIsHeadForm)
+	{
+		return;
+	}
+
+	if(!NearestCrumbles)
+	{
+		return;
+	}
+
+	NearestCrumbles->Destroy();
+	NearestCrumbles = nullptr;
+
+	bIsHeadForm = false;
+
+	DestroyBodyAndSpawnCrumbles();
+
+	AddActorWorldOffset(FVector(0.f, 0.f, 90.f));
+	
+	GetMesh()->SetSkeletalMeshAsset(CharacterMesh);
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
+
+	GetCapsuleComponent()->SetCapsuleHalfHeight(88.f);
+
+	
+}
+
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
