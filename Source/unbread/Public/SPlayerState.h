@@ -10,6 +10,7 @@
 
 class UAbilitySystemComponent;
 class USHealthAttributeSet;
+class USWeaponAttributeSet;
 
 /**
  * 
@@ -27,6 +28,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
 	USHealthAttributeSet* HealthAttributeSet;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
+	USWeaponAttributeSet* WeaponAttributeSet;
 
 protected:
 	UPROPERTY()

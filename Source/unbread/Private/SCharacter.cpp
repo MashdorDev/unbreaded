@@ -18,6 +18,7 @@
 #include "SHealthAttributeSet.h"
 #include "Camera/CameraActor.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "SWeapon.h"
 
 
 // Sets default values
@@ -82,6 +83,24 @@ void ASCharacter::BeginPlay()
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
+
+	// Spawn and Equip the default weapon for Player Character
+	UWorld* const World = GetWorld();
+
+	if (World && DefaultWeaponClass)
+	{
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ActorSpawnParams.Owner = this;
+
+		Weapon = World->SpawnActor<ASWeapon>(DefaultWeaponClass, GetActorLocation(), GetActorRotation(), ActorSpawnParams);
+		if (Weapon)
+		{
+			Weapon->Equip();
+		}
+	}
+	
+
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -232,13 +251,14 @@ void ASCharacter::ShootProjectile()
 		return;
 	}
 	
-	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn") + FVector(0.f, 0.f, 150.f);
-	FRotator ProjectileSpawnRotation = GetMesh()->GetRelativeRotation() + FRotator(0.0f, 90.f, -10.f);
+	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn");
+	FRotator ProjectileSpawnRotation = GetMesh()->GetRelativeRotation() + FRotator(0.0f, 90.f, 0.f);
 	FTransform SpawnTM = FTransform(ProjectileSpawnRotation, ProjectileSpawnLocation);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
+	SpawnParams.Owner = this;
 
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 	CurrentAmmo--;
@@ -298,7 +318,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 
 		// TEMPORARY
-		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckAmmo);
+		//EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckAmmo);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
 
 		// GAS
