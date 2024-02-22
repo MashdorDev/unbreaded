@@ -29,6 +29,7 @@ void USNavigatableMenu::AddButton(USMenuButton* Button)
 
 void USNavigatableMenu::Navigate(EDirection Direction)
 {
+	if(!Selected) return;
 	FString Name = Selected->Connections[Direction];
 	
 	if(Name == "") return;
