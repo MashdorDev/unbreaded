@@ -67,7 +67,7 @@ Unbread is brought to life thanks to the dedication and passion of a talented te
 | ------------------ | ----------------------------- |
 | Safak Onol         |   |
 | Dor Zairi          |   |
-| Ryler Bleau        |   |
+| Ryler Bleau        |   [Linkedin ](https://ca.linkedin.com/in/ryler-bleau-359013206)<br>  [Portfolio website](https://rylerbleau.wixsite.com/rylerbleau)|
 | Volodymyr Antoniuk |  |
 | Gage Morash        |   |
 
