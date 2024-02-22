@@ -22,6 +22,6 @@ class UNBREAD_API ICookieInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Camera Interface Events")
-	void SetCanRevert(AActor* CameraActor);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Cookie Interface")
+	void SetNearestCrumblePile(AActor* CrumblesActor);
 };
