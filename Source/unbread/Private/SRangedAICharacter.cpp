@@ -39,8 +39,10 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
 
+
 	TArray<AActor*> IgnoredActors;
 	ActorsToIgnore.AddUnique(this);
+
 
 	FVector EyesLoc;
 	FRotator EyesRot;
@@ -53,11 +55,11 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 
 void ASRangedAICharacter::StartWaponFire()
 {
-	if(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
 	{
 		return;
 	}
-	if(!AnimValues.bIsInCombat)
+	if (!AnimValues.bIsInCombat)
 	{
 		return;
 	}
@@ -68,10 +70,12 @@ void ASRangedAICharacter::StartWaponFire()
 	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
 
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
+	if (pr){
 	pr->SetInstigator(this);
-	pr->SetActorScale3D({0.5f, 0.5f, 0.5f});
+	pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
+	}
 
-	if(FireHandle.IsValid())
+	if (FireHandle.IsValid())
 	{
 		return;
 	}
@@ -103,9 +107,12 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 	const ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(DamageCauser->GetInstigator());
 
 	if(chr && (chr == this || chr->faction == faction))
+
+	if(chr && (chr == this || chr->faction == faction))
 	{
 		return 0.0f;
 	}
+
 
 	Health -= DamageApplied;
 
