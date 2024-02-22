@@ -13,6 +13,7 @@
 #include "unbread/DynamicCameraComponent.h"
 #include "../unbread.h"
 #include "AbilitySystemComponent.h"
+#include "SCrumbles.h"
 #include "SExplodingBody.h"
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
@@ -264,6 +265,12 @@ void ASCharacter::TransitionCamera_Implementation(const float TransitionTime)
 	DynamicCamera->TransitionCamera(TransitionTime);
 }
 
+void ASCharacter::SetNearestCrumblePile_Implementation(AActor* CrumblesActor)
+{
+	ICookieInterface::SetNearestCrumblePile_Implementation(CrumblesActor);
+	NearestCrumbles = CrumblesActor;
+}
+
 void ASCharacter::LaunchHead()
 {
 	bIsHeadForm = true;
@@ -288,9 +295,9 @@ void ASCharacter::LaunchHead()
 
 void ASCharacter::DestroyBodyAndSpawnCrumbles()
 {
-	for (auto& body : ActiveBodies)
+	for (auto& Body : ActiveBodies)
 	{
-		body->Explode();
+		Body->Explode();
 	}
 	ActiveBodies.Empty();
 }
@@ -303,6 +310,14 @@ void ASCharacter::ReformBody()
 		return;
 	}
 
+	if(!NearestCrumbles)
+	{
+		return;
+	}
+
+	NearestCrumbles->Destroy();
+	NearestCrumbles = nullptr;
+
 	bIsHeadForm = false;
 
 	DestroyBodyAndSpawnCrumbles();
@@ -314,7 +329,7 @@ void ASCharacter::ReformBody()
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.f);
 
-	// Crumble Pile Call CrumbleInteraction()
+	
 }
 
 

@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "CookieInterface.h"
 #include "GameplayAbilitySpec.h"
 #include "InteractInterface.h"
 #include "SCharacter.generated.h"
@@ -22,7 +23,7 @@ class USGameplayAbility;
 class UGameplayEffect;
 
 UCLASS()
-class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface
+class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
 {
 	GENERATED_BODY()
 
@@ -123,6 +124,9 @@ protected:
 	bool bIsHeadForm = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* NearestCrumbles = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<ASExplodingBody*> ActiveBodies;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -172,7 +176,9 @@ protected:
 
 	void TransitionCamera_Implementation(const float TransitionTime) override;
 
-	// Splitting Mechanic
+	// Splitting Mechanic Functions 
+
+	void SetNearestCrumblePile_Implementation(AActor* CrumblesActor) override;
 
 	UFUNCTION(BlueprintCallable)
 	void LaunchHead();

@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "SExplodingBody.generated.h"
 
+class ASCrumbles;
 class UCapsuleComponent;
 class URadialForceComponent;
 
@@ -18,7 +19,7 @@ public:
 	// Sets default values for this pawn's properties
 	ASExplodingBody();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Componens")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USceneComponent* Root;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
@@ -33,6 +34,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<ASCrumbles> CrumblesActor;
 
 public:	
 	// Called every frame

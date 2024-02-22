@@ -3,6 +3,7 @@
 
 #include "SExplodingBody.h"
 
+#include "SCrumbles.h"
 #include "Components/CapsuleComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
@@ -57,7 +58,8 @@ void ASExplodingBody::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 void ASExplodingBody::Explode()
 {
 	RadialForce->FireImpulse();
-	// TODO::Spawn Crumble Pile For Pickup
+	const FActorSpawnParameters SpawnParameters;
+	GetWorld()->SpawnActor<ASCrumbles>(CrumblesActor, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), SpawnParameters);
 	Destroy();
 }
 
