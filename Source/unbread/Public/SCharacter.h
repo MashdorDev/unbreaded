@@ -118,6 +118,9 @@ protected:
 
 	void Sprint();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float LerpSpeed = 0.6f;
+
 	// Splitting Variables
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
