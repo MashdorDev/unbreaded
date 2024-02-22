@@ -7,7 +7,7 @@
 
 // Sets default values
 ASWeapon::ASWeapon()
-	: Damage(10.0f), FireRate(1.0f), bIsAutoFireOn(false)
+	: Damage(10.0f), FireRate(1.0f), bIsAutoFireOn(false), MaxLoadedAmmo(3.0f)
 {
  	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComp");
 	RootComponent = SkeletalMeshComp;

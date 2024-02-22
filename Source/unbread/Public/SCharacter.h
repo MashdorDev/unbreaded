@@ -99,7 +99,6 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
-	void RotateToTarget(const FVector LookAtTarget);
 
 	// TEMPORARY CHARACTER SETUP
 
@@ -132,12 +131,6 @@ protected:
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void CheckAmmo();
-	
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void ShootProjectile();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	int MaxAmmo;
@@ -207,4 +200,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
 	void OnShieldChanged(float OldValue, float NewValue);
 
+	UFUNCTION(BlueprintCallable)
+	void EquipWeapon(ASWeapon* NewWeapon);
 };

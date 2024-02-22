@@ -27,7 +27,10 @@ class UNBREAD_API ASWeapon : public AActor
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess = true))
 	bool bIsAutoFireOn;
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess = true))
+	float MaxLoadedAmmo;
+
 public:	
 	// Sets default values for this actor's properties
 	ASWeapon();
