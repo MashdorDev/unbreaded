@@ -37,7 +37,7 @@ public:
 	FVector2D SelectedImagePadding;
 
 	UPROPERTY()
-	UCanvasPanelSlot* ImageLocation;
+	UCanvasPanelSlot* ImageTransform;
 
 	UPROPERTY(EditAnywhere)
 	float LerpSpeed;
@@ -66,14 +66,20 @@ public:
 
 private:
 	float ImageLerpT;
+	
 	FVector2D DestinationLocation;
+	FVector2D DestinationSize;
+
 	FVector2D OriginLocation;
 	FVector2D CurrentLocation;
 
+	FVector2D OriginSize;
+	FVector2D CurrentSize;
 
 
 
-	void ResetLerp(FVector2D DestinationLocation_);
+
+	void ResetLerp(FVector2D DestinationLocation_, FVector2D DestinationSize_);
 
 
 };

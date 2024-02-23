@@ -7,10 +7,12 @@
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "CookieInterface.h"
 #include "GameplayAbilitySpec.h"
 #include "InteractInterface.h"
 #include "SCharacter.generated.h"
 
+class ASExplodingBody;
 class UDynamicCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -21,7 +23,7 @@ class USGameplayAbility;
 class UGameplayEffect;
 
 UCLASS()
-class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface
+class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
 {
 	GENERATED_BODY()
 
@@ -115,9 +117,33 @@ protected:
 	bool bIsWalking;
 
 	void Sprint();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float LerpSpeed = 0.6f;
+
+	// Splitting Variables
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsHeadForm = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* NearestCrumbles = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<ASExplodingBody*> ActiveBodies;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<APawn> BodyClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* CharacterMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* HeadMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadLaunchVelocityMultiplier = 1000.f;
+	
 
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
@@ -152,6 +178,19 @@ protected:
 	void SetNextCamera_Implementation(AActor* CameraActor) override;
 
 	void TransitionCamera_Implementation(const float TransitionTime) override;
+
+	// Splitting Mechanic Functions 
+
+	void SetNearestCrumblePile_Implementation(AActor* CrumblesActor) override;
+
+	UFUNCTION(BlueprintCallable)
+	void LaunchHead();
+
+	UFUNCTION(BlueprintCallable)
+	void DestroyBodyAndSpawnCrumbles();
+
+	UFUNCTION(BlueprintCallable)
+	void ReformBody();
 
 
 public:

@@ -29,6 +29,7 @@ void USNavigatableMenu::AddButton(USMenuButton* Button)
 
 void USNavigatableMenu::Navigate(EDirection Direction)
 {
+	if(!Selected) return;
 	FString Name = Selected->Connections[Direction];
 	
 	if(Name == "") return;
@@ -91,16 +92,17 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 		if (Selected && Selected->Button)
 		{
 			const UCanvasPanelSlot* S = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected);
-			UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
+			const UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
+			const UCanvasPanelSlot* B = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected->Button);
 
-			if (!S || !I) return;
+			if (!S || !I || !B) return;
 			
 			if (Selected->Button->GetIsFocusable())
 			{
 				// Set focus on the button if it's focusable
 				Selected->Button->SetFocus();
 			}
-			ResetLerp(S->GetPosition());
+			ResetLerp(S->GetPosition(), B->GetSize());
 			
 		}
 	}
@@ -110,17 +112,25 @@ void USNavigatableMenu::LerpImage()
 {
 	ImageLerpT += 0.1 * LerpSpeed;
 	CurrentLocation = FMath::Lerp(OriginLocation, DestinationLocation, ImageLerpT);
-	ImageLocation->SetPosition(CurrentLocation);
+	CurrentSize = FMath::Lerp(OriginSize, DestinationSize, ImageLerpT);
+	ImageTransform->SetPosition(CurrentLocation);
+	ImageTransform->SetSize(CurrentSize);
 	if(ImageLerpT >= 1.0f)
 	{
-		ImageLocation->SetPosition(DestinationLocation);
+		ImageTransform->SetPosition(DestinationLocation);
 	}
 }
 
-void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_)
+void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_, FVector2D DestinationSize_)
 {
-	OriginLocation = ImageLocation->GetPosition();
+
+	
+	OriginLocation = ImageTransform->GetPosition();
 	DestinationLocation = DestinationLocation_;
+	
+	OriginSize = ImageTransform->GetSize();
+	DestinationSize = DestinationSize_ + SelectedImagePadding;
+	
 	ImageLerpT = 0.0f;
 }
 
@@ -135,13 +145,21 @@ void USNavigatableMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 void USNavigatableMenu::NativePreConstruct()
 {
 	Super::NativePreConstruct();
-	ImageLocation = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
-	OriginLocation = ImageLocation->GetPosition();
+	ImageTransform = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
+	OriginLocation = ImageTransform->GetPosition();
 
 	const auto& SlateApplication = FSlateApplication::Get();
 	auto& NavigationConfig = *SlateApplication.GetNavigationConfig();
 
 	NavigationConfig.bAnalogNavigation = false;
+	NavigationConfig.bKeyNavigation = false;
+
+	if(SelectedImagePadding.Length() <= 0.0f)
+	{
+		SelectedImagePadding.X = 20.0f;
+		SelectedImagePadding.Y = 20.0f;
+
+	}
 
 }
 
