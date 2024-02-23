@@ -21,6 +21,8 @@ class UCameraComponent;
 struct FInputActionValue;
 class USGameplayAbility;
 class UGameplayEffect;
+class UAbilitySystemComponent;
+class ASWeapon;
 
 UCLASS()
 class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
@@ -80,6 +82,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* UtilityAbilityAction;
 
+	// Weapon System
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
+	ASWeapon* Weapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	TSubclassOf<ASWeapon> DefaultWeaponClass;
+
 	// TEMPORARY!!!
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* ProjectileAttackAction;
@@ -91,7 +101,6 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
-	void RotateToTarget(const FVector LookAtTarget);
 
 	// TEMPORARY CHARACTER SETUP
 
@@ -148,17 +157,7 @@ protected:
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
-
-	UFUNCTION(BlueprintCallable, Category = "Combat")
-	void CheckAmmo();
-	void ShootProjectile();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-	int MaxAmmo;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-	int CurrentAmmo;
-
+	
 	// TODO: UPDATE TEMPORARY SETUP USING GAS
 
 
@@ -233,4 +232,7 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
 	void OnShieldChanged(float OldValue, float NewValue);
+
+	UFUNCTION(BlueprintCallable)
+	void EquipWeapon(ASWeapon* NewWeapon);
 };

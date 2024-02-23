@@ -21,6 +21,7 @@
 #include "Camera/CameraActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "SWeapon.h"
 
 
 // Sets default values
@@ -49,10 +50,6 @@ ASCharacter::ASCharacter()
 	SprintSpeed = 1.0f;
 	Speed = WalkSpeed;
 	bIsWalking = true;
-	
-	MaxAmmo = 300;
-	CurrentAmmo = 300;
-
 }
 
 // Called when the game starts or when spawned
@@ -85,6 +82,21 @@ void ASCharacter::BeginPlay()
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
+
+	// Spawn and Equip the default weapon for Player Character
+	UWorld* const World = GetWorld();
+
+	if (World && DefaultWeaponClass)
+	{
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ActorSpawnParams.Owner = this;
+
+		ASWeapon* DefaultWeapon = World->SpawnActor<ASWeapon>(DefaultWeaponClass, GetActorLocation(), GetActorRotation(), ActorSpawnParams);
+		EquipWeapon(DefaultWeapon);
+	}
+	
+
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -130,48 +142,10 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	CameraWorldRotation.Roll = 0.f;
 	CameraWorldRotation.Pitch = 0.f;	
 	const FRotator TargetRotation = UKismetMathLibrary::ComposeRotators(FRotator(0.0f, -1* Angle, 0.0f), CameraWorldRotation);
-
-
-
+	
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
 	GetMesh()->SetWorldRotation(LerpedRotation);
-}
-
-void ASCharacter::RotateToTarget(const FVector LookAtTarget)
-{
-
-	// METHOD 1
-
-	//const FRotator Rotation = Controller->GetControlRotation();
-	//const FRotator YawRotation(0.0f, Rotation.Yaw, 0.0f);
-
-	//FRotator DeltaRotation = FRotator::ZeroRotator;
-	// FRotator DeltaRotation = Value.Get<FRotator>();
-	// DeltaRotation.Yaw *= RotationRate * UGameplayStatics::GetWorldDeltaSeconds(this);
-	// AddActorLocalRotation(DeltaRotation, true);
-
-	// METHOD 2
-
-	/*const FVector2D RotateAxisValue = Value.Get<FVector2D>();
-	if(GetController())
-	{
-		AddControllerYawInput(RotateAxisValue.X);
-		AddControllerPitchInput(RotateAxisValue.Y);
-	}	*/
-
-	// METHOD 3
-
-	/*const FVector ToTarget = LookAtTarget - GetMesh()->GetComponentLocation(); // this is a world rotation
-	const FRotator LookAtRotation(0.f, ToTarget.Rotation().Yaw - 90.f, 0.f); //
-
-	GetMesh()->SetWorldRotation(FMath::RInterpTo(GetMesh()->GetComponentRotation(), LookAtRotation, UGameplayStatics::GetWorldDeltaSeconds(this), 10.f));*/
-
-	// METHOD 4
-
-
-	
-	// TODO: Update rotation according to camera, lerp as tank
 }
 
 void ASCharacter::CheckJump()
@@ -213,38 +187,6 @@ void ASCharacter::Sprint()
 	{
 		Speed = SprintSpeed;
 	}
-}
-
-void ASCharacter::CheckAmmo()
-{
-	if (CurrentAmmo > 0)
-	{
-		ShootProjectile();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Ammo!"));
-	}
-}
-
-void ASCharacter::ShootProjectile()
-{
-	if(bIsHeadForm)
-	{
-		return;
-	}
-	
-	FVector ProjectileSpawnLocation = GetMesh()->GetSocketLocation("ProjectileSpawn") + FVector(0.f, 0.f, 150.f);
-	FRotator ProjectileSpawnRotation = GetMesh()->GetRelativeRotation() + FRotator(0.0f, 90.f, -10.f);
-	FTransform SpawnTM = FTransform(ProjectileSpawnRotation, ProjectileSpawnLocation);
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
-	CurrentAmmo--;
-	UE_LOG(LogTemp, Log, TEXT("Ammo Remaining: %d"), CurrentAmmo);
 }
 
 void ASCharacter::Landed(const FHitResult& Hit)
@@ -329,8 +271,6 @@ void ASCharacter::ReformBody()
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.f);
-
-	
 }
 
 
@@ -338,15 +278,6 @@ void ASCharacter::ReformBody()
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// Using APlayerController::GetHitResultUnderCursor to line trace to mouse cursor and getting hit information
-	/*if (PlayerController)
-	{
-		// We're passing the FHitResult as reference but not const, because we need to change the information on HitResult with every hit.
-		/*FHitResult HitResult;
-		PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, HitResult);
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.f, 12, FColor::Blue, false, -1.f);
-		RotateToTarget(HitResult.ImpactPoint);#1#
-	}*/
 
 	if (bIsJumping)
 	{
@@ -368,7 +299,6 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 
 		// TEMPORARY
-		EnhancedInputComponent->BindAction(ProjectileAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::CheckAmmo);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
 
 		// GAS
@@ -469,6 +399,29 @@ void ASCharacter::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
 void ASCharacter::OnShieldAttributeChanged(const FOnAttributeChangeData& Data)
 {
 	OnShieldChanged(Data.OldValue, Data.NewValue);
+}
+
+void ASCharacter::EquipWeapon(ASWeapon* NewWeapon)
+{
+	if (!NewWeapon)
+	{
+		return;
+	}
+
+	if (Weapon)
+	{
+		Weapon->SetActorLocation(NewWeapon->GetActorLocation());
+		Weapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		Weapon->UnEquip();
+	}
+
+	Weapon = NewWeapon;
+	Weapon->SetOwner(this);
+	Weapon->SetActorLocation(GetActorLocation());
+	FAttachmentTransformRules AttachmentTransformRules(EAttachmentRule::SnapToTarget, true);
+	Weapon->AttachToComponent(GetMesh(), AttachmentTransformRules);
+	Weapon->Equip();
+	Weapon->SetActorHiddenInGame(true);
 }
 
 void ASCharacter::OnPrimaryAttack(const FInputActionValue& Value)
