@@ -50,10 +50,6 @@ ASCharacter::ASCharacter()
 	SprintSpeed = 1.0f;
 	Speed = WalkSpeed;
 	bIsWalking = true;
-	
-	MaxAmmo = 300;
-	CurrentAmmo = 300;
-
 }
 
 // Called when the game starts or when spawned
@@ -146,9 +142,7 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	CameraWorldRotation.Roll = 0.f;
 	CameraWorldRotation.Pitch = 0.f;	
 	const FRotator TargetRotation = UKismetMathLibrary::ComposeRotators(FRotator(0.0f, -1* Angle, 0.0f), CameraWorldRotation);
-
-
-
+	
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
 	GetMesh()->SetWorldRotation(LerpedRotation);
@@ -277,8 +271,6 @@ void ASCharacter::ReformBody()
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.f);
-
-	
 }
 
 

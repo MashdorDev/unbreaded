@@ -157,13 +157,7 @@ protected:
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-	int MaxAmmo;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-	int CurrentAmmo;
-
+	
 	// TODO: UPDATE TEMPORARY SETUP USING GAS
 
 
