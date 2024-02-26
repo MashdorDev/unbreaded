@@ -9,6 +9,8 @@
 
 struct FGameplayEffectModCallbackData;
 struct FGameplayAttribute;
+
+DECLARE_MULTICAST_DELEGATE_FourParams(FSOnDamageTakenEvent, AActor* /*EffectInstigator*/, AActor* /*EffectCauser*/, const FGameplayTagContainer& /*GameplayTagContainer*/, float /*Damage*/);
 /**
  * 
  */
@@ -39,6 +41,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Attributes", Meta = (AllowPrivateAccess = true))
 	FGameplayAttributeData AppliedDamage;
 	ATTRIBUTE_ACCESSORS(USHealthAttributeSet, AppliedDamage);
+
+	mutable FSOnDamageTakenEvent OnDamageTaken;
 
 protected:
 
