@@ -151,7 +151,7 @@ protected:
 	USkeletalMesh* HeadMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HeadLaunchVelocityMultiplier = 1000.f;
+	float HeadLaunchVelocityMultiplier = 2200.f;
 	
 
 	// TEMPORARY PROJECTILE ATTACK

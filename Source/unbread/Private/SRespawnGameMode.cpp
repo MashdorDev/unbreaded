@@ -3,9 +3,11 @@
 
 #include "SRespawnGameMode.h"
 
+#include "SCharacter.h"
 #include "Chaos/SpatialAccelerationCollection.h"
 #include "GameFramework/DefaultPawn.h"
-	
+#include "unbread/DynamicCameraComponent.h"
+
 
 void ASRespawnGameMode::BeginPlay()
 {
@@ -27,11 +29,23 @@ void ASRespawnGameMode::BeginPlay()
 void ASRespawnGameMode::SpawnPlayer()
 {
 	// spawn and possess player
-	if(APawn* SpawnedPlayer = GetWorld()->SpawnActor<APawn>(DefaultPawnClass, SpawnLocation))
+	if(APawn* SpawnedPlayer = GetWorld()->SpawnActorDeferred<APawn>(DefaultPawnClass, SpawnLocation))
 	{
+		
+		
+		UGameplayStatics::FinishSpawningActor(SpawnedPlayer, SpawnLocation);
+
+		
 		SpawnedPlayer->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
 		
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess(SpawnedPlayer);
+
+		if(auto Player = Cast<ASCharacter>(SpawnedPlayer))
+		{
+			auto DynamicCamera = Cast<UDynamicCameraComponent>(Player->GetComponentByClass(UDynamicCameraComponent::StaticClass()));
+			DynamicCamera->FindDefaultLevelCamera();
+		}
+		
 	}
 	else
 	{

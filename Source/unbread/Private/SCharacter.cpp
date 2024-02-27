@@ -95,8 +95,6 @@ void ASCharacter::BeginPlay()
 		ASWeapon* DefaultWeapon = World->SpawnActor<ASWeapon>(DefaultWeaponClass, GetActorLocation(), GetActorRotation(), ActorSpawnParams);
 		EquipWeapon(DefaultWeapon);
 	}
-	
-
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -224,11 +222,15 @@ void ASCharacter::LaunchHead()
 
 	// Swap the mesh and launch the head
 	GetMesh()->SetSkeletalMeshAsset(HeadMesh);
-	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -150.f));
+
+	// Move the head down & Adjust the collider
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -150.f)); 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(34.f);
 
-	const FVector LaunchVelocity = GetMesh()->GetRightVector() * HeadLaunchVelocityMultiplier;
-	
+	// Move head forward & launch
+	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
+
+	const FVector LaunchVelocity = (GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier;	
 	GetCharacterMovement()->Velocity = LaunchVelocity;
 
 	// Spawn the body and add it to ActiveBodies
@@ -240,7 +242,10 @@ void ASCharacter::DestroyBodyAndSpawnCrumbles()
 {
 	for (auto& Body : ActiveBodies)
 	{
-		Body->Explode();
+		if(Body)
+		{
+			Body->Explode();
+		}
 	}
 	ActiveBodies.Empty();
 }
