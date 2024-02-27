@@ -4,6 +4,7 @@
 #include "SPlayerState.h"
 #include "AbilitySystemComponent.h"
 #include "SHealthAttributeSet.h"
+#include "SWeaponAttributeSet.h"
 
 ASPlayerState::ASPlayerState()
 {
@@ -11,6 +12,7 @@ ASPlayerState::ASPlayerState()
 	//AbilitySystemComponent->SetIsReplicated(true);
 
 	HealthAttributeSet = CreateDefaultSubobject<USHealthAttributeSet>("HealthAttributeSet");
+	WeaponAttributeSet = CreateDefaultSubobject<USWeaponAttributeSet>("WeaponAttributeSet");
 }
 
 UAbilitySystemComponent* ASPlayerState::GetAbilitySystemComponent() const

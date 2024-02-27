@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "AbilitySystemInterface.h"
+
 #include "SPlayerState.generated.h"
 
 class UAbilitySystemComponent;
 class USHealthAttributeSet;
+class USWeaponAttributeSet;
 
 /**
  * 
@@ -26,6 +28,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
 	USHealthAttributeSet* HealthAttributeSet;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
+	USWeaponAttributeSet* WeaponAttributeSet;
 
 protected:
 	UPROPERTY()
