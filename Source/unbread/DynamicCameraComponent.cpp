@@ -2,6 +2,8 @@
 
 
 #include "DynamicCameraComponent.h"
+
+#include "CameraRegisterVolume.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -21,7 +23,12 @@ void UDynamicCameraComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+
+
+
 	
+	// Set The Default Camera
+	FindDefaultLevelCamera();	
 }
 
 
@@ -50,8 +57,6 @@ void UDynamicCameraComponent::SetNextCamera(AActor* CameraActor)
 // Transitions to the next camera
 void UDynamicCameraComponent::TransitionCamera(const float TransitionTime)
 {
-
-	
 	// Do nothing if there is no camera actor to transition to
 	if(NextCameraActor == nullptr)
 	{
@@ -71,9 +76,30 @@ void UDynamicCameraComponent::TransitionCamera(const float TransitionTime)
 	//NextCameraActor = nullptr;
 
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->EnableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	
-	if(DefaultCameraActor == nullptr) DefaultCameraActor = CurrentCameraActor;
 
 	return;
+}
+
+void UDynamicCameraComponent::FindDefaultLevelCamera()
+{
+	TArray<AActor*> CameraActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "MainCamera", CameraActors);
+
+	// Get the first actor tagged as "MainCamera"
+	if(CameraActors.Num() > 0)
+	{
+		DefaultCameraActor = CameraActors[0];
+
+		if(auto MainCamera = Cast<ACameraRegisterVolume>(CameraActors[0]))
+		{
+			MainCamera->Target = GetOwner();
+		}
+	}
+	else
+	{
+		DefaultCameraActor = GetOwner();
+	}
+
+	TransitionCamera(0.f);
 }
 

@@ -37,7 +37,12 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintCallable)
 	void SetNextCamera(AActor* CameraActor);
 
+	UFUNCTION(BlueprintCallable)
 	void TransitionCamera(const float TransitionTime);
+
+	UFUNCTION(BlueprintCallable)
+	void FindDefaultLevelCamera();
 };
