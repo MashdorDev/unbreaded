@@ -63,39 +63,41 @@ Unbread is brought to life thanks to the dedication and passion of a talented te
 
 ## Programmers
 
-| Name               | Link                         |
-| ------------------ | ----------------------------- |
-| Safak Onol         |   |
-| Dor Zairi          |   |
-| Ryler Bleau        |   [Linkedin ](https://ca.linkedin.com/in/ryler-bleau-359013206)<br>  [Portfolio website](https://rylerbleau.wixsite.com/rylerbleau)|
-| Volodymyr Antoniuk |  |
-| Gage Morash        |   |
+| Name               | Link                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Dor Zairi          | [Linkedin ](https://www.linkedin.com/in/dorz/)<br> [Portfolio website](https://dorzairi.com)                                     |
+| Safak Onol         |                                                                                                                                  |
+| Ryler Bleau        | [Linkedin ](https://ca.linkedin.com/in/ryler-bleau-359013206)<br> [Portfolio website](https://rylerbleau.wixsite.com/rylerbleau) |
+| Volodymyr Antoniuk | [Linkedin](https://www.linkedin.com/in/antoniukoff/)                                                                             |
+| Gage Morash        | [Linkedin](https://www.linkedin.com/in/gage-morash/)                                                                             |
+| Alan Jiménez       | [Linkedin](https://www.linkedin.com/in/alandjs23/)                                                                               |
 
 ---
 
 ## Writers
 
-| Name           |         Link            |
-| -------------- | ------------------------------- |
-| Arthur Bullock |     |
-| Jorge Lavalle  |     |
-| Maddy          |     |
+| Name           | Link                                                           |
+| -------------- | -------------------------------------------------------------- |
+| Arthur Bullock | [Linkedin](https://www.linkedin.com/in/arthur-bullock/)        |
+| Jorge Lavalle  |                                                                |
+| Maddy          | [Linkedin](https://www.linkedin.com/in/maddie-cain-313819252/) |
 
 ---
 
 ## Audio
 
-|Name|Link|
-|---|---|
-|Zane Kismet |      |
-|Nadav Shelly | <Email>|
+| Name         | Link    |
+| ------------ | ------- |
+| Zane Kismet  |         |
+| Nadav Shelly | <Email> |
 
 ---
 
 ## 3d artists
-|Name|Link|
-|---|---|
-|Sonia |  |
-|Yulia |  |
+
+| Name  | Link                                                   |
+| ----- | ------------------------------------------------------ |
+| Sonia | [Linkedin](https://www.linkedin.com/in/sofiiaorlovska) |
+| Yulia |                                                        |
 
 ---
