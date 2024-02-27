@@ -26,7 +26,7 @@ ASRanged_AIController::ASRanged_AIController(FObjectInitializer const& ObjectIni
 	Hearing = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("Hearing"));
 
 	Sight->SightRadius = 2000.0f;
-	Sight->LoseSightRadius = Sight->SightRadius +500.0f;
+	Sight->LoseSightRadius = Sight->SightRadius + 500.0f;
 	Hearing->HearingRange = 2000.0f;
 
 	//Tell the senses to detect everything
@@ -38,7 +38,6 @@ ASRanged_AIController::ASRanged_AIController(FObjectInitializer const& ObjectIni
 	AiPerceptionComponent->ConfigureSense(*Sight);
 	AiPerceptionComponent->ConfigureSense(*Hearing);
 	AiPerceptionComponent->SetDominantSense(Sight->GetSenseImplementation());
-	
 }
 
 void ASRanged_AIController::BeginPlay()
