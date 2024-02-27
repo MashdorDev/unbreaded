@@ -1,12 +1,12 @@
-# Unbread
+# Unbreaded
 
 ## Description
 
-Unbread narrates the adventurous tale of a gingerbread man brought to life by a passionate chef, embroiled in a struggle against a corporation aiming to industrialize his artisan bakery. Set in a transformed bakery, now a battleground between the warmth of traditional baking and the coldness of industrial advancement, players navigate through puzzles and combat animated kitchen foes. This game highlights the importance of preserving artisanal traditions in the face of modern challenges.
+Unbreaded narrates the adventurous tale of a gingerbread man brought to life by a passionate chef, embroiled in a struggle against a corporation aiming to industrialize his artisan bakery. Set in a transformed bakery, now a battleground between the warmth of traditional baking and the coldness of industrial advancement, players navigate through puzzles and combat animated kitchen foes. This game highlights the importance of preserving artisanal traditions in the face of modern challenges.
 
 ## Table of Contents
 
-- [Unbread](#unbread)
+- [Unbreaded](#unbreaded)
   - [Description](#description)
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
