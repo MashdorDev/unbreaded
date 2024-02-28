@@ -26,19 +26,18 @@ ASRanged_AIController::ASRanged_AIController(FObjectInitializer const& ObjectIni
 	Hearing = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("Hearing"));
 
 	Sight->SightRadius = 2000.0f;
-	Sight->LoseSightRadius = Sight->SightRadius +500.0f;
+	Sight->LoseSightRadius = Sight->SightRadius + 500.0f;
 	Hearing->HearingRange = 2000.0f;
 
-	//Tell the senses to detect everthing
+	//Tell the senses to detect everything
 	Sight->DetectionByAffiliation.bDetectEnemies = true;
 	Sight->DetectionByAffiliation.bDetectFriendlies = true;
 	Sight->DetectionByAffiliation.bDetectNeutrals = true;
 
-	// REgister the sight sense to our perception Component
+	// Register the sight sense to our perception Component
 	AiPerceptionComponent->ConfigureSense(*Sight);
 	AiPerceptionComponent->ConfigureSense(*Hearing);
 	AiPerceptionComponent->SetDominantSense(Sight->GetSenseImplementation());
-	
 }
 
 void ASRanged_AIController::BeginPlay()
@@ -86,6 +85,7 @@ void ASRanged_AIController::OnPossess(APawn* InPawn)
 		LocationKeyID = BBC->GetKeyID("MoveToLocation");
 		ContactKeyID = BBC->GetKeyID("Contact");
 		DamagedKeyID = BBC->GetKeyID("Damaged");
+			StateID = BBC->GetKeyID("EAIState");
 
 		BTC->StartTree(*aiCharacter->GetBehaviourTree());
 		
@@ -128,7 +128,8 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 			return;
 		}
 	}
-	if(BBC->GetValueAsEnum(("AIState")) == (uint8_t)EAIState::Attack)
+	
+	if(BBC->GetValueAsEnum("AIState") == (uint8_t)EAIState::Attack)
 	{
 		return;
 	}
@@ -145,9 +146,11 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 
 void ASRanged_AIController::SetDetectionLevel()
 {
+	auto State = BBC->GetValueAsEnum("AIState");
+	
 	if(!Target || !BBC->GetValueAsBool("Contact"))
 	{
-		if(BBC->GetValueAsEnum("AIState") != (uint8_t)EAIState::Idle)
+		if(State != (uint8_t)EAIState::Idle)
 		{
 			GetWorldTimerManager().ClearTimer(DetectionTimer);
 			Agent->UpdateWidgetVis(false);
@@ -164,10 +167,16 @@ void ASRanged_AIController::SetDetectionLevel()
 
 		return;
 	}
-
+	
 	const float Distance = GetPawn()->GetDistanceTo(Target);
-	Rate = (Distance <= 500.0f) ? 1.f : 2.f;
-	DetectionLevel += 1;
+
+	if (Distance <= 2000.0f) {
+		Rate =  Distance / 2000.0f;
+	} else {
+		Rate = 1.0f;
+	}
+
+	DetectionLevel += 0.5f / Rate;
 	
 	if(DetectionLevel >= DetectionThreshold)
 	{
