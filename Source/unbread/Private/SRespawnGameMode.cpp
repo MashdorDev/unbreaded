@@ -62,7 +62,7 @@ void ASRespawnGameMode::SpawnPlayer()
 void ASRespawnGameMode::RespawnPlayer(AActor* Destroyed)
 {
 	CurLives--;
-
+	
 	if (CheckLoss()) return;
 	
 	// spawn player with delay, or no delay if 0.

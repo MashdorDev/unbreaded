@@ -125,10 +125,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float SprintSpeed;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	bool bIsWalking;
-
 	void Sprint();
+	void Walk();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float LerpSpeed = 0.6f;
