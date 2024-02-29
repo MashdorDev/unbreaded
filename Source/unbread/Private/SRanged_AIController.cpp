@@ -144,7 +144,7 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 	}
 }
 
-void ASRanged_AIController::SetDetectionLevel()
+void ASRanged_AIController::SetDetectionLevel() 
 {
 	auto State = BBC->GetValueAsEnum("AIState");
 	

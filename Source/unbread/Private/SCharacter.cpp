@@ -49,7 +49,6 @@ ASCharacter::ASCharacter()
 	WalkSpeed = 0.5f;
 	SprintSpeed = 1.0f;
 	Speed = WalkSpeed;
-	bIsWalking = true;
 }
 
 // Called when the game starts or when spawned
@@ -194,15 +193,21 @@ void ASCharacter::Sprint()
 		return;
 	}
 	
-	bIsWalking = !bIsWalking;
-	if (bIsWalking)
+
+	Speed = SprintSpeed;
+	
+}
+
+void ASCharacter::Walk()
+{
+	if(bIsHeadForm)
 	{
-		Speed = WalkSpeed;
+		return;
 	}
-	else
-	{
-		Speed = SprintSpeed;
-	}
+	
+
+	Speed = WalkSpeed;
+	
 }
 
 void ASCharacter::Landed(const FHitResult& Hit)
@@ -292,9 +297,9 @@ void ASCharacter::ReformBody()
 		IInteractInterface::Execute_CrumbleInteraction(NearestCrumbles, this);
 	}
 	NearestCrumbles = nullptr;
-
 	bIsHeadForm = false;
-
+	Speed = WalkSpeed;
+	
 	DestroyBodyAndSpawnCrumbles();
 
 	AddActorWorldOffset(FVector(0.f, 0.f, 90.f));
@@ -332,6 +337,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		// TEMPORARY
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ASCharacter::Walk);
+
 
 		// GAS
 		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::OnPrimaryAttack);
