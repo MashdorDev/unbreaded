@@ -217,7 +217,7 @@ void ASCharacter::LaunchHead()
 	bIsHeadForm = true;
 	
 	// Store the current location and rotation of the character
-	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation();
+	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
 	const FRotator BodySpawnRotation = GetMesh()->GetComponentRotation();
 
 	// Swap the mesh and launch the head
@@ -234,7 +234,11 @@ void ASCharacter::LaunchHead()
 	GetCharacterMovement()->Velocity = LaunchVelocity;
 
 	// Spawn the body and add it to ActiveBodies
-	ActiveBodies.AddUnique(GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation));
+	FActorSpawnParameters Parameters {};
+	Parameters.bNoFail = true;
+	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
+	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
+	ActiveBodies.AddUnique(Spawned);
 	
 }
 
