@@ -127,10 +127,28 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	// TODO: Update forward and right vectors according to camera position and rotation
 	//
 	//
+	
+	if(!bUseNewRotation) return;
+
+	const FVector2D RotVector = Value.Get<FVector2D>();
+	
+	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
+
+	// Rotate the character relative to the current camera
+	FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetComponentRotation();
+	CameraWorldRotation.Roll = 0.f;
+	CameraWorldRotation.Pitch = 0.f;	
+	const FRotator TargetRotation = UKismetMathLibrary::ComposeRotators(FRotator(0.0f, -1* Angle, 0.0f), CameraWorldRotation);
+	
+	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
+	
+	GetMesh()->SetWorldRotation(LerpedRotation);
 }
 
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
+	if(bUseNewRotation) return;
+	
 	const FVector2D RotVector = Value.Get<FVector2D>();
 	
 	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
@@ -267,7 +285,12 @@ void ASCharacter::ReformBody()
 		return;
 	}
 
-	NearestCrumbles->Destroy();
+	//NearestCrumbles->Destroy();
+
+	if(NearestCrumbles->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
+	{
+		IInteractInterface::Execute_CrumbleInteraction(NearestCrumbles, this);
+	}
 	NearestCrumbles = nullptr;
 
 	bIsHeadForm = false;

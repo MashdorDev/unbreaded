@@ -16,22 +16,22 @@ ASExplodingBody::ASExplodingBody()
 	Root = CreateDefaultSubobject<USceneComponent>("RootComponent");
 	SetRootComponent(Root);
 
+	//Capsule = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
+	//Capsule->SetupAttachment(Root);
+	//Capsule->SetRelativeLocation(FVector(0.f, 0.f, 88.f));
+	//Capsule->SetCapsuleHalfHeight(88.f);
+	//Capsule->SetCapsuleRadius(34.f);
+
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
+	Mesh->SetupAttachment(Root);
+	Mesh->SetRelativeScale3D(FVector(0.465f, 0.465f, 0.465f));
+	Mesh->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	
 	RadialForce = CreateDefaultSubobject<URadialForceComponent>("RadialForceComponent");
-	RadialForce->SetupAttachment(Root);
+	RadialForce->SetupAttachment(Mesh);
 	RadialForce->Radius = 200.f;
 	RadialForce->ImpulseStrength = 1000.f;
 	RadialForce->bImpulseVelChange = true;
-
-	Capsule = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
-	Capsule->SetupAttachment(Root);
-	Capsule->SetRelativeLocation(FVector(0.f, 0.f, 88.f));
-	Capsule->SetCapsuleHalfHeight(88.f);
-	Capsule->SetCapsuleRadius(34.f);
-
-	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
-	Mesh->SetupAttachment(Capsule);
-	Mesh->SetRelativeScale3D(FVector(0.465f, 0.465f, 0.465f));
-	Mesh->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 
 }
 
@@ -59,7 +59,10 @@ void ASExplodingBody::Explode()
 {
 	RadialForce->FireImpulse();
 	const FActorSpawnParameters SpawnParameters;
-	GetWorld()->SpawnActor<ASCrumbles>(CrumblesActor, Mesh->GetComponentLocation(), Mesh->GetComponentRotation(), SpawnParameters);
+	FRotator SpawnRotation = Mesh->GetComponentRotation();
+	SpawnRotation.Pitch = 0.f;
+	SpawnRotation.Roll = 0.f;
+	GetWorld()->SpawnActor<ASCrumbles>(CrumblesActor, Mesh->GetComponentLocation(), SpawnRotation, SpawnParameters);
 	Destroy();
 }
 
