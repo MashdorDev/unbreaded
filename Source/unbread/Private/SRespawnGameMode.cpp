@@ -16,12 +16,17 @@ void ASRespawnGameMode::BeginPlay()
 	CurLives = MaxLives;
 
 	SetSpawnLocation(FindPlayerStart(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetTransform());
-	UGameplayStatics::GetPlayerPawn(GetWorld(),0)->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
 
-	// Temp code for testing pause game
-	/*FTimerHandle UnusedHandle;
-	GetWorldTimerManager().SetTimer(
-	UnusedHandle, this, &ASRespawnGameMode::PauseGame, 2.0f, false);*/
+	// get ref to player in world
+	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(),0);
+
+	// bind death and pause
+	Pawn->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
+	if(auto Player = Cast<ASCharacter>(Pawn))
+	{
+		Player->PauseGame.AddDynamic(this, &ASRespawnGameMode::PauseGame);
+	}
+	
 	
 	
 }
@@ -44,6 +49,7 @@ void ASRespawnGameMode::SpawnPlayer()
 		{
 			auto DynamicCamera = Cast<UDynamicCameraComponent>(Player->GetComponentByClass(UDynamicCameraComponent::StaticClass()));
 			DynamicCamera->FindDefaultLevelCamera();
+			Player->PauseGame.AddDynamic(this, &ASRespawnGameMode::PauseGame);
 		}
 		
 	}

@@ -24,6 +24,9 @@ class UGameplayEffect;
 class UAbilitySystemComponent;
 class ASWeapon;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGamePauseInput);
+
+
 UCLASS()
 class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
 {
@@ -205,6 +208,9 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 
 	virtual void Landed(const FHitResult& Hit) override;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FGamePauseInput PauseGame;
 
 protected:
 	UPROPERTY()
