@@ -33,7 +33,6 @@ void ASDestructible::BeginPlay()
 	}
 
 	AbilitySystemComp->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASDestructible::OnHealthAttributeChanged);
-	
 }
 
 // Called every frame
