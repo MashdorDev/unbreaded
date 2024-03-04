@@ -19,23 +19,26 @@ public:
 	// Sets default values for this actor's properties
 	ACameraRegisterVolume();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CameraTransitionTime = 0.5f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bResetCameraOnExit = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* Target;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	USceneComponent* Root;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UCameraComponent* Camera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UBoxComponent* TriggerVolume;
 
 public:	

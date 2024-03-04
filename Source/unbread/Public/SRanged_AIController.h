@@ -16,6 +16,7 @@
 UCLASS()
 class UNBREAD_API ASRanged_AIController : public AAIController
 {
+	friend class AAIManager;
 	GENERATED_BODY()
 public:
 	ASRanged_AIController(FObjectInitializer const& ObjectInitializer);
@@ -49,6 +50,7 @@ public:
 	FBlackboard::FKey LocationKeyID;
 	FBlackboard::FKey ContactKeyID;
 	FBlackboard::FKey DamagedKeyID;
+	FBlackboard::FKey StateID;
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -65,7 +67,7 @@ protected:
 
 	FTimerHandle DetectionTimer;
 	void SetDetectionLevel();
-	float Rate = 1.0f;
+	float Rate = 0.5f;
 	
 	AActor* Target = nullptr;
 	FVector LastStimulusLocation = FVector::ZeroVector;

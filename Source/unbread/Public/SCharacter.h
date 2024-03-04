@@ -24,6 +24,9 @@ class UGameplayEffect;
 class UAbilitySystemComponent;
 class ASWeapon;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGamePauseInput);
+
+
 UCLASS()
 class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
 {
@@ -122,13 +125,14 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float SprintSpeed;
 
-	UPROPERTY(EditAnywhere, Category = "Movement")
-	bool bIsWalking;
-
 	void Sprint();
+	void Walk();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float LerpSpeed = 0.6f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bUseNewRotation = true;
 
 	// Splitting Variables
 	
@@ -151,7 +155,7 @@ protected:
 	USkeletalMesh* HeadMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HeadLaunchVelocityMultiplier = 1000.f;
+	float HeadLaunchVelocityMultiplier = 2200.f;
 	
 
 	// TEMPORARY PROJECTILE ATTACK
@@ -207,6 +211,9 @@ public:
 	virtual void PossessedBy(AController* NewController) override;
 
 	virtual void Landed(const FHitResult& Hit) override;
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FGamePauseInput PauseGame;
 
 protected:
 	UPROPERTY()

@@ -45,7 +45,7 @@ EBTNodeResult::Type UBTTask_Fire::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 	if(!PlayerHitActor && (!HitActor || HitActor->faction == MyController->Agent->faction) && !Projectile)
 	{
  		Shoot(false);
-		MyController->BBC->SetValueAsBool("Move", true);
+		MyController->BBC->SetValueAsBool("Damaged", true);
 		return EBTNodeResult::Succeeded;
 	}
 

@@ -49,7 +49,6 @@ ASCharacter::ASCharacter()
 	WalkSpeed = 0.5f;
 	SprintSpeed = 1.0f;
 	Speed = WalkSpeed;
-	bIsWalking = true;
 }
 
 // Called when the game starts or when spawned
@@ -95,8 +94,6 @@ void ASCharacter::BeginPlay()
 		ASWeapon* DefaultWeapon = World->SpawnActor<ASWeapon>(DefaultWeaponClass, GetActorLocation(), GetActorRotation(), ActorSpawnParams);
 		EquipWeapon(DefaultWeapon);
 	}
-	
-
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -129,10 +126,28 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	// TODO: Update forward and right vectors according to camera position and rotation
 	//
 	//
+	
+	if(!bUseNewRotation) return;
+
+	const FVector2D RotVector = Value.Get<FVector2D>();
+	
+	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
+
+	// Rotate the character relative to the current camera
+	FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetComponentRotation();
+	CameraWorldRotation.Roll = 0.f;
+	CameraWorldRotation.Pitch = 0.f;	
+	const FRotator TargetRotation = UKismetMathLibrary::ComposeRotators(FRotator(0.0f, -1* Angle, 0.0f), CameraWorldRotation);
+	
+	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
+	
+	GetMesh()->SetWorldRotation(LerpedRotation);
 }
 
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
+	if(bUseNewRotation) return;
+	
 	const FVector2D RotVector = Value.Get<FVector2D>();
 	
 	const float Angle = FMath::Atan2(RotVector.Y, RotVector.X) * (180.0f / PI);
@@ -178,15 +193,21 @@ void ASCharacter::Sprint()
 		return;
 	}
 	
-	bIsWalking = !bIsWalking;
-	if (bIsWalking)
+
+	Speed = SprintSpeed;
+	
+}
+
+void ASCharacter::Walk()
+{
+	if(bIsHeadForm)
 	{
-		Speed = WalkSpeed;
+		return;
 	}
-	else
-	{
-		Speed = SprintSpeed;
-	}
+	
+
+	Speed = WalkSpeed;
+	
 }
 
 void ASCharacter::Landed(const FHitResult& Hit)
@@ -219,20 +240,28 @@ void ASCharacter::LaunchHead()
 	bIsHeadForm = true;
 	
 	// Store the current location and rotation of the character
-	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation();
+	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
 	const FRotator BodySpawnRotation = GetMesh()->GetComponentRotation();
 
 	// Swap the mesh and launch the head
 	GetMesh()->SetSkeletalMeshAsset(HeadMesh);
-	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -150.f));
+
+	// Move the head down & Adjust the collider
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -150.f)); 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(34.f);
 
-	const FVector LaunchVelocity = GetMesh()->GetRightVector() * HeadLaunchVelocityMultiplier;
-	
+	// Move head forward & launch
+	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
+
+	const FVector LaunchVelocity = (GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier;	
 	GetCharacterMovement()->Velocity = LaunchVelocity;
 
 	// Spawn the body and add it to ActiveBodies
-	ActiveBodies.AddUnique(GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation));
+	FActorSpawnParameters Parameters {};
+	Parameters.bNoFail = true;
+	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
+	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
+	ActiveBodies.AddUnique(Spawned);
 	
 }
 
@@ -240,7 +269,10 @@ void ASCharacter::DestroyBodyAndSpawnCrumbles()
 {
 	for (auto& Body : ActiveBodies)
 	{
-		Body->Explode();
+		if(Body)
+		{
+			Body->Explode();
+		}
 	}
 	ActiveBodies.Empty();
 }
@@ -258,11 +290,16 @@ void ASCharacter::ReformBody()
 		return;
 	}
 
-	NearestCrumbles->Destroy();
+	//NearestCrumbles->Destroy();
+
+	if(NearestCrumbles->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
+	{
+		IInteractInterface::Execute_CrumbleInteraction(NearestCrumbles, this);
+	}
 	NearestCrumbles = nullptr;
-
 	bIsHeadForm = false;
-
+	Speed = WalkSpeed;
+	
 	DestroyBodyAndSpawnCrumbles();
 
 	AddActorWorldOffset(FVector(0.f, 0.f, 90.f));
@@ -300,6 +337,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 		// TEMPORARY
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ASCharacter::Walk);
+
 
 		// GAS
 		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::OnPrimaryAttack);

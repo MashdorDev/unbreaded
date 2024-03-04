@@ -92,9 +92,14 @@ void AAIManager::CreateAgentsList()
 
 void AAIManager::NotifyAIState(EAIState state)
 {
-	for( auto & Cntrl: Agents)
+	for(auto & Cntrl: Agents)
 	{
-		Cntrl->BBC->SetValueAsEnum("AIState", (uint8_t)state);
+		Cntrl->BBC->SetValueAsEnum("AIState", StaticCast<uint8>(state));
+		if(state == EAIState::Attack)
+		{
+			GetWorldTimerManager().ClearTimer(Cntrl->DetectionTimer);
+			Cntrl->Agent->UpdateWidgetVis(false);
+		}
 	}
 	if(state == EAIState::Attack)
 	{

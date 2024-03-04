@@ -3,9 +3,11 @@
 
 #include "SRespawnGameMode.h"
 
+#include "SCharacter.h"
 #include "Chaos/SpatialAccelerationCollection.h"
 #include "GameFramework/DefaultPawn.h"
-	
+#include "unbread/DynamicCameraComponent.h"
+
 
 void ASRespawnGameMode::BeginPlay()
 {
@@ -14,12 +16,17 @@ void ASRespawnGameMode::BeginPlay()
 	CurLives = MaxLives;
 
 	SetSpawnLocation(FindPlayerStart(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetTransform());
-	UGameplayStatics::GetPlayerPawn(GetWorld(),0)->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
 
-	// Temp code for testing pause game
-	/*FTimerHandle UnusedHandle;
-	GetWorldTimerManager().SetTimer(
-	UnusedHandle, this, &ASRespawnGameMode::PauseGame, 2.0f, false);*/
+	// get ref to player in world
+	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(),0);
+
+	// bind death and pause
+	Pawn->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
+	if(auto Player = Cast<ASCharacter>(Pawn))
+	{
+		Player->PauseGame.AddDynamic(this, &ASRespawnGameMode::PauseGame);
+	}
+	
 	
 	
 }
@@ -27,11 +34,24 @@ void ASRespawnGameMode::BeginPlay()
 void ASRespawnGameMode::SpawnPlayer()
 {
 	// spawn and possess player
-	if(APawn* SpawnedPlayer = GetWorld()->SpawnActor<APawn>(DefaultPawnClass, SpawnLocation))
+	if(APawn* SpawnedPlayer = GetWorld()->SpawnActorDeferred<APawn>(DefaultPawnClass, SpawnLocation))
 	{
+		
+		
+		UGameplayStatics::FinishSpawningActor(SpawnedPlayer, SpawnLocation);
+
+		
 		SpawnedPlayer->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
 		
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess(SpawnedPlayer);
+
+		if(auto Player = Cast<ASCharacter>(SpawnedPlayer))
+		{
+			auto DynamicCamera = Cast<UDynamicCameraComponent>(Player->GetComponentByClass(UDynamicCameraComponent::StaticClass()));
+			DynamicCamera->FindDefaultLevelCamera();
+			Player->PauseGame.AddDynamic(this, &ASRespawnGameMode::PauseGame);
+		}
+		
 	}
 	else
 	{
@@ -41,8 +61,8 @@ void ASRespawnGameMode::SpawnPlayer()
 
 void ASRespawnGameMode::RespawnPlayer(AActor* Destroyed)
 {
-	CurLives--;
-
+	//CurLives--;
+	
 	if (CheckLoss()) return;
 	
 	// spawn player with delay, or no delay if 0.
