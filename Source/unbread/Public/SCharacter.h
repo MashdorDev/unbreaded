@@ -131,6 +131,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float LerpSpeed = 0.6f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bUseNewRotation = true;
+
 	// Splitting Variables
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

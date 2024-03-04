@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UBoxComponent* TriggerVolume;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDestroyOnUse = true;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -25,8 +25,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	URadialForceComponent* RadialForce;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	UCapsuleComponent* Capsule;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	//UCapsuleComponent* Capsule;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USkeletalMeshComponent* Mesh;

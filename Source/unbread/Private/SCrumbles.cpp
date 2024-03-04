@@ -60,6 +60,9 @@ void ASCrumbles::Tick(float DeltaTime)
 void ASCrumbles::CrumbleInteraction_Implementation(AActor* InstigatingActor)
 {
 	IInteractInterface::CrumbleInteraction_Implementation(InstigatingActor);
-	Destroy();
+	if(bDestroyOnUse)
+	{
+		Destroy();
+	}
 }
 

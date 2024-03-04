@@ -61,7 +61,7 @@ void ASRespawnGameMode::SpawnPlayer()
 
 void ASRespawnGameMode::RespawnPlayer(AActor* Destroyed)
 {
-	CurLives--;
+	//CurLives--;
 	
 	if (CheckLoss()) return;
 	
