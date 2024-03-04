@@ -3,6 +3,7 @@
 
 #include "SRangedAICharacter.h"
 
+#include "AbilitySystemComponent.h"
 #include "AIManager.h"
 #include "SRanged_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -15,12 +16,21 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "IO/IoDispatcher.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "AbilitySystemComponent.h"
+#include "SGameplayAbility.h"
+#include "SHealthAttributeSet.h"
+#include "SWeaponAttributeSet.h"
 
 // Sets default values
 ASRangedAICharacter::ASRangedAICharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComp");
+
+	HealthAttributeSet = CreateDefaultSubobject<USHealthAttributeSet>("HealthAttributeSet");
+	WeaponAttributeSet = CreateDefaultSubobject<USWeaponAttributeSet>("WeaponAttributeSet");
 }
 
 // might change this
@@ -32,7 +42,6 @@ bool ASRangedAICharacter::IsHostile(ASCharacter* character)
 	}
 	return false;
 }
-
 
 FHitResult ASRangedAICharacter::CapsuleTrace()
 {
@@ -98,6 +107,12 @@ void ASRangedAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	UpdateWindgerRef();
+
+	// ** GAS ** //
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASRangedAICharacter::OnHealthAttributeChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASRangedAICharacter::OnShieldAttributeChanged);
+	// Broadcasted by the Macro in HealthAttributeSet.cpp //
+	HealthAttributeSet->OnDamageTaken.AddUObject(this, &ASRangedAICharacter::OnDamageTakenChanged);
 }
 
 float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -233,6 +248,77 @@ void ASRangedAICharacter::ToggleCrouch(const bool Newbool)
 void ASRangedAICharacter::ToggleADS(const bool Newbool)
 {
 	AnimValues.bADS = Newbool;
+}
+
+// ** GAS ** //
+
+UAbilitySystemComponent* ASRangedAICharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void ASRangedAICharacter::InitializeAbilities()
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+
+	for (TSubclassOf<USGameplayAbility>& Ability : DefaultAbilities)
+	{
+		FGameplayAbilitySpecHandle SpecHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability, 1, static_cast<int32>(Ability.GetDefaultObject()->AbilityInputID), this));
+	}
+}
+
+void ASRangedAICharacter::InitializeEffects()
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+
+	FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddSourceObject(this);
+
+	for (TSubclassOf<UGameplayEffect>& Effect : DefaultEffects)
+	{
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(Effect, 1, EffectContext);
+		if (SpecHandle.IsValid())
+		{
+			FActiveGameplayEffectHandle GEHandle = GetAbilitySystemComponent()->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
+}
+
+void ASRangedAICharacter::OnHealthAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	OnHealthChanged(Data.OldValue, Data.NewValue);
+}
+
+void ASRangedAICharacter::OnShieldAttributeChanged(const FOnAttributeChangeData& Data)
+{
+	OnShieldChanged(Data.OldValue, Data.NewValue);
+}
+
+void ASRangedAICharacter::OnDamageTakenChanged(AActor* DamageInstigator, AActor* DamageCauser,
+	const FGameplayTagContainer& GameplayTagContainer, float Damage)
+{
+	OnDamageTaken(DamageInstigator, DamageCauser, GameplayTagContainer, Damage);
+}
+
+void ASRangedAICharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitializeEffects();
+	InitializeAbilities();
 }
 
 

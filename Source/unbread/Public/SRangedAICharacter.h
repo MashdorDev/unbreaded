@@ -9,7 +9,16 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISightTargetInterface.h"
 #include "unbread/unbread.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayAbilitySpec.h"
+
 #include "SRangedAICharacter.generated.h"
+
+class UAbilitySystemComponent;
+class USWeaponAttributeSet;
+class USHealthAttributeSet;
+class USGameplayAbility;
+class UGameplayEffect;
 
 USTRUCT(BlueprintType)
 struct FAnimValues
@@ -37,14 +46,56 @@ public:
 
 
 UCLASS()
-class UNBREAD_API ASRangedAICharacter : public ACharacter
+class UNBREAD_API ASRangedAICharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
+	UAbilitySystemComponent* AbilitySystemComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
+	USHealthAttributeSet* HealthAttributeSet;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS", meta = (AllowPrivateAccess = true))
+	USWeaponAttributeSet* WeaponAttributeSet;
 
 public:
 	// Sets default values for this character's properties
 	ASRangedAICharacter();
 
+	// *** GAS *** //
+	
+	// Inherited from IAbilitySystemInterface
+	UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	virtual void InitializeAbilities();
+	virtual void InitializeEffects();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS")
+	TArray<TSubclassOf<USGameplayAbility>> DefaultAbilities;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "GAS")
+	TArray<TSubclassOf<UGameplayEffect>> DefaultEffects;
+
+	virtual void OnHealthAttributeChanged(const FOnAttributeChangeData& Data);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
+	void OnHealthChanged(float OldValue, float NewValue);
+
+	virtual void OnShieldAttributeChanged(const FOnAttributeChangeData& Data);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
+	void OnShieldChanged(float OldValue, float NewValue);
+
+	virtual void OnDamageTakenChanged(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayTagContainer& GameplayTagContainer, float Damage);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "GAS")
+	void OnDamageTaken(AActor* DamageInstigator, AActor* DamageCauser, const FGameplayTagContainer& GameplayTagContainer, float Damage);
+
+	virtual void PostInitializeComponents() override;
+	
+	// ** --
+	
 	UPROPERTY(BlueprintReadOnly)
 	class ASRanged_AIController* ControllerRef = nullptr;
 	

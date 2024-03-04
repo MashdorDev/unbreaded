@@ -32,6 +32,7 @@ ASExplodingBody::ASExplodingBody()
 	RadialForce->Radius = 200.f;
 	RadialForce->ImpulseStrength = 1000.f;
 	RadialForce->bImpulseVelChange = true;
+	RadialForce->AddCollisionChannelToAffect(ECC_WorldDynamic);
 
 }
 
