@@ -13,15 +13,19 @@
 #include "unbread/DynamicCameraComponent.h"
 #include "../unbread.h"
 #include "AbilitySystemComponent.h"
+#include "AIManager.h"
 #include "SCrumbles.h"
 #include "SExplodingBody.h"
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "SRangedAICharacter.h"
+#include "SRanged_AIController.h"
 #include "Camera/CameraActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
+#include "GeometryCollection/GeometryCollectionAlgo.h"
 
 
 // Sets default values
@@ -84,7 +88,7 @@ void ASCharacter::BeginPlay()
 
 	// Spawn and Equip the default weapon for Player Character
 	UWorld* const World = GetWorld();
-
+	
 	if (World && DefaultWeaponClass)
 	{
 		FActorSpawnParameters ActorSpawnParams;
@@ -93,6 +97,21 @@ void ASCharacter::BeginPlay()
 
 		ASWeapon* DefaultWeapon = World->SpawnActor<ASWeapon>(DefaultWeaponClass, GetActorLocation(), GetActorRotation(), ActorSpawnParams);
 		EquipWeapon(DefaultWeapon);
+	}
+
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ASCharacter::OnBeginOverlap);
+}
+
+void ASCharacter::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(OtherActor);
+	if(bIsHeadForm && chr)
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorLocation({OtherActor->GetActorLocation().X, OtherActor->GetActorLocation().Y, OtherActor->GetActorLocation().Z + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + chr->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()});
+		AttachToActor(OtherActor, FAttachmentTransformRules::KeepWorldTransform);
+		chr->ControllerRef->AIManager->SwitchFaction(chr->ControllerRef);
 	}
 }
 
@@ -184,6 +203,11 @@ void ASCharacter::CheckJump()
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();
+	if(GetAttachParentActor())
+	{
+		DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
 }
 
 void ASCharacter::Sprint()

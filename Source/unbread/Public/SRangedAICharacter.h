@@ -180,7 +180,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	TSubclassOf<class ASProjectile> Projectile;
 	
-	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

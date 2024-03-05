@@ -54,6 +54,10 @@ public:
 	void NotifyAIState(EAIState state);
 
 	UFUNCTION()
+	void SwitchFaction(ASRanged_AIController* agent);
+
+	UFUNCTION()
 	void RemoveAgent(ASRanged_AIController* controllerToRemove);
-	
+private:
+	AAIManager* OppositeFaction;
 };

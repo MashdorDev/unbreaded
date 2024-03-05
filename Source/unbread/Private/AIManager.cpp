@@ -22,6 +22,18 @@ void AAIManager::BeginPlay()
 {
 	Super::BeginPlay();
 	CreateAgentsList();
+	const TSubclassOf<AAIManager> ClassToFind = StaticClass();
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ClassToFind, actors);
+	for(auto& actor: actors)
+	{
+		AAIManager* act = Cast<AAIManager>(actor);
+		if(act->Faction != Faction)
+		{
+			OppositeFaction = act;
+			break;
+		}
+	}
 }
 
 bool AAIManager::Engaged()
@@ -113,6 +125,13 @@ void AAIManager::NotifyAIState(EAIState state)
 		GetWorldTimerManager().SetTimer(SearchTimer, this, &AAIManager::RunSearchTimer, 1.0f, true);
 		return;
 	}
+}
+
+void AAIManager::SwitchFaction(ASRanged_AIController* agent)
+{
+	OppositeFaction->Agents.AddUnique(agent);
+	agent->Agent->faction = OppositeFaction->Faction;
+	RemoveAgent(agent);
 }
 
 void AAIManager::RemoveAgent(ASRanged_AIController* controllerToRemove)

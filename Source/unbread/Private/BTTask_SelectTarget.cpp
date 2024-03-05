@@ -42,10 +42,13 @@ void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> 
 
 		ASCharacter* player = Cast<ASCharacter>(Actor);
 		ASRangedAICharacter* Character = Cast<ASRangedAICharacter>(Actor);
-		if(player)
+		if(Cntrl->Agent->faction == EFaction::Enemy)
 		{
-			BestTarget = player;
-			break;
+			if(player)
+			{
+				BestTarget = player;
+				break;
+			}
 		}
 		if (Character && Character->faction != Cntrl->Agent->faction && Score > HighestScore)
 		{

@@ -101,7 +101,7 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 		ASRangedAICharacter* chr2 = Cast<ASRangedAICharacter>(actor);
         
 		// Improve logical condition clarity and correctness
-		bool isEnemy = chr || (chr2 && chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral);
+		bool isEnemy = (Agent->faction == EFaction::Enemy && chr) || (chr2 && chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral);
         
 		if (isEnemy)
 		{
@@ -137,7 +137,7 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 	// might change here
 	ASCharacter* chr = Cast<ASCharacter>(actor);
 	ASRangedAICharacter* chr2 = Cast<ASRangedAICharacter>(actor);
-	if(chr || (chr2 && chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral))
+	if((Agent->faction == EFaction::Enemy && chr) || (chr2 && chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral))
 	{
 		BBC->SetValueAsEnum("AIState", (uint8_t)EAIState::Investigate);
 		BBC->SetValueAsVector("MoveToLocation", stimulus.StimulusLocation);

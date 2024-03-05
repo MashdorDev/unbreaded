@@ -47,8 +47,6 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 {
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
-
-
 	TArray<AActor*> IgnoredActors;
 	ActorsToIgnore.AddUnique(this);
 
@@ -58,7 +56,7 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 	GetController()->GetPlayerViewPoint(EyesLoc, EyesRot);
 
 	const FVector End = (EyesRot.Vector() * 2000.0f) + EyesLoc + FVector(0.0f, 0.0f, 120.0f);
-	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+	UKismetSystemLibrary::SphereTraceSingle(GetWorld(), EyesLoc, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForOneFrame, OutHit, true, FColor::Green);
 	return OutHit;
 }
 
@@ -79,9 +77,10 @@ void ASRangedAICharacter::StartWaponFire()
 	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
 
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
+	
 	if (pr){
-	pr->SetInstigator(this);
-	pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
+		pr->SetInstigator(this);
+		pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
 	}
 
 	if (FireHandle.IsValid())
