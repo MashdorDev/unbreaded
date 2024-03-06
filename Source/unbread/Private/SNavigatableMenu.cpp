@@ -153,6 +153,7 @@ void USNavigatableMenu::NativePreConstruct()
 
 	NavigationConfig.bAnalogNavigation = false;
 	NavigationConfig.bKeyNavigation = false;
+	NavigationConfig.bTabNavigation = false;
 
 	if(SelectedImagePadding.Length() <= 0.0f)
 	{

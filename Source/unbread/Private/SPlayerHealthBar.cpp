@@ -15,6 +15,7 @@ void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
 	float interval = 1.0f / NumOfImages;
 
 	HealthBar->SetPercent(BarPercentage);
+	
 
 	for(int i = NumOfImages - 1; i >= 0; i--)
 	{
@@ -44,9 +45,10 @@ void USPlayerHealthBar::SetShield(float CurrentShield, float MaxShield)
 
 void USPlayerHealthBar::OnConstruct()
 {
-	NumOfImages = Images.Num();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("num of images: %i"), NumOfImages));
+	BiteImageTransform = UWidgetLayoutLibrary::SlotAsCanvasSlot(BiteImageEnd);
 
+	
+	NumOfImages = Images.Num();
 	CurImage = 0;
 	SetHealthFace(0);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Construct health bar"));
@@ -57,5 +59,5 @@ void USPlayerHealthBar::SetHealthFace(const int& index)
 {
 	if(index >= Images.Num()) return;
 	if(!Images[index]) return;
-	HealthFace->SetBrushFromTexture(Images[index], false);
+	HealthFace->SetBrushFromTexture(Images[index], true);
 }

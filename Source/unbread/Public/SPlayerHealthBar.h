@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/CanvasPanel.h"
 #include "Components/Image.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "SPlayerHealthBar.generated.h"
 
 /**
@@ -41,8 +42,13 @@ class UNBREAD_API USPlayerHealthBar : public UCanvasPanel
 	UPROPERTY(EditAnywhere, meta= (BindWidget))
 	UImage* HealthFace;
 
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UImage* BiteImageEnd;
+	
 	UPROPERTY(EditAnywhere)
 	TArray<UTexture2D*> Images;
+
+	
 
 	
 private:
@@ -50,5 +56,8 @@ private:
 	float ShieldPercentage;
 	int NumOfImages;
 	int CurImage;
+
+	UPROPERTY()
+	UCanvasPanelSlot* BiteImageTransform;
 
 };
