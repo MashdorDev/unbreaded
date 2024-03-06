@@ -10,6 +10,8 @@ void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
 	if(!HealthBar) return;
 
 	BarPercentage = CurrentHealth / MaxHealth;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("HEALTH UI: %f"), BarPercentage));
+
 	HealthBar->SetPercent(BarPercentage);
 	TimeSinceHit = 0.0f;
 }
