@@ -10,10 +10,29 @@ void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
 	if(!HealthBar) return;
 
 	BarPercentage = CurrentHealth / MaxHealth;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("HEALTH UI: %f"), BarPercentage));
+
+	// calc final percentage
+	float interval = 1.0f / NumOfImages;
 
 	HealthBar->SetPercent(BarPercentage);
-	TimeSinceHit = 0.0f;
+
+	for(int i = NumOfImages - 1; i >= 0; i--)
+	{
+		if(BarPercentage <= i * interval)
+		{
+
+			if(BarPercentage > (i-1) * interval)
+			{
+				// found correct range
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("INDEX: %i"), i));
+
+				SetHealthFace(NumOfImages - i);
+				return;
+			}
+		}
+	}
+
+	
 }
 
 void USPlayerHealthBar::SetShield(float CurrentShield, float MaxShield)
@@ -22,62 +41,21 @@ void USPlayerHealthBar::SetShield(float CurrentShield, float MaxShield)
 	ShieldBar->SetPercent(ShieldPercentage);
 }
 
-void USPlayerHealthBar::SetAmmunition(int CurrentAmmo, int MaxAmmo)
-{
-	Ammo = CurrentAmmo;
-	
-}
-
-void USPlayerHealthBar::OnTick(const float InDeltaTime)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Ticking hp"));
-
-	LerpDelayedHPBar(InDeltaTime);
-}
 
 void USPlayerHealthBar::OnConstruct()
 {
-	DelayBarPercentage = HealthBar->GetPercent();
-	DelayedHealthBar->SetPercent(DelayBarPercentage);
-	DelayBarLerpTarget = DelayBarPercentage;
-	DelayBarLerpStart = DelayBarPercentage;
-	DelayBarLerpT = 1.0f;
+	NumOfImages = Images.Num();
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("num of images: %i"), NumOfImages));
+
+	CurImage = 0;
+	SetHealthFace(0);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Construct health bar"));
-}
-
-void USPlayerHealthBar::LerpDelayedHPBar(const float& InDeltaTime)
-{
-	if(!IsLerping)
-	{
-		TimeSinceHit += InDeltaTime;
-		
-		if(TimeSinceHit >= HPDelayThreshold)
-		{
-			// start lerping hp bar, reset all values
-			IsLerping = true;
-			DelayBarLerpT = 1.0f;
-			DelayBarLerpTarget = BarPercentage;
-        		
-		}
-		return;
-	}
 	
-	if(DelayBarLerpT >= 0.0f)
-	{
-		// continue lerping
-		DelayBarLerpT -= 0.1f;
-		DelayBarPercentage = FMath::Lerp(DelayBarLerpTarget, DelayBarLerpStart, DelayBarLerpT);
-		DelayedHealthBar->SetPercent(DelayBarPercentage);
-		
-	}
-	else
-	{
-		// done lerp
-		IsLerping = false;
-		DelayBarLerpStart = DelayBarPercentage;
-	}
 }
 
-void USPlayerHealthBar::LerpHealthBar(const float InDeltaTime)
+void USPlayerHealthBar::SetHealthFace(const int& index)
 {
+	if(index >= Images.Num()) return;
+	if(!Images[index]) return;
+	HealthFace->SetBrushFromTexture(Images[index], false);
 }
