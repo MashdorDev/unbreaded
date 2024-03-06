@@ -217,9 +217,7 @@ void ASCharacter::Sprint()
 		return;
 	}
 	
-
 	Speed = SprintSpeed;
-	
 }
 
 void ASCharacter::Walk()

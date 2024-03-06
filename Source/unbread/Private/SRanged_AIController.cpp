@@ -101,7 +101,7 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 		ASRangedAICharacter* chr2 = Cast<ASRangedAICharacter>(actor);
         
 		// Improve logical condition clarity and correctness
-		bool isEnemy = (Agent->faction == EFaction::Enemy && chr) || (chr2 && chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral);
+		bool isEnemy = chr || (chr2 && chr2->faction != Agent->faction && chr2->faction != EFaction::Neutral);
         
 		if (isEnemy)
 		{
@@ -113,6 +113,11 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 			}
 
 			Target = actor;
+			if(chr && chr->GetAttachParentActor())
+			{
+				Target = chr->GetAttachParentActor();
+			}
+			
 			LastStimulusLocation = stimulus.StimulusLocation;
 			TimeStamp = UKismetSystemLibrary::GetGameTimeInSeconds(Agent);
 

@@ -46,6 +46,11 @@ void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> 
 		{
 			if(player)
 			{
+				if(player->GetAttachParentActor())
+				{
+					BestTarget = Cast<ASRangedAICharacter>(player->GetAttachParentActor());
+					break;
+				}
 				BestTarget = player;
 				break;
 			}
