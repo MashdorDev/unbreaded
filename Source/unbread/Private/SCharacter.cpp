@@ -81,7 +81,7 @@ void ASCharacter::BeginPlay()
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
-
+	
 	// Spawn and Equip the default weapon for Player Character
 	UWorld* const World = GetWorld();
 
@@ -384,7 +384,7 @@ void ASCharacter::PossessedBy(AController* NewController)
 
 void ASCharacter::InitializeAbilities()
 {
-	if (!AbilitySystemComponent.IsValid())
+	if (!HasAuthority() || !AbilitySystemComponent.IsValid())
 	{
 		return;
 	}

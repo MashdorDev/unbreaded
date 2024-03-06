@@ -9,6 +9,7 @@
 #include "AbilitySystemInterface.h"
 #include "CookieInterface.h"
 #include "GameplayAbilitySpec.h"
+#include "GameplayEffectTypes.h"
 #include "InteractInterface.h"
 #include "SCharacter.generated.h"
 

@@ -16,7 +16,7 @@ ASDestructible::ASDestructible()
 	RootComponent = StaticMeshComp;
 
 	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComp");
-	//AbilitySystemComp->SetIsReplicated(true);
+	AbilitySystemComp->SetIsReplicated(true);
 
 	HealthAttributeSet = CreateDefaultSubobject<USHealthAttributeSet>("HealthAttributeSet");
 
