@@ -3,6 +3,7 @@
 
 #include "SPlayerHealthBar.h"
 
+#include "Components/CanvasPanelSlot.h"
 #include "Components/ProgressBar.h"
 
 void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
@@ -11,22 +12,25 @@ void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
 
 	BarPercentage = CurrentHealth / MaxHealth;
 
-	// calc final percentage
-	float interval = 1.0f / NumOfImages;
-
 	HealthBar->SetPercent(BarPercentage);
-	
 
+	// update the bite mark image position on the end of the progress bar
+	float X = HealthBarTransform->GetPosition().X - HealthBarTransform->GetSize().X / 2;
+	FVector2D T = FVector2D(X + (BarPercentage * HealthBarTransform->GetSize().X), BiteImageTransform->GetPosition().Y);
+	BiteImageTransform->SetPosition(T);
+	
+	float interval = 1.0f / NumOfImages;
+	// iterate through each image, and calculate which section the bar percentage is in.
 	for(int i = NumOfImages - 1; i >= 0; i--)
 	{
+		// check upper limit
 		if(BarPercentage <= i * interval)
 		{
-
+			// check lower limit
 			if(BarPercentage > (i-1) * interval)
 			{
 				// found correct range
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("INDEX: %i"), i));
-
+				// inverse the index, because the faces are in reverse order
 				SetHealthFace(NumOfImages - i);
 				return;
 			}
@@ -46,6 +50,8 @@ void USPlayerHealthBar::SetShield(float CurrentShield, float MaxShield)
 void USPlayerHealthBar::OnConstruct()
 {
 	BiteImageTransform = UWidgetLayoutLibrary::SlotAsCanvasSlot(BiteImageEnd);
+	HealthBarTransform = UWidgetLayoutLibrary::SlotAsCanvasSlot(HealthBar);
+	
 
 	
 	NumOfImages = Images.Num();

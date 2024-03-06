@@ -59,5 +59,8 @@ private:
 
 	UPROPERTY()
 	UCanvasPanelSlot* BiteImageTransform;
+	
+	UPROPERTY()
+	UCanvasPanelSlot* HealthBarTransform;
 
 };
