@@ -4,12 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/CanvasPanel.h"
+#include "Components/Image.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "SPlayerHealthBar.generated.h"
 
 /**
  * 
  */
 class UProgressBar;
+class UImage;
 
 UCLASS(Blueprintable)
 class UNBREAD_API USPlayerHealthBar : public UCanvasPanel
@@ -22,44 +25,42 @@ class UNBREAD_API USPlayerHealthBar : public UCanvasPanel
 
 	UFUNCTION(BlueprintCallable)
 	void SetShield(float CurrentShield, float MaxShield);
-
-	UFUNCTION(BlueprintCallable)
-	void SetAmmunition(int CurrentAmmo, int MaxAmmo = 3);
-
-	UFUNCTION(BlueprintCallable)
-	void OnTick(const float InDeltaTime);
-
+	
 	UFUNCTION(BlueprintCallable)
 	void OnConstruct();
 
-	void LerpDelayedHPBar(const float& InDeltaTime);
+	UFUNCTION(BlueprintCallable)
+	void SetHealthFace(const int& index);
 
-	void LerpHealthBar(const float InDeltaTime);
-
-
-	UPROPERTY(EditAnywhere)
-	int Ammo;
 	
 	UPROPERTY(EditAnywhere, meta= (BindWidget))
 	UProgressBar* HealthBar;
-
-	UPROPERTY(EditAnywhere, meta= (BindWidget))
-	UProgressBar* DelayedHealthBar;
 	
-	UPROPERTY(EditAnywhere)
-	float HPDelayThreshold;
-
 	UPROPERTY(EditAnywhere, meta= (BindWidget))
 	UProgressBar* ShieldBar;
+
+	UPROPERTY(EditAnywhere, meta= (BindWidget))
+	UImage* HealthFace;
+
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	UImage* BiteImageEnd;
+	
+	UPROPERTY(EditAnywhere)
+	TArray<UTexture2D*> Images;
+
+	
+
 	
 private:
 	float BarPercentage;
 	float ShieldPercentage;
-	float TimeSinceHit;
+	int NumOfImages;
+	int CurImage;
+
+	UPROPERTY()
+	UCanvasPanelSlot* BiteImageTransform;
 	
-	float DelayBarPercentage;
-	float DelayBarLerpT;
-	float DelayBarLerpStart;
-	float DelayBarLerpTarget;
-	bool IsLerping;
+	UPROPERTY()
+	UCanvasPanelSlot* HealthBarTransform;
+
 };
