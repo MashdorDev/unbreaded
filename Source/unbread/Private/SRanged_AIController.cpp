@@ -38,11 +38,14 @@ ASRanged_AIController::ASRanged_AIController(FObjectInitializer const& ObjectIni
 	AiPerceptionComponent->ConfigureSense(*Sight);
 	AiPerceptionComponent->ConfigureSense(*Hearing);
 	AiPerceptionComponent->SetDominantSense(Sight->GetSenseImplementation());
+
+	
 }
 
 void ASRanged_AIController::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	if(!Agent)
 	{
 		ASRangedAICharacter* character = Cast<ASRangedAICharacter>(GetPawn());

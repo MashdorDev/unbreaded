@@ -25,6 +25,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "GeometryCollection/GeometryCollectionAlgo.h"
 
 
@@ -106,12 +107,13 @@ void ASCharacter::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActor* Othe
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	ASRangedAICharacter* chr = Cast<ASRangedAICharacter>(OtherActor);
-	if(bIsHeadForm && chr)
+	if(bIsHeadForm && chr && chr->faction == EFaction::Enemy)
 	{
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SetActorLocation({OtherActor->GetActorLocation().X, OtherActor->GetActorLocation().Y, OtherActor->GetActorLocation().Z + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + chr->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()});
 		AttachToActor(OtherActor, FAttachmentTransformRules::KeepWorldTransform);
 		chr->ControllerRef->AIManager->SwitchFaction(chr->ControllerRef);
+		chr->ControllerRef->BTC->RestartLogic();
 	}
 }
 

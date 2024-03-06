@@ -18,6 +18,9 @@ public:
 	UBTTask_SmoothlyRotate(const FObjectInitializer& ObjectInitializer);
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 
 	class ASRanged_AIController* Cntrl;
+	AActor* MyActor = nullptr;
+	AActor* TargetActor = nullptr;
 };
