@@ -3,6 +3,7 @@
 
 #include "SPlayerHealthBar.h"
 
+#include "Components/CanvasPanelSlot.h"
 #include "Components/ProgressBar.h"
 
 void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
@@ -10,8 +11,33 @@ void USPlayerHealthBar::SetHealth(float CurrentHealth, float MaxHealth)
 	if(!HealthBar) return;
 
 	BarPercentage = CurrentHealth / MaxHealth;
+
 	HealthBar->SetPercent(BarPercentage);
-	TimeSinceHit = 0.0f;
+
+	// update the bite mark image position on the end of the progress bar
+	float X = HealthBarTransform->GetPosition().X - HealthBarTransform->GetSize().X / 2;
+	FVector2D T = FVector2D(X + (BarPercentage * HealthBarTransform->GetSize().X), BiteImageTransform->GetPosition().Y);
+	BiteImageTransform->SetPosition(T);
+	
+	float interval = 1.0f / NumOfImages;
+	// iterate through each image, and calculate which section the bar percentage is in.
+	for(int i = NumOfImages - 1; i >= 0; i--)
+	{
+		// check upper limit
+		if(BarPercentage <= i * interval)
+		{
+			// check lower limit
+			if(BarPercentage > (i-1) * interval)
+			{
+				// found correct range
+				// inverse the index, because the faces are in reverse order
+				SetHealthFace(NumOfImages - i);
+				return;
+			}
+		}
+	}
+
+	
 }
 
 void USPlayerHealthBar::SetShield(float CurrentShield, float MaxShield)
@@ -20,62 +46,24 @@ void USPlayerHealthBar::SetShield(float CurrentShield, float MaxShield)
 	ShieldBar->SetPercent(ShieldPercentage);
 }
 
-void USPlayerHealthBar::SetAmmunition(int CurrentAmmo, int MaxAmmo)
-{
-	Ammo = CurrentAmmo;
-	
-}
-
-void USPlayerHealthBar::OnTick(const float InDeltaTime)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Ticking hp"));
-
-	LerpDelayedHPBar(InDeltaTime);
-}
 
 void USPlayerHealthBar::OnConstruct()
 {
-	DelayBarPercentage = HealthBar->GetPercent();
-	DelayedHealthBar->SetPercent(DelayBarPercentage);
-	DelayBarLerpTarget = DelayBarPercentage;
-	DelayBarLerpStart = DelayBarPercentage;
-	DelayBarLerpT = 1.0f;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Construct health bar"));
-}
-
-void USPlayerHealthBar::LerpDelayedHPBar(const float& InDeltaTime)
-{
-	if(!IsLerping)
-	{
-		TimeSinceHit += InDeltaTime;
-		
-		if(TimeSinceHit >= HPDelayThreshold)
-		{
-			// start lerping hp bar, reset all values
-			IsLerping = true;
-			DelayBarLerpT = 1.0f;
-			DelayBarLerpTarget = BarPercentage;
-        		
-		}
-		return;
-	}
+	BiteImageTransform = UWidgetLayoutLibrary::SlotAsCanvasSlot(BiteImageEnd);
+	HealthBarTransform = UWidgetLayoutLibrary::SlotAsCanvasSlot(HealthBar);
 	
-	if(DelayBarLerpT >= 0.0f)
-	{
-		// continue lerping
-		DelayBarLerpT -= 0.1f;
-		DelayBarPercentage = FMath::Lerp(DelayBarLerpTarget, DelayBarLerpStart, DelayBarLerpT);
-		DelayedHealthBar->SetPercent(DelayBarPercentage);
-		
-	}
-	else
-	{
-		// done lerp
-		IsLerping = false;
-		DelayBarLerpStart = DelayBarPercentage;
-	}
+
+	
+	NumOfImages = Images.Num();
+	CurImage = 0;
+	SetHealthFace(0);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, TEXT("Construct health bar"));
+	
 }
 
-void USPlayerHealthBar::LerpHealthBar(const float InDeltaTime)
+void USPlayerHealthBar::SetHealthFace(const int& index)
 {
+	if(index >= Images.Num()) return;
+	if(!Images[index]) return;
+	HealthFace->SetBrushFromTexture(Images[index], true);
 }
