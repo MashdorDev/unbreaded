@@ -9,6 +9,7 @@
 #include "AbilitySystemInterface.h"
 #include "CookieInterface.h"
 #include "GameplayAbilitySpec.h"
+#include "GameplayEffectTypes.h"
 #include "InteractInterface.h"
 #include "SCharacter.generated.h"
 
@@ -120,13 +121,10 @@ protected:
 	float Speed;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float WalkSpeed;
+	float BodySpeed;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float SprintSpeed;
-
-	void Sprint();
-	void Walk();
+	float HeadSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float LerpSpeed = 0.6f;
