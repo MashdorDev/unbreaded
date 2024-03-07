@@ -19,8 +19,8 @@ EBTNodeResult::Type UBTTask_SmoothlyRotate::ExecuteTask(UBehaviorTreeComponent& 
     Cntrl = Cast<ASRanged_AIController>(OwnerComp.GetAIOwner());
     if (Cntrl)
     {
-        MyActor = Cast<AActor>(Cntrl->GetPawn());
-        TargetActor = Cast<AActor>(Cntrl->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
+        MyActor = Cast<ASRangedAICharacter>(Cntrl->GetPawn());
+        TargetActor = Cast<ASRangedAICharacter>(Cntrl->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
 
         if (!MyActor || !TargetActor)
         {
@@ -31,6 +31,7 @@ EBTNodeResult::Type UBTTask_SmoothlyRotate::ExecuteTask(UBehaviorTreeComponent& 
     }
     return EBTNodeResult::Failed;
 }
+
 
 void UBTTask_SmoothlyRotate::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
@@ -43,21 +44,16 @@ void UBTTask_SmoothlyRotate::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* 
     FVector TargetLoc = TargetActor->GetActorLocation();
     FVector Direction = (TargetLoc - MyActor->GetActorLocation()).GetSafeNormal();
     FRotator TargetRotation = Direction.Rotation();
-    FRotator CurrentRotation = MyActor->GetActorRotation();    
+
+    FRotator CurrentRotation = MyActor->GetActorRotation();
     FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaSeconds, 5.0f);
     
-    // Check if there's significant misalignment before rotating
-    if (FMath::Abs(FVector::DotProduct(Direction, MyActor->GetActorForwardVector())) < 0.99f)
+    Cntrl->Agent->GetCapsuleComponent()->SetWorldRotation({CurrentRotation.Pitch, NewRotation.Yaw, CurrentRotation.Roll});
+    
+    if (FMath::Abs(FVector::DotProduct(Direction, MyActor->GetActorForwardVector())) > 0.99f)
     {
-        MyActor->SetActorRotation(NewRotation);
-        // Task is still in progress because we haven't aligned yet
-        // Do not call FinishLatentTask here to allow further ticks
-    }
-    else
-    {
-        // Alignment is good enough, finish task with success
         FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
-        return; // Ensure no further code is executed after completing the task
     }
 }
+
 

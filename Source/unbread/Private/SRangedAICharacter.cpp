@@ -233,10 +233,8 @@ UBehaviorTree* ASRangedAICharacter::GetBehaviourTree() const
 void ASRangedAICharacter::ToggleCombat(const bool Newbool)
 {
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.2f);
-	bool isPlaying = 	GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
+	bool isPlaying = GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
 	AnimValues.bIsInCombat = Newbool;
-	bUseControllerRotationYaw = Newbool;
-	GetCharacterMovement()->bOrientRotationToMovement = !Newbool;
 	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? 187.f : 94.f;
 }
 
