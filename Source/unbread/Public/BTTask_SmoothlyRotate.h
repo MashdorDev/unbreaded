@@ -23,5 +23,5 @@ public:
 	
 	class ASRanged_AIController* Cntrl;
 	ASRangedAICharacter* MyActor = nullptr;
-	ASRangedAICharacter* TargetActor = nullptr;
+	AActor* TargetActor = nullptr;
 };

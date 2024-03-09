@@ -20,7 +20,7 @@ EBTNodeResult::Type UBTTask_SmoothlyRotate::ExecuteTask(UBehaviorTreeComponent& 
     if (Cntrl)
     {
         MyActor = Cast<ASRangedAICharacter>(Cntrl->GetPawn());
-        TargetActor = Cast<ASRangedAICharacter>(Cntrl->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
+        TargetActor = Cast<AActor>(Cntrl->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
 
         if (!MyActor || !TargetActor)
         {
@@ -48,7 +48,7 @@ void UBTTask_SmoothlyRotate::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* 
     FRotator CurrentRotation = MyActor->GetActorRotation();
     FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaSeconds, 5.0f);
     
-    Cntrl->Agent->GetCapsuleComponent()->SetWorldRotation({CurrentRotation.Pitch, NewRotation.Yaw, CurrentRotation.Roll});
+    MyActor->SetActorRotation({CurrentRotation.Pitch, NewRotation.Yaw, CurrentRotation.Roll});
     
     if (FMath::Abs(FVector::DotProduct(Direction, MyActor->GetActorForwardVector())) > 0.99f)
     {

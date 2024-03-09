@@ -110,8 +110,8 @@ void ASCharacter::OnBeginOverlap(UPrimitiveComponent* HitComponent, AActor* Othe
 	if(bIsHeadForm && chr && chr->faction == EFaction::Enemy)
 	{
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		SetActorLocation({OtherActor->GetActorLocation().X, OtherActor->GetActorLocation().Y, OtherActor->GetActorLocation().Z + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + chr->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()});
 		AttachToActor(OtherActor, FAttachmentTransformRules::KeepWorldTransform);
+		SetActorLocation({OtherActor->GetActorLocation().X, OtherActor->GetActorLocation().Y, OtherActor->GetActorLocation().Z + GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + chr->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()});
 		chr->ControllerRef->AIManager->SwitchFaction(chr->ControllerRef);
 		chr->ControllerRef->BTC->RestartLogic();
 	}
