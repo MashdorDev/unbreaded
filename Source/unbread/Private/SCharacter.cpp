@@ -46,9 +46,10 @@ ASCharacter::ASCharacter()
 	bIsJumping = false;
 	JumpCount = 0;
 
-	WalkSpeed = 0.5f;
-	SprintSpeed = 1.0f;
-	Speed = WalkSpeed;
+	BodySpeed = 0.8;
+	HeadSpeed = 1.0f;
+	Speed = BodySpeed;
+
 }
 
 // Called when the game starts or when spawned
@@ -81,7 +82,7 @@ void ASCharacter::BeginPlay()
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASCharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASCharacter::OnShieldAttributeChanged);
-
+	
 	// Spawn and Equip the default weapon for Player Character
 	UWorld* const World = GetWorld();
 
@@ -100,7 +101,10 @@ void ASCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MoveVector = Value.Get<FVector2D>();
 	FVector2d NormalizedMoveVector = MoveVector.GetSafeNormal();
+	float MoveVectorLength = MoveVector.Size();
 
+	float AdjSpeed = Speed * MoveVectorLength;
+	
 	FVector Forward, Right;
 	
 	// Get the camera transform
@@ -118,10 +122,10 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	}
 	
 	// Forward / Backward
-	AddMovementInput(Forward, NormalizedMoveVector.Y * Speed);
+	AddMovementInput(Forward, NormalizedMoveVector.Y * AdjSpeed);
 	
 	// Right / Left
-	AddMovementInput(Right, NormalizedMoveVector.X * Speed);
+	AddMovementInput(Right, NormalizedMoveVector.X * AdjSpeed);
 
 	// TODO: Update forward and right vectors according to camera position and rotation
 	//
@@ -186,30 +190,6 @@ void ASCharacter::Jump(const FInputActionValue& Value)
 	ACharacter::Jump();
 }
 
-void ASCharacter::Sprint()
-{
-	if(bIsHeadForm)
-	{
-		return;
-	}
-	
-
-	Speed = SprintSpeed;
-	
-}
-
-void ASCharacter::Walk()
-{
-	if(bIsHeadForm)
-	{
-		return;
-	}
-	
-
-	Speed = WalkSpeed;
-	
-}
-
 void ASCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
@@ -262,6 +242,8 @@ void ASCharacter::LaunchHead()
 	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
 	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
 	ActiveBodies.AddUnique(Spawned);
+
+	Speed = HeadSpeed;
 	
 }
 
@@ -298,7 +280,7 @@ void ASCharacter::ReformBody()
 	}
 	NearestCrumbles = nullptr;
 	bIsHeadForm = false;
-	Speed = WalkSpeed;
+	Speed = BodySpeed;
 	
 	DestroyBodyAndSpawnCrumbles();
 
@@ -334,12 +316,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
-
-		// TEMPORARY
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ASCharacter::Sprint);
-		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ASCharacter::Walk);
-
-
+		
 		// GAS
 		EnhancedInputComponent->BindAction(PrimaryAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::OnPrimaryAttack);
 		EnhancedInputComponent->BindAction(SecondaryAttackAction, ETriggerEvent::Triggered, this, &ASCharacter::OnSecondaryAttack);
@@ -384,7 +361,7 @@ void ASCharacter::PossessedBy(AController* NewController)
 
 void ASCharacter::InitializeAbilities()
 {
-	if (!AbilitySystemComponent.IsValid())
+	if (!HasAuthority() || !AbilitySystemComponent.IsValid())
 	{
 		return;
 	}

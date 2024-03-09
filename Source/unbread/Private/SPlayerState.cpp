@@ -9,7 +9,7 @@
 ASPlayerState::ASPlayerState()
 {
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComp");
-	//AbilitySystemComponent->SetIsReplicated(true);
+	AbilitySystemComponent->SetIsReplicated(true);
 
 	HealthAttributeSet = CreateDefaultSubobject<USHealthAttributeSet>("HealthAttributeSet");
 	WeaponAttributeSet = CreateDefaultSubobject<USWeaponAttributeSet>("WeaponAttributeSet");
