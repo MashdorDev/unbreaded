@@ -22,6 +22,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
+#include "Engine/StaticMeshActor.h"
 
 
 // Sets default values
@@ -67,10 +68,12 @@ void ASCharacter::BeginPlay()
 		}
 	}
 
-	APlayerCameraManager* const camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	camMan->ViewPitchMax = -50.0f;
 	camMan->ViewPitchMax = 10.0f;
 
+	
+	
 	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
 	if (!PState)
 	{
@@ -290,6 +293,8 @@ void ASCharacter::ReformBody()
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.f);
+
+	
 }
 
 
@@ -303,6 +308,22 @@ void ASCharacter::Tick(float DeltaTime)
 		ACharacter::Jump();
 	}
 
+	TArray<FHitResult> OutHit;
+	static const FName NAME_LineOfSight = FName(TEXT("TestPawnLineOfSight"));
+	auto s = camMan->GetCameraLocation();
+	
+	const bool bHitSocket = GetWorld()->LineTraceMultiByObjectType(OutHit, GetActorLocation(), s,
+		FCollisionObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic)),
+		FCollisionQueryParams(NAME_LineOfSight, true, this));
+
+	if(OutHit.Num() > 1)
+	{
+		for(int i = 0; i < OutHit.Num() - 1; ++i)
+		{
+			auto* s = Cast<AStaticMeshActor>(OutHit[i].GetActor());
+			
+		}
+	}
 }
 
 // Called to bind functionality to input
