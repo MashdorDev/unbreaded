@@ -279,7 +279,7 @@ void ASCharacter::ReformBody()
 
 	if(NearestCrumbles->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
 	{
-		IInteractInterface::Execute_CrumbleInteraction(NearestCrumbles, this);
+		IInteractInterface::CrumbleInteraction(this);
 	}
 	NearestCrumbles = nullptr;
 	bIsHeadForm = false;
@@ -309,19 +309,63 @@ void ASCharacter::Tick(float DeltaTime)
 	}
 
 	TArray<FHitResult> OutHit;
-	static const FName NAME_LineOfSight = FName(TEXT("TestPawnLineOfSight"));
 	auto s = camMan->GetCameraLocation();
-	
-	const bool bHitSocket = GetWorld()->LineTraceMultiByObjectType(OutHit, GetActorLocation(), s,
-		FCollisionObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic)),
-		FCollisionQueryParams(NAME_LineOfSight, true, this));
 
-	if(OutHit.Num() > 1)
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+
+	const bool isCollision = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), s, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForOneFrame, OutHit, true, FColor::Green);
+	
+	TArray<AActor*> ActorsJustOccluded;
+	if(isCollision && OutHit.Num() > 0)
 	{
-		for(int i = 0; i < OutHit.Num() - 1; ++i)
+		for(int i = 0; i < OutHit.Num(); ++i)
 		{
-			auto* s = Cast<AStaticMeshActor>(OutHit[i].GetActor());
-			
+			AActor* HitActor = OutHit[i].GetActor();
+			HideOccludedActor(HitActor);
+			ActorsJustOccluded.AddUnique(HitActor);
+		}
+		for(auto& [Key, Value]: OccludedActors)
+		{
+			if(!ActorsJustOccluded.Contains(Key) && Value.IsOccluded)
+			{
+				if (!IsValid(Value.Actor))
+				{
+					OccludedActors.Remove(Value.Actor);
+				}
+				Value.IsOccluded = false;
+				for(int i = 0; i < Value.StaticMesh->GetNumMaterials(); i++)
+				{
+					Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
+				}
+			}
+		}
+	}
+}
+
+void ASCharacter::HideOccludedActor(const AActor* Actor)
+{
+	UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+	if(StaticMesh)
+	{
+		FCameraOccludedActor* ExistingActor = OccludedActors.Find(Actor);
+		if(ExistingActor && ExistingActor->IsOccluded)
+		{
+			return;
+		}
+		else
+		{
+			FCameraOccludedActor OccludedActor;
+			OccludedActor.Actor = Actor;
+			OccludedActor.Materials = StaticMesh->GetMaterials();
+			OccludedActor.StaticMesh = StaticMesh;
+			OccludedActor.IsOccluded = true;
+			OccludedActors.Add(Actor, OccludedActor);
+
+			for(int i = 0; i < StaticMesh->GetNumMaterials(); i++)
+			{
+				StaticMesh->SetMaterial(i, FadeMaterial);
+			}
 		}
 	}
 }
