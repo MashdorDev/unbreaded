@@ -28,6 +28,25 @@ class ASWeapon;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGamePauseInput);
 
 
+USTRUCT(BlueprintType)
+struct FCameraOccludedActor
+{
+	GENERATED_USTRUCT_BODY()
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	const AActor* Actor;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* StaticMesh;
+  
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<UMaterialInterface*> Materials;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool IsOccluded;
+};
+
+
 UCLASS()
 class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
 {
@@ -50,6 +69,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UDynamicCameraComponent*  DynamicCamera;
+	
+	APlayerCameraManager*  camMan;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -100,6 +121,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* SprintAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Occlusion|Materials")
+	UMaterialInterface* FadeMaterial;
 
 	// FUNCTIONS AND VARIABLES
 
@@ -154,7 +178,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float HeadLaunchVelocityMultiplier = 2200.f;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
 
 	// TEMPORARY PROJECTILE ATTACK
 	UPROPERTY(EditAnywhere)
@@ -197,6 +223,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void HideOccludedActor(const AActor* Actor);
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

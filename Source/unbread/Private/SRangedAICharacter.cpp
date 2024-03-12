@@ -146,20 +146,7 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 
 	if (Health <= 0)
 	{
-		GetMesh()->bIgnoreRadialForce = true;
-		GetMesh()->SetSimulatePhysics(true);
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		StopWeaponFire();
-		Dead = true;
-		if(ControllerRef)
-		{
-			ControllerRef->GetBrainComponent()->StopLogic("Agent is Dead");
-			ControllerRef->ClearFocus(EAIFocusPriority::LastFocusPriority);
-			ControllerRef->GetAIPerceptionComponent()->DestroyComponent(true);
-			ControllerRef->AIManager->RemoveAgent(ControllerRef);
-			SetLifeSpan(10);
-		}
+		DestroyCharacter();
 		return 0.0f;
 	}
 
@@ -248,6 +235,24 @@ void ASRangedAICharacter::ToggleCrouch(const bool Newbool)
 void ASRangedAICharacter::ToggleADS(const bool Newbool)
 {
 	AnimValues.bADS = Newbool;
+}
+
+void ASRangedAICharacter::DestroyCharacter()
+{
+	GetMesh()->bIgnoreRadialForce = true;
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StopWeaponFire();
+	Dead = true;
+	if(ControllerRef)
+	{
+		ControllerRef->GetBrainComponent()->StopLogic("Agent is Dead");
+		ControllerRef->ClearFocus(EAIFocusPriority::LastFocusPriority);
+		ControllerRef->GetAIPerceptionComponent()->DestroyComponent(true);
+		ControllerRef->AIManager->RemoveAgent(ControllerRef);
+		SetLifeSpan(10);
+	}
 }
 
 // ** GAS ** //
