@@ -128,6 +128,9 @@ public:
 	void ToggleCrouch(bool Newbool);
 	void ToggleADS(bool Newbool);
 	
+	UFUNCTION(BlueprintCallable)
+	void DestroyCharacter();
+
 	UPROPERTY(BlueprintReadOnly, Category = "Animation")
 	FAnimValues AnimValues;
 
@@ -184,8 +187,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
+
 	float Health = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PartickleEmitter")
