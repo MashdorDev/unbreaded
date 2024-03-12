@@ -45,9 +45,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
 
-	// TEMP
-	// TODO: review after full merge with camera system
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UDynamicCameraComponent*  DynamicCamera;
 	
