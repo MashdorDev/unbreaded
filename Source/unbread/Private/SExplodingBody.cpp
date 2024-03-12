@@ -63,7 +63,8 @@ void ASExplodingBody::Explode()
 	FRotator SpawnRotation = Mesh->GetComponentRotation();
 	SpawnRotation.Pitch = 0.f;
 	SpawnRotation.Roll = 0.f;
-	GetWorld()->SpawnActor<ASCrumbles>(CrumblesActor, Mesh->GetComponentLocation(), SpawnRotation, SpawnParameters);
+	auto* crumbles = GetWorld()->SpawnActor<ASCrumbles>(CrumblesActor, Mesh->GetComponentLocation(), SpawnRotation, SpawnParameters);
+	crumbles->SetInstigator(this);
 	Destroy();
 }
 

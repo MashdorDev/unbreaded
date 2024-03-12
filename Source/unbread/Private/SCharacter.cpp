@@ -18,6 +18,7 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "SProjectile.h"
 #include "Camera/CameraActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -244,6 +245,7 @@ void ASCharacter::LaunchHead()
 	Parameters.bNoFail = true;
 	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
 	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
+	Spawned->SetInstigator(this);
 	ActiveBodies.AddUnique(Spawned);
 
 	Speed = HeadSpeed;
@@ -279,7 +281,7 @@ void ASCharacter::ReformBody()
 
 	if(NearestCrumbles->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
 	{
-		IInteractInterface::CrumbleInteraction(this);
+		IInteractInterface::Execute_CrumbleInteraction(NearestCrumbles, this);
 	}
 	NearestCrumbles = nullptr;
 	bIsHeadForm = false;
@@ -293,8 +295,6 @@ void ASCharacter::ReformBody()
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.f);
-
-	
 }
 
 
@@ -309,12 +309,17 @@ void ASCharacter::Tick(float DeltaTime)
 	}
 
 	TArray<FHitResult> OutHit;
-	auto s = camMan->GetCameraLocation();
+	FVector CamLocation = camMan->GetCameraLocation();
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.AddUnique(this);
 
-	const bool isCollision = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), s, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::ForOneFrame, OutHit, true, FColor::Green);
+	FVector Start = GetActorLocation();
+	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	
+	const bool isCollision = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), Start, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
 	
 	TArray<AActor*> ActorsJustOccluded;
 	if(isCollision && OutHit.Num() > 0)
@@ -322,6 +327,11 @@ void ASCharacter::Tick(float DeltaTime)
 		for(int i = 0; i < OutHit.Num(); ++i)
 		{
 			AActor* HitActor = OutHit[i].GetActor();
+			if(HitActor->GetInstigator())
+			{
+				return;
+			}
+			
 			HideOccludedActor(HitActor);
 			ActorsJustOccluded.AddUnique(HitActor);
 		}
@@ -334,7 +344,7 @@ void ASCharacter::Tick(float DeltaTime)
 					OccludedActors.Remove(Value.Actor);
 				}
 				Value.IsOccluded = false;
-				for(int i = 0; i < Value.StaticMesh->GetNumMaterials(); i++)
+				for(int i = 0; i < Value.Materials.Num(); i++)
 				{
 					Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
 				}
