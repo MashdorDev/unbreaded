@@ -5,7 +5,7 @@
 #include "GameplayEffectExtension.h"
 
 USHealthAttributeSet::USHealthAttributeSet()
-	: Health(10.f), MaxHealth(30.f), Shield(0.0f), MaxShield(0.0f)
+	: Health(30.f), MaxHealth(30.f), Shield(0.0f), MaxShield(0.0f)
 {
 	
 }

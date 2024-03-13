@@ -104,9 +104,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* UtilityAbilityAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
-	UInputAction* HealthSetAction;
-
 	// Weapon System
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
@@ -114,13 +111,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASWeapon> DefaultWeaponClass;
-
-	// TEMPORARY!!!
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
-	UInputAction* ProjectileAttackAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
-	UInputAction* SprintAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Occlusion|Materials")
 	UMaterialInterface* FadeMaterial;
@@ -181,10 +171,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
-
-	// TEMPORARY PROJECTILE ATTACK
-	UPROPERTY(EditAnywhere)
-    TSubclassOf<AActor> ProjectileClass;
 	
 	// TODO: UPDATE TEMPORARY SETUP USING G.A.S.
 

@@ -18,7 +18,6 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
-#include "SProjectile.h"
 #include "Camera/CameraActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -41,8 +40,6 @@ ASCharacter::ASCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
-
-	// TODO: ADD PROJECTILE SPAWN POINT
 
 	// TEMPORARY
 	bIsJumping = false;
