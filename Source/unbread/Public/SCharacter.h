@@ -104,6 +104,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
 	UInputAction* UtilityAbilityAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
+	UInputAction* HealthSetAction;
+
 	// Weapon System
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapons", meta = (AllowPrivateAccess = "true"))
@@ -183,7 +186,7 @@ protected:
 	UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> ProjectileClass;
 	
-	// TODO: UPDATE TEMPORARY SETUP USING GAS
+	// TODO: UPDATE TEMPORARY SETUP USING G.A.S.
 
 
 	// GAS setup
