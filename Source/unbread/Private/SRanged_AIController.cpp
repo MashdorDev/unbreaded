@@ -123,7 +123,7 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 			{
 				DetectionLevel = 0.0f;
 				Agent->UpdateWidgetVis(true);
-				GetWorldTimerManager().SetTimer(DetectionTimer, this, &ASRanged_AIController::SetDetectionLevel, Rate, true, 0.f);
+				GetWorldTimerManager().SetTimer(DetectionTimer, this, &ASRanged_AIController::SetDetectionLevel, 0.1f, true, 0.f);
 			}
 			return;
 		}
@@ -173,10 +173,10 @@ void ASRanged_AIController::SetDetectionLevel()
 	if (Distance <= 2000.0f) {
 		Rate =  Distance / 2000.0f;
 	} else {
-		Rate = 1.0f;
+		Rate = 1.0f / (Distance / 2000.0f);
 	}
 
-	DetectionLevel += 0.5f / Rate;
+	DetectionLevel += 0.2f / Rate;
 	
 	if(DetectionLevel >= DetectionThreshold)
 	{

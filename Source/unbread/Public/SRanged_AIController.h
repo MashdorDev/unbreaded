@@ -67,7 +67,7 @@ protected:
 
 	FTimerHandle DetectionTimer;
 	void SetDetectionLevel();
-	float Rate = 0.5f;
+	float Rate = 0.1f;
 	
 	AActor* Target = nullptr;
 	FVector LastStimulusLocation = FVector::ZeroVector;

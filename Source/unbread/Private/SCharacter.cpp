@@ -224,7 +224,7 @@ void ASCharacter::LaunchHead()
 	bIsHeadForm = true;
 	
 	// Store the current location and rotation of the character
-	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
+	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 20;
 	const FRotator BodySpawnRotation = GetMesh()->GetComponentRotation();
 
 	// Swap the mesh and launch the head
