@@ -41,6 +41,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	FString Name;
 
+	UPROPERTY(EditAnywhere)
+	bool IsPermanent;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnMenuButtonHovered Hovered;
 	

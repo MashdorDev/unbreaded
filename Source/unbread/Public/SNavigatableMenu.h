@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "SMenuButton.h"
+#include "Widgets/SWidget.h"
 #include "ButtonWidgetStyle.generated.h"
 #include "SNavigatableMenu.generated.h"
 
@@ -14,6 +15,7 @@
  */
 class UButton;
 class UImage;
+//class SWidget;
 
 UCLASS()
 class UNBREAD_API USNavigatableMenu : public UUserWidget
@@ -52,6 +54,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetSelected(USMenuButton* Selected_);
+
+	UFUNCTION()
+	FVector2D GetAbsolutePosOfChild(UWidget* Child);
 
 	UFUNCTION()
 	void LerpImage();

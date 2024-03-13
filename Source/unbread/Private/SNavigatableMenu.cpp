@@ -5,10 +5,12 @@
 
 #include "FrameTypes.h"
 #include "PropertyAccess.h"
+#include "Blueprint/SlateBlueprintLibrary.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Framework/Application/NavigationConfig.h"
+#include "Widgets/SViewport.h"
 
 void USNavigatableMenu::AddButton(USMenuButton* Button)
 {
@@ -36,17 +38,25 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 	
 	if(USMenuButton* Button = *Buttons.Find(Name))
 	{
+		
 		if(Selected->HasChildCanvas() && Direction == EDirection::In)
 		{
+			if(!Selected->IsPermanent)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Not permanent"));
+				Button->ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
+			}
+			
 			Selected->ChildCanvas->SetVisibility(ESlateVisibility::Visible);
-			Button->ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
+			Selected->ChildCanvas->SetVisibility((ESlateVisibility::SelfHitTestInvisible));
 		}
 		else if(Selected->HasParentCanvas() && Direction == EDirection::Out)
 		{
 			Selected->ParentCanvas->SetVisibility(ESlateVisibility::Visible);
+			Selected->ParentCanvas->SetVisibility((ESlateVisibility::SelfHitTestInvisible));
+
 			Button->ChildCanvas->SetVisibility(ESlateVisibility::Collapsed);
 		}
-		
 		SetSelected(Button);
 		
 	}
@@ -94,18 +104,49 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 			const UCanvasPanelSlot* S = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected);
 			const UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
 			const UCanvasPanelSlot* B = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected->Button);
-
+			
 			if (!S || !I || !B) return;
 			
 			if (Selected->Button->GetIsFocusable())
 			{
 				// Set focus on the button if it's focusable
 				Selected->Button->SetFocus();
+				
 			}
+			
+			FVector2D pos = Selected->GetRenderTransform().Translation;
+			//pos = GetAbsolutePosOfChild(Selected);
+		
+			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Position: %f %f"), pos.X, pos.Y));
 			ResetLerp(S->GetPosition(), B->GetSize());
 			
 		}
 	}
+}
+
+FVector2D USNavigatableMenu::GetAbsolutePosOfChild(UWidget* Child)
+{
+	FVector2D AbsolutePosition(0, 0);
+
+	UWidget* CurrentWidget = Child;
+	
+	while(CurrentWidget->GetParent())
+	{
+		/*if(!CurrentWidget->GetParent())
+		{
+			break;
+		}*/
+		UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CurrentWidget);
+		FVector2D Anchor = CanvasSlot->GetAnchors().Minimum;
+		FVector2D size = TopMostCanvas->GetDesiredSize();
+		//FGeometry WidgetGeometry =  CurrentWidget->GetCachedGeometry();
+		AbsolutePosition += CanvasSlot->GetPosition() + (CanvasSlot->GetAnchors().Minimum * size);
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, CurrentWidget->GetName() + FString::Printf(TEXT("size: %f %f"), Anchor.X,  Anchor.Y));
+
+		CurrentWidget = CurrentWidget->GetParent();
+	}
+	return FVector2D(AbsolutePosition.X, AbsolutePosition.Y);
+
 }
 
 void USNavigatableMenu::LerpImage()
