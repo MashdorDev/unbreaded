@@ -234,9 +234,12 @@ void ASCharacter::LaunchHead()
 	// Move head forward & launch
 	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
 
-	const FVector LaunchVelocity = (GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier;	
-	GetCharacterMovement()->Velocity = LaunchVelocity;
+	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
+	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd;
+	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
+	GetCharacterMovement()->Launch(LaunchVelocity);
+	
 	// Spawn the body and add it to ActiveBodies
 	FActorSpawnParameters Parameters {};
 	Parameters.bNoFail = true;
@@ -244,7 +247,7 @@ void ASCharacter::LaunchHead()
 	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
 	Spawned->SetInstigator(this);
 	ActiveBodies.AddUnique(Spawned);
-
+	
 	Speed = HeadSpeed;
 	
 }
