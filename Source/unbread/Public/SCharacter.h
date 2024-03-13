@@ -167,14 +167,14 @@ protected:
 	USkeletalMesh* HeadMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HeadLaunchVelocityMultiplier = 2200.f;
+	float HeadLaunchVelocityMultiplier = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadLaunchVelocityZAxisAdd = 1200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
 	
-	// TODO: UPDATE TEMPORARY SETUP USING G.A.S.
-
-
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
 	void OnSecondaryAttack(const FInputActionValue& Value);
