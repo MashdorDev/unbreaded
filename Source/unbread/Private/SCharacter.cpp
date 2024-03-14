@@ -22,6 +22,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
+#include "Engine/StaticMeshActor.h"
 
 
 // Sets default values
@@ -39,8 +40,6 @@ ASCharacter::ASCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
-
-	// TODO: ADD PROJECTILE SPAWN POINT
 
 	// TEMPORARY
 	bIsJumping = false;
@@ -67,10 +66,12 @@ void ASCharacter::BeginPlay()
 		}
 	}
 
-	APlayerCameraManager* const camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
+	camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	camMan->ViewPitchMax = -50.0f;
 	camMan->ViewPitchMax = 10.0f;
 
+	
+	
 	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
 	if (!PState)
 	{
@@ -233,16 +234,20 @@ void ASCharacter::LaunchHead()
 	// Move head forward & launch
 	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
 
-	const FVector LaunchVelocity = (GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier;	
-	GetCharacterMovement()->Velocity = LaunchVelocity;
+	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
+	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd;
+	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
+	GetCharacterMovement()->Launch(LaunchVelocity);
+	
 	// Spawn the body and add it to ActiveBodies
 	FActorSpawnParameters Parameters {};
 	Parameters.bNoFail = true;
 	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
 	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
+	Spawned->SetInstigator(this);
 	ActiveBodies.AddUnique(Spawned);
-
+	
 	Speed = HeadSpeed;
 	
 }
@@ -303,6 +308,76 @@ void ASCharacter::Tick(float DeltaTime)
 		ACharacter::Jump();
 	}
 
+	TArray<FHitResult> OutHit;
+	FVector CamLocation = camMan->GetCameraLocation();
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+
+	FVector Start = GetActorLocation();
+	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	
+	const bool isCollision = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), Start, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+	
+	TArray<AActor*> ActorsJustOccluded;
+	if(isCollision && OutHit.Num() > 0)
+	{
+		for(int i = 0; i < OutHit.Num(); ++i)
+		{
+			AActor* HitActor = OutHit[i].GetActor();
+			if(HitActor->GetInstigator())
+			{
+				return;
+			}
+			
+			HideOccludedActor(HitActor);
+			ActorsJustOccluded.AddUnique(HitActor);
+		}
+		for(auto& [Key, Value]: OccludedActors)
+		{
+			if(!ActorsJustOccluded.Contains(Key) && Value.IsOccluded)
+			{
+				if (!IsValid(Value.Actor))
+				{
+					OccludedActors.Remove(Value.Actor);
+				}
+				Value.IsOccluded = false;
+				for(int i = 0; i < Value.Materials.Num(); i++)
+				{
+					Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
+				}
+			}
+		}
+	}
+}
+
+void ASCharacter::HideOccludedActor(const AActor* Actor)
+{
+	UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
+	if(StaticMesh)
+	{
+		FCameraOccludedActor* ExistingActor = OccludedActors.Find(Actor);
+		if(ExistingActor && ExistingActor->IsOccluded)
+		{
+			return;
+		}
+		else
+		{
+			FCameraOccludedActor OccludedActor;
+			OccludedActor.Actor = Actor;
+			OccludedActor.Materials = StaticMesh->GetMaterials();
+			OccludedActor.StaticMesh = StaticMesh;
+			OccludedActor.IsOccluded = true;
+			OccludedActors.Add(Actor, OccludedActor);
+
+			for(int i = 0; i < StaticMesh->GetNumMaterials(); i++)
+			{
+				StaticMesh->SetMaterial(i, FadeMaterial);
+			}
+		}
+	}
 }
 
 // Called to bind functionality to input
