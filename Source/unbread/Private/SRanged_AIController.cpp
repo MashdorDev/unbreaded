@@ -110,7 +110,7 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 			if (BBC->GetValueAsEnum("AIState") != static_cast<uint8>(EAIState::Attack))
 			{
 				BBC->SetValueAsObject("TargetActor", actor);
-			}
+			}	
 
 			Target = actor;
 			LastStimulusLocation = stimulus.StimulusLocation;
@@ -147,7 +147,7 @@ void ASRanged_AIController::OnPerception(AActor* actor, FAIStimulus stimulus)
 void ASRanged_AIController::SetDetectionLevel() 
 {
 	auto State = BBC->GetValueAsEnum("AIState");
-	
+
 	if(!Target || !BBC->GetValueAsBool("Contact"))
 	{
 		if(State != (uint8_t)EAIState::Idle)

@@ -104,7 +104,12 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	ECombatRole CombatRole;
-	
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	UAnimMontage* SurprisedAnimation;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	UAnimMontage* FireAnimation;
 	
 	virtual bool CanBeSeenFrom
 (
@@ -148,6 +153,9 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	float BaseDamage = 0.01f;
+
+	UPROPERTY(EditAnyWhere, Category = "AI")
+	bool detectedPlayer = false;
 	
 	// might change this
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
