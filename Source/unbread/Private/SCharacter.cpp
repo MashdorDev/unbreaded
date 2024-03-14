@@ -170,18 +170,15 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 
 void ASCharacter::CheckJump()
 {
-	if (bIsJumping)
+	if (bIsCoyoteTime && !bIsJumping)
 	{
-		bIsJumping = false;
-	}
-	else
-	{
+		ACharacter::Jump();
 		bIsJumping = true;
-		JumpCount++;
-		if (JumpCount == 2)
-		{
-			LaunchCharacter(FVector(0.f, 0.f, 600.f), false, true);
-		}
+		bIsCoyoteTime = false;
+	}
+	else if (!bIsCoyoteTime && !bIsJumping)
+	{
+		ACharacter::Jump();
 	}
 }
 
@@ -189,6 +186,17 @@ void ASCharacter::CheckJump()
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
 	ACharacter::Jump();
+
+	if (bIsCoyoteTime)
+	{
+		ACharacter::Jump();
+	}
+}
+
+void ASCharacter::StopJumping()
+{
+	Super::StopJumping();
+	GetCharacterMovement()->GravityScale = 5.0f;
 }
 
 void ASCharacter::Landed(const FHitResult& Hit)
@@ -389,7 +397,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 		
 		// GAS
