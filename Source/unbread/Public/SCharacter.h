@@ -64,9 +64,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
 
-	// TEMP
-	// TODO: review after full merge with camera system
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UDynamicCameraComponent*  DynamicCamera;
 	
@@ -114,13 +111,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASWeapon> DefaultWeaponClass;
-
-	// TEMPORARY!!!
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
-	UInputAction* ProjectileAttackAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
-	UInputAction* SprintAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Occlusion|Materials")
 	UMaterialInterface* FadeMaterial;
@@ -177,18 +167,14 @@ protected:
 	USkeletalMesh* HeadMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HeadLaunchVelocityMultiplier = 2200.f;
+	float HeadLaunchVelocityMultiplier = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadLaunchVelocityZAxisAdd = 1200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
-
-	// TEMPORARY PROJECTILE ATTACK
-	UPROPERTY(EditAnywhere)
-    TSubclassOf<AActor> ProjectileClass;
 	
-	// TODO: UPDATE TEMPORARY SETUP USING GAS
-
-
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
 	void OnSecondaryAttack(const FInputActionValue& Value);
