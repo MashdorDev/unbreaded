@@ -84,6 +84,7 @@ void UDynamicCameraComponent::FindDefaultLevelCamera()
 {
 	TArray<AActor*> CameraActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "MainCamera", CameraActors);
+	//AActor::GetOverlappingActors()
 
 	// Get the first actor tagged as "MainCamera"
 	if(CameraActors.Num() > 0)

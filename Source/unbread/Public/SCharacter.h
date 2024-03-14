@@ -28,6 +28,25 @@ class ASWeapon;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGamePauseInput);
 
 
+USTRUCT(BlueprintType)
+struct FCameraOccludedActor
+{
+	GENERATED_USTRUCT_BODY()
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	const AActor* Actor;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* StaticMesh;
+  
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TArray<UMaterialInterface*> Materials;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool IsOccluded;
+};
+
+
 UCLASS()
 class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
 {
@@ -45,11 +64,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* CameraComponent;
 
-	// TEMP
-	// TODO: review after full merge with camera system
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UDynamicCameraComponent*  DynamicCamera;
+	
+	APlayerCameraManager*  camMan;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -94,12 +112,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	TSubclassOf<ASWeapon> DefaultWeaponClass;
 
-	// TEMPORARY!!!
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
-	UInputAction* ProjectileAttackAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = true))
-	UInputAction* SprintAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Camera Occlusion|Materials")
+	UMaterialInterface* FadeMaterial;
 
 	// FUNCTIONS AND VARIABLES
 
@@ -153,16 +167,14 @@ protected:
 	USkeletalMesh* HeadMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HeadLaunchVelocityMultiplier = 2200.f;
+	float HeadLaunchVelocityMultiplier = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HeadLaunchVelocityZAxisAdd = 1200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
 	
-
-	// TEMPORARY PROJECTILE ATTACK
-	UPROPERTY(EditAnywhere)
-    TSubclassOf<AActor> ProjectileClass;
-	
-	// TODO: UPDATE TEMPORARY SETUP USING GAS
-
-
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
 	void OnSecondaryAttack(const FInputActionValue& Value);
@@ -197,6 +209,7 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void HideOccludedActor(const AActor* Actor);
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

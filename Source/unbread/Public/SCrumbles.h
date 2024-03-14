@@ -17,8 +17,6 @@ class UNBREAD_API ASCrumbles : public AActor, public IInteractInterface
 public:	
 	// Sets default values for this actor's properties
 	ASCrumbles();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	USceneComponent* Root;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UStaticMeshComponent* Mesh;
