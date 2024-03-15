@@ -104,7 +104,12 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	ECombatRole CombatRole;
-	
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	UAnimMontage* SurprisedAnimation;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	UAnimMontage* FireAnimation;
 	
 	virtual bool CanBeSeenFrom
 (
@@ -148,6 +153,9 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	float BaseDamage = 0.01f;
+
+	UPROPERTY(EditAnyWhere, Category = "AI")
+	bool detectedPlayer = false;
 	
 	// might change this
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
@@ -189,7 +197,7 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 
-	float Health = 100.0f;
+	float Health = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PartickleEmitter")
 	UParticleSystem* BloodFX;

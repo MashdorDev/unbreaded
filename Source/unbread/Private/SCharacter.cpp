@@ -213,10 +213,31 @@ void ASCharacter::LaunchHead()
 {
 	bIsHeadForm = true;
 	
-	// Store the current location and rotation of the character
-	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
-	const FRotator BodySpawnRotation = GetMesh()->GetComponentRotation();
+	FVector Start = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
+	FVector End = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 100;
+	FHitResult OutHit;
 
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+	
+	const bool isCollision = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f,
+		ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+
+	FVector BodySpawnLocation ;
+
+	// Store the current location and rotation of the character
+	if(isCollision)
+	{
+		BodySpawnLocation = GetMesh()->GetComponentLocation() +
+			 FVector(0.f, 0.f, 50.f) + GetMesh()->GetRightVector() * 140;
+	}
+	else
+	{
+ 		BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 20;
+	}
+	FRotator BodySpawnRotation =  GetMesh()->GetComponentRotation();
+
+	
 	// Swap the mesh and launch the head
 	GetMesh()->SetSkeletalMeshAsset(HeadMesh);
 
@@ -232,12 +253,14 @@ void ASCharacter::LaunchHead()
 	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
 	GetCharacterMovement()->Launch(LaunchVelocity);
+
 	
 	// Spawn the body and add it to ActiveBodies
 	FActorSpawnParameters Parameters {};
 	Parameters.bNoFail = true;
 	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
-	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
+	FVector Impulse = isCollision ? GetMesh()->GetRightVector() : -GetMesh()->GetRightVector();
+	Spawned->Mesh->AddImpulse(Impulse * 10 * HeadLaunchVelocityMultiplier);
 	Spawned->SetInstigator(this);
 	ActiveBodies.AddUnique(Spawned);
 	
@@ -301,25 +324,34 @@ void ASCharacter::Tick(float DeltaTime)
 		ACharacter::Jump();
 	}
 
-	TArray<FHitResult> OutHit;
+	TArray<FHitResult> OutHits;
 	FVector CamLocation = camMan->GetCameraLocation();
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.AddUnique(this);
 
 	FVector Start = GetActorLocation();
-	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2;
 
 	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	
-	const bool isCollision = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), Start, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+	bool isCollision = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
+	GetWorld(), Start, End, 1,
+	GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2, CollisionObjectTypes, true,
+	ActorsToIgnore,
+	EDrawDebugTrace::None,
+	OutHits, true);
 	
 	TArray<AActor*> ActorsJustOccluded;
-	if(isCollision && OutHit.Num() > 0)
+	if(isCollision && OutHits.Num() > 0)
 	{
-		for(int i = 0; i < OutHit.Num(); ++i)
+		for(int i = 0; i < OutHits.Num(); ++i)
 		{
-			AActor* HitActor = OutHit[i].GetActor();
+			AActor* HitActor = OutHits[i].GetActor();
 			if(HitActor->GetInstigator())
 			{
 				return;

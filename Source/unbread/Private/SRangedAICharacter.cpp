@@ -80,10 +80,10 @@ void ASRangedAICharacter::StartWaponFire()
 
 	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 	if (pr){
-	pr->SetInstigator(this);
-	pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
+		pr->SetInstigator(this);
+		pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
 	}
-
+	
 	if (FireHandle.IsValid())
 	{
 		return;
@@ -217,8 +217,7 @@ UBehaviorTree* ASRangedAICharacter::GetBehaviourTree() const
 
 void ASRangedAICharacter::ToggleCombat(const bool Newbool)
 {
-	GetMesh()->GetAnimInstance()->StopAllMontages(0.2f);
-	bool isPlaying = 	GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
+	bool isPlaying = GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
 	AnimValues.bIsInCombat = Newbool;
 	bUseControllerRotationYaw = Newbool;
 	GetCharacterMovement()->bOrientRotationToMovement = !Newbool;
@@ -244,6 +243,7 @@ void ASRangedAICharacter::DestroyCharacter()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	StopWeaponFire();
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.1f);
 	Dead = true;
 	if(ControllerRef)
 	{
