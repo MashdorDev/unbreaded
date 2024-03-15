@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SCharacter.h"
-
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
@@ -18,12 +16,9 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
-#include "Camera/CameraActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
-#include "Engine/StaticMeshActor.h"
-
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -43,7 +38,6 @@ ASCharacter::ASCharacter()
 
 	// TEMPORARY
 	bIsJumping = false;
-	JumpCount = 0;
 
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
@@ -170,32 +164,31 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 
 void ASCharacter::CheckJump()
 {
-	if (bIsJumping)
-	{
-		bIsJumping = false;
-	}
-	else
-	{
-		bIsJumping = true;
-		JumpCount++;
-		if (JumpCount == 2)
-		{
-			LaunchCharacter(FVector(0.f, 0.f, 600.f), false, true);
-		}
-	}
+	
 }
-
 
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
-	ACharacter::Jump();
+	if (!bIsJumping)
+	{
+		bIsJumping = true;
+		Super::Jump();
+		GetCharacterMovement()->GravityScale = 3.0f;
+	}
+
+}
+
+void ASCharacter::StopJumping()
+{
+	Super::StopJumping();
+	//GetCharacterMovement()->GravityScale = 5.0f;
+	//bIsJumping = false;
 }
 
 void ASCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-
-	JumpCount = 0;
+	bIsJumping = false;
 }
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
