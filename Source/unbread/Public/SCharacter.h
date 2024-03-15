@@ -128,9 +128,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsCoyoteTime;
 
-	UPROPERTY(EditAnywhere)
-	int JumpCount;
-
 	void CheckJump();
 
 	void Jump(const FInputActionValue& Value);

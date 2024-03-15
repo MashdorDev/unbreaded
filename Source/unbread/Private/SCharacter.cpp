@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SCharacter.h"
-
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
@@ -18,12 +16,9 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
-#include "Camera/CameraActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
-#include "Engine/StaticMeshActor.h"
-
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -43,7 +38,6 @@ ASCharacter::ASCharacter()
 
 	// TEMPORARY
 	bIsJumping = false;
-	JumpCount = 0;
 
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
@@ -170,40 +164,32 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 
 void ASCharacter::CheckJump()
 {
-	if (bIsCoyoteTime && !bIsJumping)
-	{
-		ACharacter::Jump();
-		bIsJumping = true;
-		bIsCoyoteTime = false;
-	}
-	else if (!bIsCoyoteTime && !bIsJumping)
-	{
-		ACharacter::Jump();
-	}
+	
 }
 
 
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
-	ACharacter::Jump();
-
-	if (bIsCoyoteTime)
+	if (!bIsJumping)
 	{
-		ACharacter::Jump();
+		bIsJumping = true;
+		Super::Jump();
+		GetCharacterMovement()->GravityScale = 3.0f;
 	}
+
 }
 
 void ASCharacter::StopJumping()
 {
 	Super::StopJumping();
-	GetCharacterMovement()->GravityScale = 5.0f;
+	//GetCharacterMovement()->GravityScale = 5.0f;
+	//bIsJumping = false;
 }
 
 void ASCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-
-	JumpCount = 0;
+	bIsJumping = false;
 }
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
@@ -397,7 +383,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 		
 		// GAS
