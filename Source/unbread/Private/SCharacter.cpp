@@ -167,7 +167,6 @@ void ASCharacter::CheckJump()
 	
 }
 
-
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
 	if (!bIsJumping)
