@@ -122,15 +122,17 @@ protected:
 
 	// TEMPORARY CHARACTER SETUP
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsJumping;
 
-	UPROPERTY(EditAnywhere)
-	int JumpCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsCoyoteTime;
 
 	void CheckJump();
 
 	void Jump(const FInputActionValue& Value);
+
+	void StopJumping() override;
 
 	float Speed;
 
