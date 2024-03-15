@@ -331,25 +331,34 @@ void ASCharacter::Tick(float DeltaTime)
 		ACharacter::Jump();
 	}
 
-	TArray<FHitResult> OutHit;
+	TArray<FHitResult> OutHits;
 	FVector CamLocation = camMan->GetCameraLocation();
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.AddUnique(this);
 
 	FVector Start = GetActorLocation();
-	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2;
 
 	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	
-	const bool isCollision = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), Start, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+	bool isCollision = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
+	GetWorld(), Start, End, 1,
+	GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2, CollisionObjectTypes, true,
+	ActorsToIgnore,
+	EDrawDebugTrace::None,
+	OutHits, true);
 	
 	TArray<AActor*> ActorsJustOccluded;
-	if(isCollision && OutHit.Num() > 0)
+	if(isCollision && OutHits.Num() > 0)
 	{
-		for(int i = 0; i < OutHit.Num(); ++i)
+		for(int i = 0; i < OutHits.Num(); ++i)
 		{
-			AActor* HitActor = OutHit[i].GetActor();
+			AActor* HitActor = OutHits[i].GetActor();
 			if(HitActor->GetInstigator())
 			{
 				return;

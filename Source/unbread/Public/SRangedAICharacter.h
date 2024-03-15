@@ -197,7 +197,7 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 
-	float Health = 100.0f;
+	float Health = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PartickleEmitter")
 	UParticleSystem* BloodFX;
