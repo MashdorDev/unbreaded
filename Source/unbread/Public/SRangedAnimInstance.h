@@ -37,5 +37,8 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Animation")
 	bool bHasDetected = false;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Animation")
+	bool bHasProjectile = false;
 	
 };

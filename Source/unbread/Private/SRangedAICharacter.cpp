@@ -64,32 +64,60 @@ FHitResult ASRangedAICharacter::CapsuleTrace()
 
 void ASRangedAICharacter::StartWaponFire()
 {
-	if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+	if(GetVelocity().Length() == 0.0f)
 	{
-		return;
+		if (!AnimHandle.IsValid())
+		{
+			GetWorldTimerManager().ClearTimer(FireHandle);
+			if (!GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+			{
+				PlayAnimMontage(FireAnimation);
+				GetWorldTimerManager().SetTimer(AnimHandle, this, &ASRangedAICharacter::CheckAndSpawnProjectile, 0.05f, true);
+			}
+		}
 	}
-	if (!AnimValues.bIsInCombat)
+	else
 	{
-		return;
+		GetWorldTimerManager().ClearTimer(AnimHandle);
+		if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+		{
+			return;
+		}
+		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+
+		pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
+		if (pr)
+		{
+			pr->SetInstigator(this);
+			pr->SetActorScale3D(FVector(0.5f, 0.5f, 0.5f));
+		}
+		if (!FireHandle.IsValid())
+		{
+			GetWorldTimerManager().SetTimer(FireHandle, this, &ASRangedAICharacter::StartWaponFire, FireRate, true, 0.0f);
+		}
 	}
 
-	ToggleADS(true);
-	AnimValues.bIsShooting = true;
 
-	FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
-
-	ASProjectile* pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
-	if (pr){
-		pr->SetInstigator(this);
-		pr->SetActorScale3D({ 0.5f, 0.5f, 0.5f });
-	}
-	
-	if (FireHandle.IsValid())
-	{
-		return;
-	}
-	GetWorldTimerManager().SetTimer(FireHandle, this, &ASRangedAICharacter::StartWaponFire, FireRate, true, 0.0f);
 }
+
+void ASRangedAICharacter::CheckAndSpawnProjectile()
+{
+	float CurrentPosition = GetMesh()->GetAnimInstance()->Montage_GetPosition(FireAnimation);
+	float HalfwayPoint = FireAnimation->GetPlayLength() / 2.0f;
+
+	if (CurrentPosition >= HalfwayPoint)
+	{
+		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+		pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
+		if (pr)
+		{
+			pr->SetInstigator(this);
+			pr->SetActorScale3D(FVector(0.5f, 0.5f, 0.5f));
+		}
+		GetWorldTimerManager().ClearTimer(AnimHandle);
+	}
+}
+
 
 void ASRangedAICharacter::StopWeaponFire()
 {
