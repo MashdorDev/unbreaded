@@ -96,8 +96,6 @@ void ASRangedAICharacter::StartWaponFire()
 			GetWorldTimerManager().SetTimer(FireHandle, this, &ASRangedAICharacter::StartWaponFire, FireRate, true, 0.0f);
 		}
 	}
-
-
 }
 
 void ASRangedAICharacter::CheckAndSpawnProjectile()
