@@ -178,6 +178,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartWaponFire();
+	void CheckAndSpawnProjectile();
 
 	UFUNCTION(BlueprintCallable)
 	void StopWeaponFire();
@@ -188,10 +189,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 	FTimerHandle FireHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
+	FTimerHandle AnimHandle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	TSubclassOf<class ASProjectile> Projectile;
 	
-	
+	ASProjectile* pr;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -206,4 +210,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess="true"))
 	UBehaviorTree* Tree;
+
+	
 };
