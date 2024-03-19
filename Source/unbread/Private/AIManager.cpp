@@ -92,13 +92,18 @@ void AAIManager::CreateAgentsList()
 
 void AAIManager::NotifyAIState(EAIState state)
 {
-	for(auto & Cntrl: Agents)
+	for(auto& Cntrl: Agents)
 	{
 		Cntrl->BBC->SetValueAsEnum("AIState", StaticCast<uint8>(state));
 		if(state == EAIState::Attack)
 		{
 			GetWorldTimerManager().ClearTimer(Cntrl->DetectionTimer);
 			Cntrl->Agent->UpdateWidgetVis(false);
+			if(!Cntrl->Agent->detectedPlayer)
+			{
+				Cntrl->Agent->PlayAnimMontage(Cntrl->Agent->SurprisedAnimation);
+				Cntrl->Agent->detectedPlayer = true;
+			}
 		}
 	}
 	if(state == EAIState::Attack)

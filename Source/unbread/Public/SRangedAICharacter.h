@@ -104,7 +104,12 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	ECombatRole CombatRole;
-	
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	UAnimMontage* SurprisedAnimation;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	UAnimMontage* FireAnimation;
 	
 	virtual bool CanBeSeenFrom
 (
@@ -148,6 +153,9 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	float BaseDamage = 0.01f;
+
+	UPROPERTY(EditAnyWhere, Category = "AI")
+	bool detectedPlayer = false;
 	
 	// might change this
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI")
@@ -170,6 +178,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartWaponFire();
+	void CheckAndSpawnProjectile();
 
 	UFUNCTION(BlueprintCallable)
 	void StopWeaponFire();
@@ -180,16 +189,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 	FTimerHandle FireHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
+	FTimerHandle AnimHandle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	TSubclassOf<class ASProjectile> Projectile;
 	
-	
+	ASProjectile* pr;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 
-	float Health = 100.0f;
+	float Health = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="PartickleEmitter")
 	UParticleSystem* BloodFX;
@@ -198,4 +210,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess="true"))
 	UBehaviorTree* Tree;
+
+	
 };
