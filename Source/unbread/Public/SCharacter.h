@@ -175,7 +175,7 @@ protected:
 	float HeadLaunchVelocityZAxisAdd = 1200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
+	TMap<const UStaticMeshComponent*, FCameraOccludedActor> OccludedActors;
 	
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
@@ -211,7 +211,10 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void HideOccludedActor(const AActor* Actor);
+	void HideOccludedActor(UStaticMeshComponent* Mesh);
+
+	UFUNCTION(BlueprintCallable)
+	void ForceShowActors();
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

@@ -346,61 +346,84 @@ void ASCharacter::Tick(float DeltaTime)
 	EDrawDebugTrace::None,
 	OutHits, true);
 	
-	TArray<AActor*> ActorsJustOccluded;
+	TArray<const UStaticMeshComponent*> MeshesJustOccluded;
 	if(isCollision && OutHits.Num() > 0)
 	{
 		for(int i = 0; i < OutHits.Num(); ++i)
 		{
-			AActor* HitActor = OutHits[i].GetActor();
-			if(HitActor->GetInstigator())
+			UStaticMeshComponent* HitComponent = Cast<UStaticMeshComponent>(OutHits[i].GetComponent());
+			if(!HitComponent || HitComponent->GetOwner()->GetInstigator())
 			{
 				return;
 			}
 			
-			HideOccludedActor(HitActor);
-			ActorsJustOccluded.AddUnique(HitActor);
+			HideOccludedActor(HitComponent);
+			MeshesJustOccluded.AddUnique(HitComponent);
 		}
-		for(auto& [Key, Value]: OccludedActors)
+	}
+	for(auto& [Key, Value]: OccludedActors)
+	{
+		if(!MeshesJustOccluded.Contains(Value.StaticMesh) && Value.IsOccluded)
 		{
-			if(!ActorsJustOccluded.Contains(Key) && Value.IsOccluded)
+			if (!IsValid(Value.Actor))
 			{
-				if (!IsValid(Value.Actor))
-				{
-					OccludedActors.Remove(Value.Actor);
-				}
-				Value.IsOccluded = false;
-				for(int i = 0; i < Value.Materials.Num(); i++)
-				{
-					Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
-				}
+				OccludedActors.Remove(Value.StaticMesh);
+			}
+			Value.IsOccluded = false;
+			for(int i = 0; i < Value.Materials.Num(); i++)
+			{
+				Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
 			}
 		}
 	}
 }
 
-void ASCharacter::HideOccludedActor(const AActor* Actor)
+void ASCharacter::HideOccludedActor(UStaticMeshComponent* OccludedMesh)
 {
-	UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	if(StaticMesh)
+	if(OccludedMesh)
 	{
-		FCameraOccludedActor* ExistingActor = OccludedActors.Find(Actor);
+		FCameraOccludedActor* ExistingActor = OccludedActors.Find(OccludedMesh);
 		if(ExistingActor && ExistingActor->IsOccluded)
 		{
 			return;
 		}
+		if(ExistingActor && ExistingActor->StaticMesh == OccludedMesh)
+		{
+			ExistingActor->IsOccluded = true;
+			for(int i = 0; i < ExistingActor->StaticMesh->GetNumMaterials(); i++)
+			{
+				ExistingActor->StaticMesh->SetMaterial(i, FadeMaterial);
+			}
+		}
 		else
 		{
 			FCameraOccludedActor OccludedActor;
-			OccludedActor.Actor = Actor;
-			OccludedActor.Materials = StaticMesh->GetMaterials();
-			OccludedActor.StaticMesh = StaticMesh;
+			OccludedActor.Actor = OccludedMesh->GetOwner();
+			OccludedActor.Materials = OccludedMesh->GetMaterials();
+			OccludedActor.StaticMesh = OccludedMesh;
 			OccludedActor.IsOccluded = true;
-			OccludedActors.Add(Actor, OccludedActor);
+			OccludedActors.Add(OccludedMesh, OccludedActor);
 
-			for(int i = 0; i < StaticMesh->GetNumMaterials(); i++)
+			for(int i = 0; i < OccludedActor.StaticMesh->GetNumMaterials(); i++)
 			{
-				StaticMesh->SetMaterial(i, FadeMaterial);
+				OccludedActor.StaticMesh->SetMaterial(i, FadeMaterial);
 			}
+		}
+	}
+}
+
+void ASCharacter::ForceShowActors()
+{
+	for(auto& [Key, Value]: OccludedActors)
+	{
+		if (!IsValid(Value.Actor))
+		{
+			OccludedActors.Remove(Value.StaticMesh);
+		}
+		Value.IsOccluded = false;
+		for(int i = 0; i < Value.Materials.Num(); i++)
+		{
+			Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
 		}
 	}
 }
