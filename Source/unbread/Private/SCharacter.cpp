@@ -135,10 +135,18 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	// Rotate the character relative to the current camera
 	FRotator CameraWorldRotation = DynamicCamera->CurrentCameraActor->GetComponentByClass<UCameraComponent>()->GetComponentRotation();
 	CameraWorldRotation.Roll = 0.f;
-	CameraWorldRotation.Pitch = 0.f;	
+	CameraWorldRotation.Pitch = 0.f;
+	if(bIsHeadForm)
+		CameraWorldRotation.Yaw += 90.f;
+	
 	const FRotator TargetRotation = UKismetMathLibrary::ComposeRotators(FRotator(0.0f, -1* Angle, 0.0f), CameraWorldRotation);
 	
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
+
+	if(bIsHeadForm)
+	{
+		LerpedRotation.Roll += 1.0f;
+	}
 	
 	GetMesh()->SetWorldRotation(LerpedRotation);
 }
@@ -253,8 +261,6 @@ void ASCharacter::LaunchHead()
 	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
 	GetCharacterMovement()->Launch(LaunchVelocity);
-
-	
 	// Spawn the body and add it to ActiveBodies
 	FActorSpawnParameters Parameters {};
 	Parameters.bNoFail = true;
