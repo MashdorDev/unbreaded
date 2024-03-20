@@ -155,7 +155,7 @@ void USNavigatableMenu::LerpImage()
 	CurrentLocation = FMath::Lerp(OriginLocation, DestinationLocation, ImageLerpT);
 	CurrentSize = FMath::Lerp(OriginSize, DestinationSize, ImageLerpT);
 	ImageTransform->SetPosition(CurrentLocation);
-	ImageTransform->SetSize(CurrentSize);
+	//ImageTransform->SetSize(CurrentSize);
 	if(ImageLerpT >= 1.0f)
 	{
 		ImageTransform->SetPosition(DestinationLocation);
