@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "SCharacter.h"
-
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
@@ -18,12 +16,9 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
-#include "Camera/CameraActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
-#include "Engine/StaticMeshActor.h"
-
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -43,7 +38,6 @@ ASCharacter::ASCharacter()
 
 	// TEMPORARY
 	bIsJumping = false;
-	JumpCount = 0;
 
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
@@ -170,32 +164,31 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 
 void ASCharacter::CheckJump()
 {
-	if (bIsJumping)
-	{
-		bIsJumping = false;
-	}
-	else
-	{
-		bIsJumping = true;
-		JumpCount++;
-		if (JumpCount == 2)
-		{
-			LaunchCharacter(FVector(0.f, 0.f, 600.f), false, true);
-		}
-	}
+	
 }
-
 
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
-	ACharacter::Jump();
+	if (!bIsJumping)
+	{
+		bIsJumping = true;
+		Super::Jump();
+		GetCharacterMovement()->GravityScale = 3.0f;
+	}
+
+}
+
+void ASCharacter::StopJumping()
+{
+	Super::StopJumping();
+	//GetCharacterMovement()->GravityScale = 5.0f;
+	//bIsJumping = false;
 }
 
 void ASCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
-
-	JumpCount = 0;
+	bIsJumping = false;
 }
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
@@ -220,10 +213,31 @@ void ASCharacter::LaunchHead()
 {
 	bIsHeadForm = true;
 	
-	// Store the current location and rotation of the character
-	const FVector BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
-	const FRotator BodySpawnRotation = GetMesh()->GetComponentRotation();
+	FVector Start = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
+	FVector End = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 100;
+	FHitResult OutHit;
 
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+	
+	const bool isCollision = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f,
+		ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+
+	FVector BodySpawnLocation ;
+
+	// Store the current location and rotation of the character
+	if(isCollision)
+	{
+		BodySpawnLocation = GetMesh()->GetComponentLocation() +
+			 FVector(0.f, 0.f, 50.f) + GetMesh()->GetRightVector() * 140;
+	}
+	else
+	{
+ 		BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 20;
+	}
+	FRotator BodySpawnRotation =  GetMesh()->GetComponentRotation();
+
+	
 	// Swap the mesh and launch the head
 	GetMesh()->SetSkeletalMeshAsset(HeadMesh);
 
@@ -234,17 +248,22 @@ void ASCharacter::LaunchHead()
 	// Move head forward & launch
 	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
 
-	const FVector LaunchVelocity = (GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier;	
-	GetCharacterMovement()->Velocity = LaunchVelocity;
+	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
+	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd;
+	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
+	GetCharacterMovement()->Launch(LaunchVelocity);
+
+	
 	// Spawn the body and add it to ActiveBodies
 	FActorSpawnParameters Parameters {};
 	Parameters.bNoFail = true;
 	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
-	Spawned->Mesh->AddImpulse(-GetMesh()->GetRightVector() * 10 * HeadLaunchVelocityMultiplier);
+	FVector Impulse = isCollision ? GetMesh()->GetRightVector() : -GetMesh()->GetRightVector();
+	Spawned->Mesh->AddImpulse(Impulse * 10 * HeadLaunchVelocityMultiplier);
 	Spawned->SetInstigator(this);
 	ActiveBodies.AddUnique(Spawned);
-
+	
 	Speed = HeadSpeed;
 	
 }
@@ -305,74 +324,106 @@ void ASCharacter::Tick(float DeltaTime)
 		ACharacter::Jump();
 	}
 
-	TArray<FHitResult> OutHit;
+	TArray<FHitResult> OutHits;
 	FVector CamLocation = camMan->GetCameraLocation();
 
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.AddUnique(this);
 
 	FVector Start = GetActorLocation();
-	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	Start.Z += GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2;
 
 	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+
+	TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	
-	const bool isCollision = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), Start, End, 20.0f, ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+	bool isCollision = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
+	GetWorld(), Start, End, 1,
+	GetCapsuleComponent()->GetScaledCapsuleHalfHeight() / 2, CollisionObjectTypes, true,
+	ActorsToIgnore,
+	EDrawDebugTrace::None,
+	OutHits, true);
 	
-	TArray<AActor*> ActorsJustOccluded;
-	if(isCollision && OutHit.Num() > 0)
+	TArray<const UStaticMeshComponent*> MeshesJustOccluded;
+	if(isCollision && OutHits.Num() > 0)
 	{
-		for(int i = 0; i < OutHit.Num(); ++i)
+		for(int i = 0; i < OutHits.Num(); ++i)
 		{
-			AActor* HitActor = OutHit[i].GetActor();
-			if(HitActor->GetInstigator())
+			UStaticMeshComponent* HitComponent = Cast<UStaticMeshComponent>(OutHits[i].GetComponent());
+			if(!HitComponent || HitComponent->GetOwner()->GetInstigator())
 			{
 				return;
 			}
 			
-			HideOccludedActor(HitActor);
-			ActorsJustOccluded.AddUnique(HitActor);
+			HideOccludedActor(HitComponent);
+			MeshesJustOccluded.AddUnique(HitComponent);
 		}
-		for(auto& [Key, Value]: OccludedActors)
+	}
+	for(auto& [Key, Value]: OccludedActors)
+	{
+		if(!MeshesJustOccluded.Contains(Value.StaticMesh) && Value.IsOccluded)
 		{
-			if(!ActorsJustOccluded.Contains(Key) && Value.IsOccluded)
+			if (!IsValid(Value.Actor))
 			{
-				if (!IsValid(Value.Actor))
-				{
-					OccludedActors.Remove(Value.Actor);
-				}
-				Value.IsOccluded = false;
-				for(int i = 0; i < Value.Materials.Num(); i++)
-				{
-					Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
-				}
+				OccludedActors.Remove(Value.StaticMesh);
+			}
+			Value.IsOccluded = false;
+			for(int i = 0; i < Value.Materials.Num(); i++)
+			{
+				Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
 			}
 		}
 	}
 }
 
-void ASCharacter::HideOccludedActor(const AActor* Actor)
+void ASCharacter::HideOccludedActor(UStaticMeshComponent* OccludedMesh)
 {
-	UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	if(StaticMesh)
+	if(OccludedMesh)
 	{
-		FCameraOccludedActor* ExistingActor = OccludedActors.Find(Actor);
+		FCameraOccludedActor* ExistingActor = OccludedActors.Find(OccludedMesh);
 		if(ExistingActor && ExistingActor->IsOccluded)
 		{
 			return;
 		}
+		if(ExistingActor && ExistingActor->StaticMesh == OccludedMesh)
+		{
+			ExistingActor->IsOccluded = true;
+			for(int i = 0; i < ExistingActor->StaticMesh->GetNumMaterials(); i++)
+			{
+				ExistingActor->StaticMesh->SetMaterial(i, FadeMaterial);
+			}
+		}
 		else
 		{
 			FCameraOccludedActor OccludedActor;
-			OccludedActor.Actor = Actor;
-			OccludedActor.Materials = StaticMesh->GetMaterials();
-			OccludedActor.StaticMesh = StaticMesh;
+			OccludedActor.Actor = OccludedMesh->GetOwner();
+			OccludedActor.Materials = OccludedMesh->GetMaterials();
+			OccludedActor.StaticMesh = OccludedMesh;
 			OccludedActor.IsOccluded = true;
-			OccludedActors.Add(Actor, OccludedActor);
+			OccludedActors.Add(OccludedMesh, OccludedActor);
 
-			for(int i = 0; i < StaticMesh->GetNumMaterials(); i++)
+			for(int i = 0; i < OccludedActor.StaticMesh->GetNumMaterials(); i++)
 			{
-				StaticMesh->SetMaterial(i, FadeMaterial);
+				OccludedActor.StaticMesh->SetMaterial(i, FadeMaterial);
 			}
+		}
+	}
+}
+
+void ASCharacter::ForceShowActors()
+{
+	for(auto& [Key, Value]: OccludedActors)
+	{
+		if (!IsValid(Value.Actor))
+		{
+			OccludedActors.Remove(Value.StaticMesh);
+		}
+		Value.IsOccluded = false;
+		for(int i = 0; i < Value.Materials.Num(); i++)
+		{
+			Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
 		}
 	}
 }

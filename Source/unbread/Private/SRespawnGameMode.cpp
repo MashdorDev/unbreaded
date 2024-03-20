@@ -22,7 +22,8 @@ void ASRespawnGameMode::BeginPlay()
 
 	// bind death and pause
 	Pawn->OnDestroyed.AddDynamic(this, &ASRespawnGameMode::RespawnPlayer);
-	if(auto Player = Cast<ASCharacter>(Pawn))
+	Player = Cast<ASCharacter>(Pawn);
+	if(Player)
 	{
 		Player->PauseGame.AddDynamic(this, &ASRespawnGameMode::PauseGame);
 	}
@@ -33,6 +34,7 @@ void ASRespawnGameMode::BeginPlay()
 
 void ASRespawnGameMode::SpawnPlayer()
 {
+	Player->ForceShowActors();
 	// spawn and possess player
 	if(APawn* SpawnedPlayer = GetWorld()->SpawnActorDeferred<APawn>(DefaultPawnClass, SpawnLocation))
 	{
@@ -45,7 +47,8 @@ void ASRespawnGameMode::SpawnPlayer()
 		
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->Possess(SpawnedPlayer);
 
-		if(auto Player = Cast<ASCharacter>(SpawnedPlayer))
+		Player = Cast<ASCharacter>(SpawnedPlayer);
+		if(Player)
 		{
 			auto DynamicCamera = Cast<UDynamicCameraComponent>(Player->GetComponentByClass(UDynamicCameraComponent::StaticClass()));
 			DynamicCamera->FindDefaultLevelCamera();

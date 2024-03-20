@@ -122,15 +122,17 @@ protected:
 
 	// TEMPORARY CHARACTER SETUP
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsJumping;
 
-	UPROPERTY(EditAnywhere)
-	int JumpCount;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsCoyoteTime;
 
 	void CheckJump();
 
 	void Jump(const FInputActionValue& Value);
+
+	void StopJumping() override;
 
 	float Speed;
 
@@ -167,14 +169,14 @@ protected:
 	USkeletalMesh* HeadMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HeadLaunchVelocityMultiplier = 2200.f;
+	float HeadLaunchVelocityMultiplier = 200.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<const AActor*, FCameraOccludedActor> OccludedActors;
+	float HeadLaunchVelocityZAxisAdd = 1200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<const UStaticMeshComponent*, FCameraOccludedActor> OccludedActors;
 	
-	// TODO: UPDATE TEMPORARY SETUP USING G.A.S.
-
-
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
 	void OnSecondaryAttack(const FInputActionValue& Value);
@@ -209,7 +211,10 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void HideOccludedActor(const AActor* Actor);
+	void HideOccludedActor(UStaticMeshComponent* Mesh);
+
+	UFUNCTION(BlueprintCallable)
+	void ForceShowActors();
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
