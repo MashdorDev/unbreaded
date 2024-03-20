@@ -46,6 +46,12 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnMenuButtonHovered Hovered;
+
+	UPROPERTY(EditAnywhere)
+	FVector2D SelectedLocationOffset;
+
+	UPROPERTY(EditAnywhere)
+	float SelectedRotationOffset;
 	
 	UFUNCTION()
 	void AddConnection(EDirection Direction_, FString Name_);

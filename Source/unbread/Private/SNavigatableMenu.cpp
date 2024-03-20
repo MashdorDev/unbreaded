@@ -5,6 +5,7 @@
 
 #include "FrameTypes.h"
 #include "PropertyAccess.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
@@ -46,7 +47,16 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Not permanent"));
 				Button->ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
 			}
+			else
+			{
+				// player selected permanent tab, therefore close all open canvas
+				CloseAllOpenCanvas();
+				Selected->Button->SetIsEnabled(false);
+				if(ActiveTab) ActiveTab->SetIsEnabled(true);
+				ActiveTab = Selected->Button;
+			}
 			
+			OpenCanvas.Push(Selected->ChildCanvas);
 			Selected->ChildCanvas->SetVisibility(ESlateVisibility::Visible);
 			Selected->ChildCanvas->SetVisibility((ESlateVisibility::SelfHitTestInvisible));
 		}
@@ -102,10 +112,9 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 		if (Selected && Selected->Button)
 		{
 			const UCanvasPanelSlot* S = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected);
-			const UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
-			const UCanvasPanelSlot* B = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected->Button);
 			
-			if (!S || !I || !B) return;
+			
+			if (!S) return;
 			
 			if (Selected->Button->GetIsFocusable())
 			{
@@ -113,65 +122,52 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 				Selected->Button->SetFocus();
 				
 			}
-			
-			FVector2D pos = Selected->GetRenderTransform().Translation;
-			//pos = GetAbsolutePosOfChild(Selected);
-		
-			//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Position: %f %f"), pos.X, pos.Y));
-			ResetLerp(S->GetPosition(), B->GetSize());
+			if(Selected->IsPermanent)
+			{
+				if(ActiveTab) ActiveTab->SetIsEnabled(true);
+				Selected->Button->SetIsEnabled(true);
+				ActiveTab = nullptr;
+			}
+
+			ResetLerp(S->GetPosition() + Selected->SelectedLocationOffset, Selected->GetRenderTransform().Angle + Selected->SelectedRotationOffset);
 			
 		}
 	}
-}
-
-FVector2D USNavigatableMenu::GetAbsolutePosOfChild(UWidget* Child)
-{
-	FVector2D AbsolutePosition(0, 0);
-
-	UWidget* CurrentWidget = Child;
-	
-	while(CurrentWidget->GetParent())
-	{
-		/*if(!CurrentWidget->GetParent())
-		{
-			break;
-		}*/
-		UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CurrentWidget);
-		FVector2D Anchor = CanvasSlot->GetAnchors().Minimum;
-		FVector2D size = TopMostCanvas->GetDesiredSize();
-		//FGeometry WidgetGeometry =  CurrentWidget->GetCachedGeometry();
-		AbsolutePosition += CanvasSlot->GetPosition() + (CanvasSlot->GetAnchors().Minimum * size);
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, CurrentWidget->GetName() + FString::Printf(TEXT("size: %f %f"), Anchor.X,  Anchor.Y));
-
-		CurrentWidget = CurrentWidget->GetParent();
-	}
-	return FVector2D(AbsolutePosition.X, AbsolutePosition.Y);
-
 }
 
 void USNavigatableMenu::LerpImage()
 {
 	ImageLerpT += 0.1 * LerpSpeed;
 	CurrentLocation = FMath::Lerp(OriginLocation, DestinationLocation, ImageLerpT);
-	CurrentSize = FMath::Lerp(OriginSize, DestinationSize, ImageLerpT);
+	CurrentRotation = FMath::Lerp(OriginRotation, DestinationRotation, ImageLerpT);
+
 	ImageTransform->SetPosition(CurrentLocation);
-	//ImageTransform->SetSize(CurrentSize);
+	SelectedImage->SetRenderTransformAngle(CurrentRotation);
+
+	
 	if(ImageLerpT >= 1.0f)
 	{
+		SelectedImage->SetRenderTransformAngle(DestinationRotation);
 		ImageTransform->SetPosition(DestinationLocation);
 	}
 }
 
-void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_, FVector2D DestinationSize_)
+void USNavigatableMenu::CloseAllOpenCanvas()
 {
+	for(auto& C : OpenCanvas)
+	{
+		C->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	OpenCanvas.Empty();
+}
 
-	
+void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_, float DestinationRotation_)
+{
 	OriginLocation = ImageTransform->GetPosition();
 	DestinationLocation = DestinationLocation_;
-	
-	OriginSize = ImageTransform->GetSize();
-	DestinationSize = DestinationSize_ + SelectedImagePadding;
-	
+
+	OriginRotation = SelectedImage->GetRenderTransform().Angle;
+	DestinationRotation = DestinationRotation_;
 	ImageLerpT = 0.0f;
 }
 

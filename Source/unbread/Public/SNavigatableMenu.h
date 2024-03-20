@@ -56,10 +56,10 @@ public:
 	void SetSelected(USMenuButton* Selected_);
 
 	UFUNCTION()
-	FVector2D GetAbsolutePosOfChild(UWidget* Child);
+	void LerpImage();
 
 	UFUNCTION()
-	void LerpImage();
+	void CloseAllOpenCanvas();
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
@@ -72,18 +72,20 @@ private:
 	float ImageLerpT;
 	
 	FVector2D DestinationLocation;
-	FVector2D DestinationSize;
-
 	FVector2D OriginLocation;
 	FVector2D CurrentLocation;
 
-	FVector2D OriginSize;
-	FVector2D CurrentSize;
+	float DestinationRotation;
+	float OriginRotation;
+	float CurrentRotation;
 
+	UPROPERTY()
+	TArray<UCanvasPanel*> OpenCanvas;
 
-
-
-	void ResetLerp(FVector2D DestinationLocation_, FVector2D DestinationSize_);
+	UPROPERTY()
+	UButton* ActiveTab;
+	
+	void ResetLerp(FVector2D DestinationLocation_, float DestinationRotation_);
 
 
 };
