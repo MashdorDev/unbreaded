@@ -120,19 +120,41 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
 
-	// TEMPORARY CHARACTER SETUP
+	// JUMP
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float GravityAppliedOnWalk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float GravityAppliedOnFall;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsJumping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsCoyoteTime;
+	bool bJumpBuffered;
 
-	void CheckJump();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JumpBufferDuration;
+	
+	FTimerHandle JumpBufferTimer;
+	
+	FTimerHandle CoyoteTimerHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CoyoteTime;
 
 	void Jump(const FInputActionValue& Value);
-
 	void StopJumping() override;
+
+	UFUNCTION(BlueprintCallable)
+	void BufferJump();
+	
+	UFUNCTION(BlueprintCallable)
+	void UnBufferJump();
+
+	void StartCoyoteTime();
+	void ResetCoyoteTime();
 
 	float Speed;
 
@@ -222,8 +244,6 @@ public:
 	void InitAbilitySystemComponent();
 
 	virtual void PossessedBy(AController* NewController) override;
-
-	virtual void Landed(const FHitResult& Hit) override;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FGamePauseInput PauseGame;

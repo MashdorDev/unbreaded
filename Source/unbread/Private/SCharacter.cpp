@@ -38,7 +38,11 @@ ASCharacter::ASCharacter()
 
 	// TEMPORARY
 	bIsJumping = false;
-
+	CoyoteTime = 1.3f;
+	GravityAppliedOnWalk = 3.f;
+	GravityAppliedOnFall = 6.f;
+	JumpBufferDuration = 0.1f;
+	
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
 	Speed = BodySpeed;
@@ -63,14 +67,15 @@ void ASCharacter::BeginPlay()
 	camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	camMan->ViewPitchMax = -50.0f;
 	camMan->ViewPitchMax = 10.0f;
-
-	
 	
 	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
 	if (!PState)
 	{
 		return;
 	}
+
+	// Set Gravity
+	//GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
 
 	// Hook Up Delegates
 	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
@@ -162,33 +167,59 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	GetMesh()->SetWorldRotation(LerpedRotation);
 }
 
-void ASCharacter::CheckJump()
-{
-	
-}
-
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
 	if (!bIsJumping)
 	{
-		bIsJumping = true;
-		Super::Jump();
-		GetCharacterMovement()->GravityScale = 3.0f;
+		Super::Jump();	
 	}
-
+	else if (bIsJumping)
+	{
+		BufferJump();
+	}
 }
 
 void ASCharacter::StopJumping()
 {
 	Super::StopJumping();
-	//GetCharacterMovement()->GravityScale = 5.0f;
-	//bIsJumping = false;
+	if (!GetCharacterMovement()->IsWalking())
+	{
+		GetCharacterMovement()->GravityScale = GravityAppliedOnFall;
+	}
+	
 }
 
-void ASCharacter::Landed(const FHitResult& Hit)
+void ASCharacter::BufferJump()
 {
-	Super::Landed(Hit);
-	bIsJumping = false;
+	UE_LOG(LogTemp, Warning, TEXT("JUMP BUFFERED!"));
+	bJumpBuffered = true;
+	GetWorldTimerManager().SetTimer(JumpBufferTimer, this, &ASCharacter::UnBufferJump, JumpBufferDuration);
+}
+
+void ASCharacter::UnBufferJump()
+{
+	//UE_LOG(LogTemp, Error, TEXT("JUMP UN-BUFFERED!"));
+	bJumpBuffered = false;
+	GetWorldTimerManager().ClearTimer(JumpBufferTimer);
+}
+
+void ASCharacter::StartCoyoteTime()
+{
+	/*// set coyote timer?
+	GetCharacterMovement()->GravityScale = 0.f;
+	bCanCoyoteJump = false;
+	GetWorldTimerManager().SetTimer(CoyoteTimerHandle, this, &ASCharacter::ResetCoyoteTime, CoyoteTime);*/
+}
+
+void ASCharacter::ResetCoyoteTime()
+{
+	/*bCanCoyoteJump = false;
+	if(GetCharacterMovement()->IsWalking())
+	{
+		bCanCoyoteJump = true;
+	}*/
+	/*UE_LOG(LogTemp, Warning, TEXT("COYOTE TIME RESET!"));
+	StopJumping();*/
 }
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
@@ -295,12 +326,21 @@ void ASCharacter::ReformBody()
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (bIsJumping)
+	
+	/*if (GetCharacterMovement()->IsFalling() && bCanCoyoteJump)
 	{
-		ACharacter::Jump();
+		StartCoyoteTime();
+	}*/
+	
+	/*if(GetCharacterMovement()->IsMovingOnGround())
+	{
+		GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
 	}
-
+	else if(GetCharacterMovement()->IsFalling())
+	{
+		GetCharacterMovement()->GravityScale = GravityAppliedOnFall;
+	}*/
+	
 	TArray<FHitResult> OutHit;
 	FVector CamLocation = camMan->GetCameraLocation();
 
@@ -382,7 +422,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 		
 		// GAS
