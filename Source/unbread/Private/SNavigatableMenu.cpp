@@ -5,10 +5,13 @@
 
 #include "FrameTypes.h"
 #include "PropertyAccess.h"
+#include "BehaviorTree/BehaviorTreeTypes.h"
+#include "Blueprint/SlateBlueprintLibrary.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Framework/Application/NavigationConfig.h"
+#include "Widgets/SViewport.h"
 
 void USNavigatableMenu::AddButton(USMenuButton* Button)
 {
@@ -36,17 +39,34 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 	
 	if(USMenuButton* Button = *Buttons.Find(Name))
 	{
+		
 		if(Selected->HasChildCanvas() && Direction == EDirection::In)
 		{
+			if(!Selected->IsPermanent)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Not permanent"));
+				Button->ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
+			}
+			else
+			{
+				// player selected permanent tab, therefore close all open canvas
+				CloseAllOpenCanvas();
+				Selected->Button->SetIsEnabled(false);
+				if(ActiveTab) ActiveTab->SetIsEnabled(true);
+				ActiveTab = Selected->Button;
+			}
+			
+			OpenCanvas.Push(Selected->ChildCanvas);
 			Selected->ChildCanvas->SetVisibility(ESlateVisibility::Visible);
-			Button->ParentCanvas->SetVisibility(ESlateVisibility::Collapsed);
+			Selected->ChildCanvas->SetVisibility((ESlateVisibility::SelfHitTestInvisible));
 		}
 		else if(Selected->HasParentCanvas() && Direction == EDirection::Out)
 		{
 			Selected->ParentCanvas->SetVisibility(ESlateVisibility::Visible);
+			Selected->ParentCanvas->SetVisibility((ESlateVisibility::SelfHitTestInvisible));
+
 			Button->ChildCanvas->SetVisibility(ESlateVisibility::Collapsed);
 		}
-		
 		SetSelected(Button);
 		
 	}
@@ -92,17 +112,24 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 		if (Selected && Selected->Button)
 		{
 			const UCanvasPanelSlot* S = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected);
-			const UCanvasPanelSlot* I = UWidgetLayoutLibrary::SlotAsCanvasSlot(SelectedImage);
-			const UCanvasPanelSlot* B = UWidgetLayoutLibrary::SlotAsCanvasSlot(Selected->Button);
-
-			if (!S || !I || !B) return;
+			
+			
+			if (!S) return;
 			
 			if (Selected->Button->GetIsFocusable())
 			{
 				// Set focus on the button if it's focusable
 				Selected->Button->SetFocus();
+				
 			}
-			ResetLerp(S->GetPosition(), B->GetSize());
+			if(Selected->IsPermanent)
+			{
+				if(ActiveTab) ActiveTab->SetIsEnabled(true);
+				Selected->Button->SetIsEnabled(true);
+				ActiveTab = nullptr;
+			}
+
+			ResetLerp(S->GetPosition() + Selected->SelectedLocationOffset, Selected->GetRenderTransform().Angle + Selected->SelectedRotationOffset);
 			
 		}
 	}
@@ -112,25 +139,35 @@ void USNavigatableMenu::LerpImage()
 {
 	ImageLerpT += 0.1 * LerpSpeed;
 	CurrentLocation = FMath::Lerp(OriginLocation, DestinationLocation, ImageLerpT);
-	CurrentSize = FMath::Lerp(OriginSize, DestinationSize, ImageLerpT);
+	CurrentRotation = FMath::Lerp(OriginRotation, DestinationRotation, ImageLerpT);
+
 	ImageTransform->SetPosition(CurrentLocation);
-	ImageTransform->SetSize(CurrentSize);
+	SelectedImage->SetRenderTransformAngle(CurrentRotation);
+
+	
 	if(ImageLerpT >= 1.0f)
 	{
+		SelectedImage->SetRenderTransformAngle(DestinationRotation);
 		ImageTransform->SetPosition(DestinationLocation);
 	}
 }
 
-void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_, FVector2D DestinationSize_)
+void USNavigatableMenu::CloseAllOpenCanvas()
 {
+	for(auto& C : OpenCanvas)
+	{
+		C->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	OpenCanvas.Empty();
+}
 
-	
+void USNavigatableMenu::ResetLerp(FVector2D DestinationLocation_, float DestinationRotation_)
+{
 	OriginLocation = ImageTransform->GetPosition();
 	DestinationLocation = DestinationLocation_;
-	
-	OriginSize = ImageTransform->GetSize();
-	DestinationSize = DestinationSize_ + SelectedImagePadding;
-	
+
+	OriginRotation = SelectedImage->GetRenderTransform().Angle;
+	DestinationRotation = DestinationRotation_;
 	ImageLerpT = 0.0f;
 }
 
