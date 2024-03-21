@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "SRespawnGameMode.generated.h"
 
+class ASCharacter;
 /**
  * 
  */
@@ -32,6 +33,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	int MaxLives = 3;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	ASCharacter* Player;
 	
 	UPROPERTY(BlueprintAssignable)
 	FGameOver GameOver;
