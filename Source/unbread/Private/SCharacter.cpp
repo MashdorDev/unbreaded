@@ -126,10 +126,6 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	
 	// Right / Left
 	AddMovementInput(Right, NormalizedMoveVector.X * AdjSpeed);
-
-	// TODO: Update forward and right vectors according to camera position and rotation
-	//
-	//
 	
 	if(!bUseNewRotation) return;
 
@@ -169,6 +165,7 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("JUMP!"));
 	if (!bIsJumping)
 	{
 		Super::Jump();	
@@ -198,28 +195,9 @@ void ASCharacter::BufferJump()
 
 void ASCharacter::UnBufferJump()
 {
-	//UE_LOG(LogTemp, Error, TEXT("JUMP UN-BUFFERED!"));
+	UE_LOG(LogTemp, Error, TEXT("JUMP UN-BUFFERED!"));
 	bJumpBuffered = false;
 	GetWorldTimerManager().ClearTimer(JumpBufferTimer);
-}
-
-void ASCharacter::StartCoyoteTime()
-{
-	/*// set coyote timer?
-	GetCharacterMovement()->GravityScale = 0.f;
-	bCanCoyoteJump = false;
-	GetWorldTimerManager().SetTimer(CoyoteTimerHandle, this, &ASCharacter::ResetCoyoteTime, CoyoteTime);*/
-}
-
-void ASCharacter::ResetCoyoteTime()
-{
-	/*bCanCoyoteJump = false;
-	if(GetCharacterMovement()->IsWalking())
-	{
-		bCanCoyoteJump = true;
-	}*/
-	/*UE_LOG(LogTemp, Warning, TEXT("COYOTE TIME RESET!"));
-	StopJumping();*/
 }
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)

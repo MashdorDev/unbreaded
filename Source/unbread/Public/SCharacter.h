@@ -138,8 +138,6 @@ protected:
 	float JumpBufferDuration;
 	
 	FTimerHandle JumpBufferTimer;
-	
-	FTimerHandle CoyoteTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CoyoteTime;
@@ -152,10 +150,7 @@ protected:
 	
 	UFUNCTION(BlueprintCallable)
 	void UnBufferJump();
-
-	void StartCoyoteTime();
-	void ResetCoyoteTime();
-
+	
 	float Speed;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
