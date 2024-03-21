@@ -224,6 +224,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ReformBody();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float LaunchHeadMaxDuration;
+	
+	FTimerHandle LaunchHeadTimerHandle;
+
+	void ResetLaunchHeadTimer();
+
 
 public:
 	// Called every frame
