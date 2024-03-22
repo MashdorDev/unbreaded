@@ -42,6 +42,7 @@ ASCharacter::ASCharacter()
 	GravityAppliedOnWalk = 3.f;
 	GravityAppliedOnFall = 6.f;
 	JumpBufferDuration = 0.1f;
+	LaunchHeadMaxDuration = 1.f;
 	
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
@@ -256,12 +257,15 @@ void ASCharacter::LaunchHead()
 
 	// Move head forward & launch
 	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
-
+	
 	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
 	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd;
 	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
+	GetCharacterMovement()->FallingLateralFriction = 0;
+	GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
 	GetCharacterMovement()->Launch(LaunchVelocity);
+	GetWorldTimerManager().SetTimer(LaunchHeadTimerHandle, this, &ASCharacter::ResetLaunchHeadTimer, LaunchHeadMaxDuration);
 
 	
 	// Spawn the body and add it to ActiveBodies
@@ -322,6 +326,11 @@ void ASCharacter::ReformBody()
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.f);
 }
 
+
+void ASCharacter::ResetLaunchHeadTimer()
+{
+	GetCharacterMovement()->FallingLateralFriction = 4.0f;
+}
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
