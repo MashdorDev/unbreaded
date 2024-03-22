@@ -147,6 +147,12 @@ void ASCharacter::Move(const FInputActionValue& Value)
 
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
+	const FVector2D RotVector = Value.Get<FVector2D>();	
+	const float Angle = RotVector.X;	
+	FRotator CameraRotation{0.f, Angle * CameraRotationMultiplier, 0.f};
+	SpringArmComponent->AddRelativeRotation(CameraRotation);
+
+	/*
 	if(bUseNewRotation) return;
 	
 	const FVector2D RotVector = Value.Get<FVector2D>();
@@ -161,7 +167,8 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
-	GetMesh()->SetWorldRotation(LerpedRotation);
+	GetMesh()->AddWorldRotation(LerpedRotation);
+	*/
 }
 
 void ASCharacter::Jump(const FInputActionValue& Value)
