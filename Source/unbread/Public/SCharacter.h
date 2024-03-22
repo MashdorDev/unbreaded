@@ -120,6 +120,10 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
 
+	// Camera Rotation Speed
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)//, Category = "Camera")
+	float CameraRotationMultiplier = 2.0f;
+
 	// JUMP
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
