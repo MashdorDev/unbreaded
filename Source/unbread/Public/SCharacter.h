@@ -24,6 +24,7 @@ class USGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
 class ASWeapon;
+class UInteractInterface;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGamePauseInput);
 
