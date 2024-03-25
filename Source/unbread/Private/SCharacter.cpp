@@ -16,6 +16,7 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "SInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
@@ -35,6 +36,8 @@ ASCharacter::ASCharacter()
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
+
+	InteractionComponent = CreateDefaultSubobject<USInteractionComponent>("InteractionComponent");
 
 	// TEMPORARY
 	bIsJumping = false;
@@ -337,6 +340,14 @@ void ASCharacter::ReformBody()
 void ASCharacter::ResetLaunchHeadTimer()
 {
 	GetCharacterMovement()->FallingLateralFriction = 4.0f;
+}
+
+void ASCharacter::MeleeInteract()
+{
+	if (ensure(InteractionComponent))
+	{
+		InteractionComponent->MeleeInteract();	
+	}
 }
 
 // Called every frame

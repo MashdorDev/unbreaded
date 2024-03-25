@@ -13,7 +13,6 @@ USInteractionComponent::USInteractionComponent()
 	// ...
 }
 
-
 // Called when the game starts
 void USInteractionComponent::BeginPlay()
 {
@@ -32,3 +31,11 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// ...
 }
 
+void USInteractionComponent::MeleeInteract()
+{
+	/*FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+
+	AActor* MyOwner = GetOwner();*/
+	
+}

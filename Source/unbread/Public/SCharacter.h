@@ -24,7 +24,7 @@ class USGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
 class ASWeapon;
-class UInteractInterface;
+class USInteractionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGamePauseInput);
 
@@ -67,6 +67,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UDynamicCameraComponent*  DynamicCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USInteractionComponent* InteractionComponent;
 	
 	APlayerCameraManager*  camMan;
 	
@@ -235,6 +238,9 @@ protected:
 	FTimerHandle LaunchHeadTimerHandle;
 
 	void ResetLaunchHeadTimer();
+
+	// MELEE INTERACT
+	void MeleeInteract();
 
 
 public:
