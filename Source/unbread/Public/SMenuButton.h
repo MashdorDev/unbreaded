@@ -33,7 +33,7 @@ public:
 	TArray<FString> Connections;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCanvasPanel* ChildCanvas;
+	TArray<UCanvasPanel*> ChildCanvas;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCanvasPanel* ParentCanvas;
@@ -63,7 +63,7 @@ public:
 	void BindOnHovered();
 
 	UFUNCTION()
-	bool HasChildCanvas() const { return (ChildCanvas) ? true : false;}
+	bool HasChildrenCanvas() const { return (!ChildCanvas.IsEmpty()) ? true : false;};
 
 	UFUNCTION()
 	bool HasParentCanvas() const { return (ParentCanvas) ? true : false;}
