@@ -164,7 +164,7 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		ControllerRef->BBC->SetValueAsBool("Damaged", true);
 	}
 
-	if (DamageApplied > 0)
+	if (false) //DamageApplied > 0)
 	{
 		auto* a = UGameplayStatics::SpawnEmitterAtLocation(this, BloodFX, GetActorLocation());
 		a->Deactivate();
