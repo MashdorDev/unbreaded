@@ -24,6 +24,7 @@ class USGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
 class ASWeapon;
+class USInteractionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGamePauseInput);
 
@@ -66,6 +67,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UDynamicCameraComponent*  DynamicCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USInteractionComponent* InteractionComponent;
 	
 	APlayerCameraManager*  camMan;
 	
@@ -120,20 +124,41 @@ protected:
 	void Move(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
 
-	// TEMPORARY CHARACTER SETUP
+	// Camera Rotation Speed
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)//, Category = "Camera")
+	float CameraRotationMultiplier = 2.0f;
 
+	// JUMP
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float GravityAppliedOnWalk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float GravityAppliedOnFall;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsJumping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsCoyoteTime;
+	bool bJumpBuffered;
 
-	void CheckJump();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float JumpBufferDuration;
+	
+	FTimerHandle JumpBufferTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CoyoteTime;
 
 	void Jump(const FInputActionValue& Value);
-
 	void StopJumping() override;
 
+	UFUNCTION(BlueprintCallable)
+	void BufferJump();
+	
+	UFUNCTION(BlueprintCallable)
+	void UnBufferJump();
+	
 	float Speed;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -207,6 +232,16 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ReformBody();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float LaunchHeadMaxDuration;
+	
+	FTimerHandle LaunchHeadTimerHandle;
+
+	void ResetLaunchHeadTimer();
+
+	// MELEE INTERACT
+	void MeleeInteract();
+
 
 public:
 	// Called every frame
@@ -225,8 +260,6 @@ public:
 	void InitAbilitySystemComponent();
 
 	virtual void PossessedBy(AController* NewController) override;
-
-	virtual void Landed(const FHitResult& Hit) override;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FGamePauseInput PauseGame;

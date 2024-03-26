@@ -16,6 +16,7 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "SInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
@@ -36,9 +37,16 @@ ASCharacter::ASCharacter()
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
 
+	InteractionComponent = CreateDefaultSubobject<USInteractionComponent>("InteractionComponent");
+
 	// TEMPORARY
 	bIsJumping = false;
-
+	CoyoteTime = 1.3f;
+	GravityAppliedOnWalk = 3.f;
+	GravityAppliedOnFall = 6.f;
+	JumpBufferDuration = 0.1f;
+	LaunchHeadMaxDuration = 1.f;
+	
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
 	Speed = BodySpeed;
@@ -63,14 +71,15 @@ void ASCharacter::BeginPlay()
 	camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	camMan->ViewPitchMax = -50.0f;
 	camMan->ViewPitchMax = 10.0f;
-
-	
 	
 	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
 	if (!PState)
 	{
 		return;
 	}
+
+	// Set Gravity
+	//GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
 
 	// Hook Up Delegates
 	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
@@ -121,10 +130,6 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	
 	// Right / Left
 	AddMovementInput(Right, NormalizedMoveVector.X * AdjSpeed);
-
-	// TODO: Update forward and right vectors according to camera position and rotation
-	//
-	//
 	
 	if(!bUseNewRotation) return;
 
@@ -145,6 +150,12 @@ void ASCharacter::Move(const FInputActionValue& Value)
 
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
+	const FVector2D RotVector = Value.Get<FVector2D>();	
+	const float Angle = RotVector.X;	
+	FRotator CameraRotation{0.f, Angle * CameraRotationMultiplier, 0.f};
+	SpringArmComponent->AddRelativeRotation(CameraRotation);
+
+	/*
 	if(bUseNewRotation) return;
 	
 	const FVector2D RotVector = Value.Get<FVector2D>();
@@ -159,36 +170,45 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
-	GetMesh()->SetWorldRotation(LerpedRotation);
-}
-
-void ASCharacter::CheckJump()
-{
-	
+	GetMesh()->AddWorldRotation(LerpedRotation);
+	*/
 }
 
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("JUMP!"));
 	if (!bIsJumping)
 	{
-		bIsJumping = true;
-		Super::Jump();
-		GetCharacterMovement()->GravityScale = 3.0f;
+		Super::Jump();	
 	}
-
+	else if (bIsJumping)
+	{
+		BufferJump();
+	}
 }
 
 void ASCharacter::StopJumping()
 {
 	Super::StopJumping();
-	//GetCharacterMovement()->GravityScale = 5.0f;
-	//bIsJumping = false;
+	if (!GetCharacterMovement()->IsWalking())
+	{
+		GetCharacterMovement()->GravityScale = GravityAppliedOnFall;
+	}
+	
 }
 
-void ASCharacter::Landed(const FHitResult& Hit)
+void ASCharacter::BufferJump()
 {
-	Super::Landed(Hit);
-	bIsJumping = false;
+	UE_LOG(LogTemp, Warning, TEXT("JUMP BUFFERED!"));
+	bJumpBuffered = true;
+	GetWorldTimerManager().SetTimer(JumpBufferTimer, this, &ASCharacter::UnBufferJump, JumpBufferDuration);
+}
+
+void ASCharacter::UnBufferJump()
+{
+	UE_LOG(LogTemp, Error, TEXT("JUMP UN-BUFFERED!"));
+	bJumpBuffered = false;
+	GetWorldTimerManager().ClearTimer(JumpBufferTimer);
 }
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
@@ -247,12 +267,15 @@ void ASCharacter::LaunchHead()
 
 	// Move head forward & launch
 	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
-
+	
 	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
 	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd;
 	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
+	GetCharacterMovement()->FallingLateralFriction = 0;
+	GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
 	GetCharacterMovement()->Launch(LaunchVelocity);
+	GetWorldTimerManager().SetTimer(LaunchHeadTimerHandle, this, &ASCharacter::ResetLaunchHeadTimer, LaunchHeadMaxDuration);
 
 	
 	// Spawn the body and add it to ActiveBodies
@@ -314,15 +337,25 @@ void ASCharacter::ReformBody()
 }
 
 
+void ASCharacter::ResetLaunchHeadTimer()
+{
+	GetCharacterMovement()->FallingLateralFriction = 4.0f;
+}
+
+void ASCharacter::MeleeInteract()
+{
+	if (ensure(InteractionComponent))
+	{
+		InteractionComponent->MeleeInteract();	
+	}
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (bIsJumping)
-	{
-		ACharacter::Jump();
-	}
+	
+	TArray<FHitResult> OutHit;
 
 	TArray<FHitResult> OutHits;
 	FVector CamLocation = camMan->GetCameraLocation();
@@ -437,7 +470,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 		
 		// GAS
