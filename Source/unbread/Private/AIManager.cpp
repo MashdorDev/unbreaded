@@ -28,6 +28,7 @@ bool AAIManager::Engaged()
 {
 	bool ED = false;
 
+	if(Agents.Num() <= 0) return false;
 	for(auto& Cntrl : Agents)
 	{
 		if(Cntrl->BBC->GetValueAsBool("Contact"))
@@ -92,6 +93,7 @@ void AAIManager::CreateAgentsList()
 
 void AAIManager::NotifyAIState(EAIState state)
 {
+	if(Agents.Num() <= 0) return;
 	for(auto& Cntrl: Agents)
 	{
 		Cntrl->BBC->SetValueAsEnum("AIState", StaticCast<uint8>(state));
