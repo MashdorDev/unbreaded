@@ -40,7 +40,7 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 	if(USMenuButton* Button = *Buttons.Find(Name))
 	{
 		
-		if(Selected->HasChildCanvas() && Direction == EDirection::In)
+		if(Selected->HasChildrenCanvas() && Direction == EDirection::In)
 		{
 			if(!Selected->IsPermanent)
 			{
@@ -56,16 +56,29 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 				ActiveTab = Selected->Button;
 			}
 			
-			OpenCanvas.Push(Selected->ChildCanvas);
-			Selected->ChildCanvas->SetVisibility(ESlateVisibility::Visible);
-			Selected->ChildCanvas->SetVisibility((ESlateVisibility::SelfHitTestInvisible));
+			// TODO find a better way to do this -
+			// right now hard coded to only disable the first child. maybe split children into cosmetic and functional?
+			// or make canvas wrapper class with flag to say whether is should be permanent or not
+			OpenCanvas.Push(Selected->ChildCanvas[0]);
+			for(UCanvasPanel* C : Selected->ChildCanvas)
+			{
+				C->SetVisibility(ESlateVisibility::Visible);
+				C->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			}
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("enabling child"));
+			
+
 		}
 		else if(Selected->HasParentCanvas() && Direction == EDirection::Out)
 		{
 			Selected->ParentCanvas->SetVisibility(ESlateVisibility::Visible);
 			Selected->ParentCanvas->SetVisibility((ESlateVisibility::SelfHitTestInvisible));
 
-			Button->ChildCanvas->SetVisibility(ESlateVisibility::Collapsed);
+			for(UCanvasPanel* C : Button->ChildCanvas)
+			{
+				C->SetVisibility(ESlateVisibility::Collapsed);
+			}
+			/*Button->ChildCanvas->SetVisibility(ESlateVisibility::Collapsed);*/
 		}
 		SetSelected(Button);
 		
