@@ -28,22 +28,26 @@ bool AAIManager::Engaged()
 {
 	bool ED = false;
 
+	if(Agents.Num() <= 0) return false;
 	for(auto& Cntrl : Agents)
 	{
-		if(Cntrl->BBC->GetValueAsBool("Contact"))
+		if(Cntrl)
 		{
-			ED = true;
-			break;
-		}
-		if(Cntrl->BBC->GetValueAsObject("TargetActor"))
-		{
-			ED = true;
-			break;
-		}
-		if(UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - Cntrl->TimeStamp < MaxStimulusTime_Combat)
-		{
-			ED = true;
-			break;
+			if(Cntrl->BBC->GetValueAsBool("Contact"))
+			{
+				ED = true;
+				break;
+			}
+			if(Cntrl->BBC->GetValueAsObject("TargetActor"))
+			{
+				ED = true;
+				break;
+			}
+			if(UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - Cntrl->TimeStamp < MaxStimulusTime_Combat)
+			{
+				ED = true;
+				break;
+			}
 		}
 	}
 	return ED;
@@ -92,19 +96,23 @@ void AAIManager::CreateAgentsList()
 
 void AAIManager::NotifyAIState(EAIState state)
 {
+	if(Agents.Num() <= 0) return;
 	for(auto& Cntrl: Agents)
 	{
-		Cntrl->BBC->SetValueAsEnum("AIState", StaticCast<uint8>(state));
-		if(state == EAIState::Attack)
+		if(Cntrl)
 		{
-			GetWorldTimerManager().ClearTimer(Cntrl->DetectionTimer);
-			Cntrl->Agent->UpdateWidgetVis(false);
-			if(!Cntrl->Agent->detectedPlayer)
+			Cntrl->BBC->SetValueAsEnum("AIState", StaticCast<uint8>(state));
+			if(state == EAIState::Attack)
 			{
-				Cntrl->Agent->PlayAnimMontage(Cntrl->Agent->SurprisedAnimation);
-				Cntrl->Agent->detectedPlayer = true;
+				GetWorldTimerManager().ClearTimer(Cntrl->DetectionTimer);
+				Cntrl->Agent->UpdateWidgetVis(false);
+				if(!Cntrl->Agent->detectedPlayer)
+				{
+					Cntrl->Agent->PlayAnimMontage(Cntrl->Agent->SurprisedAnimation);
+					Cntrl->Agent->detectedPlayer = true;
+				}
 			}
-		}
+		}	
 	}
 	if(state == EAIState::Attack)
 	{

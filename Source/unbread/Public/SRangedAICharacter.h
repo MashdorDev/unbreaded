@@ -146,10 +146,10 @@ public:
 	bool Dead = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	float WalkSpeed = 110.f;
+	float WalkSpeed = 300.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	float CrouchedWalkSpeed = 100.f;
+	float CrouchedWalkSpeed = 300.f;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	float BaseDamage = 0.01f;
