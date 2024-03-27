@@ -148,9 +148,12 @@ void ASCharacter::Move(const FInputActionValue& Value)
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
 	const FVector2D RotVector = Value.Get<FVector2D>();	
-	const float Angle = RotVector.X;	
-	FRotator CameraRotation{0.f, Angle * CameraRotationMultiplier, 0.f};
+	FRotator CameraRotation{RotVector.Y, RotVector.X * CameraRotationMultiplier, 0.f};
 	SpringArmComponent->AddRelativeRotation(CameraRotation);
+	
+	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
+	ClampedRotation.Pitch = FMath::Clamp(ClampedRotation.Pitch, -30.f, 30.f);
+	SpringArmComponent->SetRelativeRotation(ClampedRotation);
 
 	/*
 	if(bUseNewRotation) return;
@@ -360,7 +363,7 @@ void ASCharacter::Tick(float DeltaTime)
 	TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
 	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
-#define CAMERA_OCCLUSION_CHANNEL ECollisionChannel::ECC_EngineTraceChannel3 //for readability 
+#define CAMERA_OCCLUSION_CHANNEL ECollisionChannel::ECC_EngineTraceChannel4 //for readability 
 	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(CAMERA_OCCLUSION_CHANNEL)); 
 	
 	bool isCollision = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
