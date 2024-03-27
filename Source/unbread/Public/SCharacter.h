@@ -146,10 +146,12 @@ protected:
 	float JumpBufferDuration;
 	
 	FTimerHandle JumpBufferTimer;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CoyoteTime;
-
+	float RollAngleMin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RollAngleMax;
+	
 	void Jump(const FInputActionValue& Value);
 	void StopJumping() override;
 

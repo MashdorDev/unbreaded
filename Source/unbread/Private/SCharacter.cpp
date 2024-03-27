@@ -41,7 +41,6 @@ ASCharacter::ASCharacter()
 
 	// TEMPORARY
 	bIsJumping = false;
-	CoyoteTime = 1.3f;
 	GravityAppliedOnWalk = 3.f;
 	GravityAppliedOnFall = 6.f;
 	JumpBufferDuration = 0.1f;
@@ -50,6 +49,9 @@ ASCharacter::ASCharacter()
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
 	Speed = BodySpeed;
+
+	RollAngleMin = -30.f;
+	RollAngleMax = 30.f;
 
 }
 
@@ -151,10 +153,15 @@ void ASCharacter::Move(const FInputActionValue& Value)
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
 	const FVector2D RotVector = Value.Get<FVector2D>();	
-	const float Angle = RotVector.X;	
-	FRotator CameraRotation{0.f, Angle * CameraRotationMultiplier, 0.f};
+	const float YawAngle = RotVector.X;	
+	const float RollAngle = RotVector.Y;
+	
+	FRotator CameraRotation{RollAngle, YawAngle * CameraRotationMultiplier, 0.f};
 	SpringArmComponent->AddRelativeRotation(CameraRotation);
 
+	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
+	ClampedRotation.Pitch = FMath::Clamp(SpringArmComponent->GetRelativeRotation().Pitch, RollAngleMin, RollAngleMax);
+	SpringArmComponent->SetRelativeRotation(ClampedRotation);
 	/*
 	if(bUseNewRotation) return;
 	
