@@ -58,7 +58,7 @@ public:
 	UFUNCTION()
 	void LerpImage();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void CloseAllOpenCanvas();
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;

@@ -16,6 +16,7 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "SInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
@@ -36,9 +37,10 @@ ASCharacter::ASCharacter()
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
 
+	InteractionComponent = CreateDefaultSubobject<USInteractionComponent>("InteractionComponent");
+
 	// TEMPORARY
 	bIsJumping = false;
-	CoyoteTime = 1.3f;
 	GravityAppliedOnWalk = 3.f;
 	GravityAppliedOnFall = 6.f;
 	JumpBufferDuration = 0.1f;
@@ -47,6 +49,9 @@ ASCharacter::ASCharacter()
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
 	Speed = BodySpeed;
+
+	RollAngleMin = -30.f;
+	RollAngleMax = 30.f;
 
 }
 
@@ -148,13 +153,15 @@ void ASCharacter::Move(const FInputActionValue& Value)
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
 	const FVector2D RotVector = Value.Get<FVector2D>();	
-	FRotator CameraRotation{RotVector.Y, RotVector.X * CameraRotationMultiplier, 0.f};
-	SpringArmComponent->AddRelativeRotation(CameraRotation);
+	const float YawAngle = RotVector.X;	
+	const float RollAngle = RotVector.Y;
 	
-	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
-	ClampedRotation.Pitch = FMath::Clamp(ClampedRotation.Pitch, -30.f, 30.f);
-	SpringArmComponent->SetRelativeRotation(ClampedRotation);
+	FRotator CameraRotation{RollAngle, YawAngle * CameraRotationMultiplier, 0.f};
+	SpringArmComponent->AddRelativeRotation(CameraRotation);
 
+	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
+	ClampedRotation.Pitch = FMath::Clamp(SpringArmComponent->GetRelativeRotation().Pitch, RollAngleMin, RollAngleMax);
+	SpringArmComponent->SetRelativeRotation(ClampedRotation);
 	/*
 	if(bUseNewRotation) return;
 	
@@ -342,6 +349,14 @@ void ASCharacter::ResetLaunchHeadTimer()
 	GetCharacterMovement()->FallingLateralFriction = 4.0f;
 }
 
+void ASCharacter::MeleeInteract()
+{
+	if (ensure(InteractionComponent))
+	{
+		InteractionComponent->MeleeInteract();	
+	}
+}
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
@@ -361,10 +376,8 @@ void ASCharacter::Tick(float DeltaTime)
 	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
-	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
-#define CAMERA_OCCLUSION_CHANNEL ECollisionChannel::ECC_EngineTraceChannel4 //for readability 
-	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(CAMERA_OCCLUSION_CHANNEL)); 
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	
 	bool isCollision = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
 	GetWorld(), Start, End, 1,
