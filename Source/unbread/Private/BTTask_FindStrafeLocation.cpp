@@ -32,6 +32,7 @@ void UBTTask_FindStrafeLocation::LocaitonSeekerQueryFinished(TSharedPtr<FEnvQuer
 	float CurrentBestScore = 0.0f;
 	TArray<FVector> Locations;
 	Result->GetAllAsLocations(Locations);
+	if(Locations.Num() <= 0) return;
 	for(auto& Loc: Locations)
 	{
 		if(isDistanceGreaterThan(Loc) && Result->GetItemScore(Index) > CurrentBestScore)
@@ -46,10 +47,11 @@ void UBTTask_FindStrafeLocation::LocaitonSeekerQueryFinished(TSharedPtr<FEnvQuer
 
 bool UBTTask_FindStrafeLocation::isDistanceGreaterThan(FVector Location)
 {
-	if(Cntrl->AIManager->Agents.Num() <= 1) return true;
+	if(Cntrl->AIManager->Agents.Num() <= 0) return true;
 	bool ConsiderLocation = true;
 	for(auto& Agnt: Cntrl->AIManager->Agents)
 	{
+		if(!Agnt) return true;
 		const float CalculatedDistance = (Location - Agnt->Agent->GetActorLocation()).Size();
 		if(CalculatedDistance <= Distance)
 		{
