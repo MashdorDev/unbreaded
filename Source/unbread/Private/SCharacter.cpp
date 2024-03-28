@@ -162,6 +162,7 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
 	ClampedRotation.Pitch = FMath::Clamp(SpringArmComponent->GetRelativeRotation().Pitch, RollAngleMin, RollAngleMax);
 	SpringArmComponent->SetRelativeRotation(ClampedRotation);
+	
 	/*
 	if(bUseNewRotation) return;
 	
@@ -277,6 +278,70 @@ void ASCharacter::LaunchHead()
 	
 	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
 	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd;
+	//GetCharacterMovement()->Velocity = LaunchVelocity;
+
+	GetCharacterMovement()->FallingLateralFriction = 0;
+	GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
+	GetCharacterMovement()->Launch(LaunchVelocity);
+	GetWorldTimerManager().SetTimer(LaunchHeadTimerHandle, this, &ASCharacter::ResetLaunchHeadTimer, LaunchHeadMaxDuration);
+
+	
+	// Spawn the body and add it to ActiveBodies
+	FActorSpawnParameters Parameters {};
+	Parameters.bNoFail = true;
+	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
+	FVector Impulse = isCollision ? GetMesh()->GetRightVector() : -GetMesh()->GetRightVector();
+	Spawned->Mesh->AddImpulse(Impulse * 10 * HeadLaunchVelocityMultiplier);
+	Spawned->SetInstigator(this);
+	ActiveBodies.AddUnique(Spawned);
+	
+	Speed = HeadSpeed;
+	
+}
+
+void ASCharacter::LaunchHeadVertical()
+{
+	bIsHeadForm = true;
+	
+	FVector Start = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
+	FVector End = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 100;
+	FHitResult OutHit;
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+	
+	const bool isCollision = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f,
+		ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+
+	FVector BodySpawnLocation ;
+
+	// Store the current location and rotation of the character
+	if(isCollision)
+	{
+		BodySpawnLocation = GetMesh()->GetComponentLocation() +
+			 FVector(0.f, 0.f, 50.f) + GetMesh()->GetRightVector() * 140;
+	}
+	else
+	{
+ 		BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 20;
+	}
+	FRotator BodySpawnRotation =  GetMesh()->GetComponentRotation();
+
+	
+	// Swap the mesh and launch the head
+	GetMesh()->SetSkeletalMeshAsset(HeadMesh);
+
+	// Move the head down & Adjust the collider
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -150.f)); 
+	GetCapsuleComponent()->SetCapsuleHalfHeight(34.f);
+
+	// Move head forward & launch
+	AddActorWorldOffset(GetMesh()->GetUpVector() * 120.f, true);
+	
+	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
+	LaunchVelocity.X = 0;
+	LaunchVelocity.Y = 0;
+	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd * 0.8;
 	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
 	GetCharacterMovement()->FallingLateralFriction = 0;
