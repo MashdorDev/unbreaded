@@ -239,6 +239,12 @@ void ASCharacter::SetNearestCrumblePile_Implementation(AActor* CrumblesActor)
 
 void ASCharacter::LaunchHead()
 {
+
+	if(bIsLevelSequencePlaying)
+	{
+		return;
+	}
+	
 	bIsHeadForm = true;
 	
 	FVector Start = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
@@ -301,6 +307,11 @@ void ASCharacter::LaunchHead()
 
 void ASCharacter::LaunchHeadVertical()
 {
+	if(bIsLevelSequencePlaying)
+	{
+		return;
+	}
+	
 	bIsHeadForm = true;
 	
 	FVector Start = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);

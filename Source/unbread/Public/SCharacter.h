@@ -144,6 +144,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float JumpBufferDuration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsLevelSequencePlaying;
 	
 	FTimerHandle JumpBufferTimer;
 	
