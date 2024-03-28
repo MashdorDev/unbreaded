@@ -227,6 +227,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void LaunchHead();
+	
+	UFUNCTION(BlueprintCallable)
+	void LaunchHeadVertical();
 
 	UFUNCTION(BlueprintCallable)
 	void DestroyBodyAndSpawnCrumbles();
