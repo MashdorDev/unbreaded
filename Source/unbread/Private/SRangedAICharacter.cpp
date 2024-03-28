@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "SRangedAICharacter.h"
@@ -89,7 +89,7 @@ void ASRangedAICharacter::StartWaponFire()
 		if (pr)
 		{
 			pr->SetInstigator(this);
-			pr->SetActorScale3D(FVector(0.5f, 0.5f, 0.5f));
+			pr->SetActorScale3D(FVector(1.f, 1.f, 1.f));
 		}
 		if (!FireHandle.IsValid())
 		{
@@ -110,7 +110,7 @@ void ASRangedAICharacter::CheckAndSpawnProjectile()
 		if (pr)
 		{
 			pr->SetInstigator(this);
-			pr->SetActorScale3D(FVector(0.5f, 0.5f, 0.5f));
+			pr->SetActorScale3D(FVector(1.f, 1.f, 1.f));
 		}
 		GetWorldTimerManager().ClearTimer(AnimHandle);
 	}
@@ -164,7 +164,7 @@ float ASRangedAICharacter::TakeDamage(float DamageAmount, FDamageEvent const& Da
 		ControllerRef->BBC->SetValueAsBool("Damaged", true);
 	}
 
-	if (DamageApplied > 0)
+	if (false) //DamageApplied > 0)
 	{
 		auto* a = UGameplayStatics::SpawnEmitterAtLocation(this, BloodFX, GetActorLocation());
 		a->Deactivate();

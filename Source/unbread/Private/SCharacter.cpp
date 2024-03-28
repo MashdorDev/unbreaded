@@ -441,8 +441,10 @@ void ASCharacter::Tick(float DeltaTime)
 	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
-	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+#define CAMERA_OCCLUSION_CHANNEL ECollisionChannel::ECC_EngineTraceChannel4
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(CAMERA_OCCLUSION_CHANNEL)); 
+	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	
 	bool isCollision = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
 	GetWorld(), Start, End, 1,
