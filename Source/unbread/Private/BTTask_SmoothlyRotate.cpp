@@ -50,8 +50,11 @@ void UBTTask_SmoothlyRotate::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* 
     
 	MyActor->SetActorRotation({CurrentRotation.Pitch, NewRotation.Yaw, CurrentRotation.Roll});
     
-	if (FMath::Abs(FVector::DotProduct(Direction, MyActor->GetActorForwardVector())) > 0.99f)
+	float YawDifference = FMath::Abs(FMath::FindDeltaAngleDegrees(CurrentRotation.Yaw, TargetRotation.Yaw));
+
+	if (YawDifference < 5.0f) 
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
+
 }

@@ -83,7 +83,8 @@ void ASRangedAICharacter::StartWaponFire()
 		{
 			return;
 		}
-		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+		
+		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius() * 5;
 
 		pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 		if (pr)
@@ -105,7 +106,7 @@ void ASRangedAICharacter::CheckAndSpawnProjectile()
 
 	if (CurrentPosition >= HalfwayPoint)
 	{
-		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * 120.0f;
+		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius() * 5;
 		pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 		if (pr)
 		{
