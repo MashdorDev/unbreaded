@@ -34,7 +34,6 @@ void ASRespawnGameMode::BeginPlay()
 
 void ASRespawnGameMode::SpawnPlayer()
 {
-	Player->ForceShowActors();
 	// spawn and possess player
 	if(APawn* SpawnedPlayer = GetWorld()->SpawnActorDeferred<APawn>(DefaultPawnClass, SpawnLocation))
 	{
