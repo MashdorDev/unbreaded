@@ -43,6 +43,11 @@ bool ASRangedAICharacter::IsHostile(ASCharacter* character)
 	return false;
 }
 
+ void ASRangedAICharacter::SetAttackState()
+ {
+	ControllerRef->AIManager->NotifyAIState(EAIState::Attack);
+ }
+
 FHitResult ASRangedAICharacter::CapsuleTrace()
 {
 	FHitResult OutHit;

@@ -173,6 +173,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateWidgetVis(bool NewBool);
 
+	UFUNCTION(BlueprintCallable)
+	void SetAttackState();
+	
 	UFUNCTION()
 	FHitResult CapsuleTrace();
 
