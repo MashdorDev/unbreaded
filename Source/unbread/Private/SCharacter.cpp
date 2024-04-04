@@ -438,6 +438,10 @@ void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	/*
+	 * Deprecated Occlusion Mask; using Post+Processing instead
+	 *
+
 	TArray<FHitResult> OutHit;
 
 	TArray<FHitResult> OutHits;
@@ -496,6 +500,7 @@ void ASCharacter::Tick(float DeltaTime)
 			}
 		}
 	}
+	*/
 }
 
 void ASCharacter::HideOccludedActor(UStaticMeshComponent* OccludedMesh)
