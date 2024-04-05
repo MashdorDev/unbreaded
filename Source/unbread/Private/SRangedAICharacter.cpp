@@ -43,6 +43,11 @@ bool ASRangedAICharacter::IsHostile(ASCharacter* character)
 	return false;
 }
 
+ void ASRangedAICharacter::SetAttackState()
+ {
+	ControllerRef->AIManager->NotifyAIState(EAIState::Attack);
+ }
+
 FHitResult ASRangedAICharacter::CapsuleTrace()
 {
 	FHitResult OutHit;
@@ -84,7 +89,7 @@ void ASRangedAICharacter::StartWaponFire()
 			return;
 		}
 		
-		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius() * 5;
+		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2;
 
 		pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 		if (pr)
@@ -106,7 +111,7 @@ void ASRangedAICharacter::CheckAndSpawnProjectile()
 
 	if (CurrentPosition >= HalfwayPoint)
 	{
-		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius() * 5;
+		FVector launchLocation = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius() * 2;
 		pr = GetWorld()->SpawnActor<ASProjectile>(Projectile, launchLocation, GetActorRotation());
 		if (pr)
 		{
@@ -248,13 +253,13 @@ void ASRangedAICharacter::ToggleCombat(const bool Newbool)
 	AnimValues.bIsInCombat = Newbool;
 	bUseControllerRotationYaw = Newbool;
 	GetCharacterMovement()->bOrientRotationToMovement = !Newbool;
-	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? 187.f : 94.f;
+	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? 450.f : 94.f;
 }
 
 void ASRangedAICharacter::ToggleCrouch(const bool Newbool)
 {
 	AnimValues.bIsCrouching = Newbool;
-	const float Speed = AnimValues.bIsInCombat ? 187.f : WalkSpeed;
+	const float Speed = AnimValues.bIsInCombat ? 450.f : WalkSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? CrouchedWalkSpeed : Speed;
 }
 

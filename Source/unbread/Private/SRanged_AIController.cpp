@@ -85,7 +85,7 @@ void ASRanged_AIController::OnPossess(APawn* InPawn)
 		LocationKeyID = BBC->GetKeyID("MoveToLocation");
 		ContactKeyID = BBC->GetKeyID("Contact");
 		DamagedKeyID = BBC->GetKeyID("Damaged");
-			StateID = BBC->GetKeyID("EAIState");
+		StateID = BBC->GetKeyID("EAIState");
 
 		BTC->StartTree(*aiCharacter->GetBehaviourTree());
 		
