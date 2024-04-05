@@ -79,6 +79,8 @@ private:
 	float OriginRotation;
 	float CurrentRotation;
 
+	
+
 	UPROPERTY()
 	TArray<UCanvasPanel*> OpenCanvas;
 
