@@ -39,6 +39,8 @@ void USInteractionComponent::MeleeInteract()
 {
 	FCollisionObjectQueryParams ObjectQueryParams;
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	//ObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+	//ObjectQueryParams.AddObjectTypesToQuery(ECC_EngineTraceChannel3);
 	
 	AActor* MyOwner = GetOwner();
 	
