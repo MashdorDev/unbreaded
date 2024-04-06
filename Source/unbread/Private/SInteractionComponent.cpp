@@ -3,6 +3,10 @@
 
 #include "SInteractionComponent.h"
 
+#include "SGameplayInterface.h"
+#include "DrawDebugHelpers.h"
+#include "GameFramework/Character.h"
+
 // Sets default values for this component's properties
 USInteractionComponent::USInteractionComponent()
 {
@@ -33,9 +37,53 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void USInteractionComponent::MeleeInteract()
 {
-	/*FCollisionObjectQueryParams ObjectQueryParams;
+	FCollisionObjectQueryParams ObjectQueryParams;
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-
-	AActor* MyOwner = GetOwner();*/
 	
+	AActor* MyOwner = GetOwner();
+	
+	ACharacter* MyCharacter = Cast<ACharacter>(MyOwner);
+	if (MyCharacter)
+	{
+		USkeletalMeshComponent* CharacterMesh = MyCharacter->GetMesh();
+		if (CharacterMesh)
+		{
+			FVector EyeLocation;
+			FRotator EyeRotation;
+			CharacterMesh->GetSocketWorldLocationAndRotation(TEXT("spine_004"), EyeLocation, EyeRotation);
+			FRotator Correction (0.0f, 90.0f, 0.f);
+			FRotator CorrecterRotation = EyeRotation + Correction;
+			FVector End = EyeLocation + (CorrecterRotation.Vector() * 300);
+			End.Z += 100.0f;
+			// FHitResult Hit;
+			// bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);
+
+			TArray<FHitResult> Hits;
+
+			float DebugRadius = 30.f;
+
+			FCollisionShape CollisionShape;
+			CollisionShape.SetSphere(DebugRadius);
+
+			bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, CollisionShape);
+			FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+	
+			for (FHitResult Hit : Hits)
+			{
+				if (AActor* HitActor = Hit.GetActor())
+				{
+					if(HitActor->Implements<USGameplayInterface>())
+					{
+						APawn* MyPawn = Cast<APawn>(MyOwner);
+						ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
+						break;
+					}
+				}
+				DrawDebugSphere(GetWorld(), Hit.ImpactPoint, DebugRadius, 16, LineColor, false, 2.0f);
+			}
+			DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	
+		}
+	}
+
 }
