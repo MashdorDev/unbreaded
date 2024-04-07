@@ -36,24 +36,27 @@ EBTNodeResult::Type UBTTask_GetRandomPoints::ExecuteTask(UBehaviorTreeComponent&
 		return EBTNodeResult::Succeeded;
 	}
 
-	OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>("MoveToLocation", pathRef->Locations[Index]);
+	
 	if(Index < pathRef->Locations.Num() - 1)
 	{
-		Index = GetNextPoint(pathRef->Locations.Num() - 1);
+		Index = GetNextPoint(pathRef);
+		pathRef->Locations[OccupiedIndex].isOccupied = false;
+		OccupiedIndex = Index;
+		OwnerComp.GetBlackboardComponent()->SetValue<UBlackboardKeyType_Vector>("MoveToLocation", pathRef->Locations[Index].Location);
 		return EBTNodeResult::Succeeded;
 	}
-	Index = 0;
 	
+	Index = 0;
 	return EBTNodeResult::Succeeded;
 }
 
-int32_t UBTTask_GetRandomPoints::GetNextPoint(int32 MaxNum)
+int32_t UBTTask_GetRandomPoints::GetNextPoint(ASPathActor* pathRef)
 {
-	int32 nextPoint = FMath::RandRange(0, MaxNum);
-	if(nextPoint == Index)
+	int32 nextPoint = FMath::RandRange(0, pathRef->Locations.Num() - 1);
+	if(nextPoint == Index || pathRef->Locations[nextPoint].isOccupied)
 	{
-		nextPoint = GetNextPoint(MaxNum);
+		nextPoint = GetNextPoint(pathRef);
 	}
-
+	pathRef->Locations[nextPoint].isOccupied = true;
 	return nextPoint;
 }

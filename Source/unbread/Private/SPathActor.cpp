@@ -24,6 +24,6 @@ void ASPathActor::GetSplinePoints()
 {
 	for(int i = 0; i < Path->GetNumberOfSplinePoints(); ++i)
 	{
-		Locations.Add(Path->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World));
+		Locations.Add(FLocation{Path->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::World), false});
 	}
 }

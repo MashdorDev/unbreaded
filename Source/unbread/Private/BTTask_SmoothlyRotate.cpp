@@ -20,13 +20,24 @@ EBTNodeResult::Type UBTTask_SmoothlyRotate::ExecuteTask(UBehaviorTreeComponent& 
 	if (Cntrl)
 	{
 		MyActor = Cast<ASRangedAICharacter>(Cntrl->GetPawn());
-		TargetActor = Cast<AActor>(Cntrl->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
+		auto* TargetActor = Cast<AActor>(Cntrl->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
 
-		if (!MyActor || !TargetActor)
+		if (!MyActor)
 		{
 			return EBTNodeResult::Failed;
 		}
-        
+		if (TargetActor)
+		{
+			TargetLoc = TargetActor->GetActorLocation();
+		}
+		else
+		{
+			TargetLoc = Cntrl->GetBlackboardComponent()->GetValueAsVector("MoveToLocation");
+			if(TargetLoc == FVector())
+			{
+				return EBTNodeResult::Failed;
+			}
+		}
 		return EBTNodeResult::InProgress;
 	}
 	return EBTNodeResult::Failed;
@@ -35,18 +46,17 @@ EBTNodeResult::Type UBTTask_SmoothlyRotate::ExecuteTask(UBehaviorTreeComponent& 
 
 void UBTTask_SmoothlyRotate::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	if (!MyActor || !TargetActor)
+	if (!MyActor)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 		return;
 	}
-
-	FVector TargetLoc = TargetActor->GetActorLocation();
+	
 	FVector Direction = (TargetLoc - MyActor->GetActorLocation()).GetSafeNormal();
 	FRotator TargetRotation = Direction.Rotation();
 
 	FRotator CurrentRotation = MyActor->GetActorRotation();
-	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaSeconds, 5.0f);
+	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaSeconds, InterpSpeed);
     
 	MyActor->SetActorRotation({CurrentRotation.Pitch, NewRotation.Yaw, CurrentRotation.Roll});
     

@@ -139,7 +139,7 @@ void ASRangedAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	UpdateWindgerRef();
-
+ 
 	// ** GAS ** //
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASRangedAICharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASRangedAICharacter::OnShieldAttributeChanged);
