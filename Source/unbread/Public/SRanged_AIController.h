@@ -24,7 +24,7 @@ public:
 	void BeginPlay() override;
 
 	UPROPERTY(BlueprintReadOnly)
-	class AAIManager* AIManager = nullptr;
+	AAIManager* AIManager = nullptr;
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	
@@ -35,7 +35,7 @@ public:
 	float GetDetectionLevel() const;
 	
 	UPROPERTY(transient)
-	class UBlackboardComponent*  BBC;
+	UBlackboardComponent*  BBC;
 
 	class ASRangedAICharacter* Agent;
 
@@ -62,7 +62,7 @@ protected:
 	UFUNCTION()
 	void OnPerception(AActor* actor, FAIStimulus stimulus);
 	
-	class UAISenseConfig_Sight* Sight;
+	UAISenseConfig_Sight* Sight;
 	class UAISenseConfig_Hearing* Hearing;
 
 	FTimerHandle DetectionTimer;
