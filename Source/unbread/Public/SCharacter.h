@@ -248,7 +248,11 @@ protected:
 	void ResetLaunchHeadTimer();
 
 	// MELEE INTERACT
-	void MeleeInteract();
+	/*UFUNCTION(BlueprintImplementableEvent)
+	void MeleeInteract();*/
+
+	/*UFUNCTION(BlueprintImplementableEvent)
+	void Punch();*/
 
 
 public:
