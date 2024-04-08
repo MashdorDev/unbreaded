@@ -26,6 +26,8 @@ class UNBREAD_API USMenuButton : public UCanvasPanel
 	GENERATED_BODY()
 
 public:
+	USMenuButton();
+	
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UButton* Button;
 	
