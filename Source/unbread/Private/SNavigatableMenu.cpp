@@ -165,6 +165,7 @@ void USNavigatableMenu::LerpImage()
 	}
 }
 
+
 void USNavigatableMenu::CloseAllOpenCanvas()
 {
 	for(auto& C : OpenCanvas)
@@ -213,6 +214,7 @@ void USNavigatableMenu::NativePreConstruct()
 	}
 
 }
+
 
 
 
