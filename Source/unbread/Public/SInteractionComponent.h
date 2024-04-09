@@ -16,6 +16,7 @@ public:
 	// Sets default values for this component's properties
 	USInteractionComponent();
 
+	UFUNCTION(BlueprintCallable)
 	void MeleeInteract();
 
 protected:
