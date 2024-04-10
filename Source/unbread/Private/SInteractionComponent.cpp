@@ -56,7 +56,7 @@ void USInteractionComponent::MeleeInteract()
 			FRotator Correction (0.0f, 90.0f, 0.f);
 			FRotator CorrecterRotation = EyeRotation + Correction;
 			FVector End = EyeLocation + (CorrecterRotation.Vector() * 300);
-			End.Z += 100.0f;
+			End.Z = EyeLocation.Z;
 			// FHitResult Hit;
 			// bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, EyeLocation, End, ObjectQueryParams);
 
