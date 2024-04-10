@@ -10,6 +10,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
+#include "Blueprint/WidgetTree.h"
 #include "Framework/Application/NavigationConfig.h"
 #include "Widgets/SViewport.h"
 
@@ -30,14 +31,34 @@ void USNavigatableMenu::AddButton(USMenuButton* Button)
 	Buttons.Add(Button->Name, Button);
 }
 
+void USNavigatableMenu::GetButtons()
+{
+	// get all child objects of type SMenuButton, bind custom hover functionality
+	this->WidgetTree->ForEachWidgetAndDescendants([&](UWidget* Widget)
+	{
+		if (USMenuButton* Button = Cast<USMenuButton>(Widget))
+		{
+			AddButton(Button);
+		}
+	});
+}
+
 void USNavigatableMenu::Navigate(EDirection Direction)
 {
 	if(!Selected) return;
 	FString Name = Selected->Connections[Direction];
 	
 	if(Name == "") return;
-	
-	if(USMenuButton* Button = *Buttons.Find(Name))
+
+	auto it = Buttons.Find(Name);
+	if(!it)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red,
+			(TEXT("Button has no connection: ") + Name));
+
+		return;
+	}
+	if(USMenuButton* Button = *it)
 	{
 		
 		if(Selected->HasChildrenCanvas() && Direction == EDirection::In)
@@ -65,7 +86,6 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 				C->SetVisibility(ESlateVisibility::Visible);
 				C->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			}
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("enabling child"));
 			
 
 		}
@@ -76,6 +96,9 @@ void USNavigatableMenu::Navigate(EDirection Direction)
 
 			for(UCanvasPanel* C : Button->ChildCanvas)
 			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
+					(TEXT("Disabling child: ") +  C->GetName()));
+				
 				C->SetVisibility(ESlateVisibility::Collapsed);
 			}
 			/*Button->ChildCanvas->SetVisibility(ESlateVisibility::Collapsed);*/
@@ -193,6 +216,8 @@ void USNavigatableMenu::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 }
 
 
+
+
 void USNavigatableMenu::NativePreConstruct()
 {
 	Super::NativePreConstruct();
@@ -212,6 +237,8 @@ void USNavigatableMenu::NativePreConstruct()
 		SelectedImagePadding.Y = 20.0f;
 
 	}
+	GetButtons();
+	
 
 }
 
