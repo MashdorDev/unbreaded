@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "SMenuButton.h"
+#include "Widgets/SWidget.h"
 #include "ButtonWidgetStyle.generated.h"
 #include "SNavigatableMenu.generated.h"
 
@@ -14,6 +15,7 @@
  */
 class UButton;
 class UImage;
+//class SWidget;
 
 UCLASS()
 class UNBREAD_API USNavigatableMenu : public UUserWidget
@@ -55,6 +57,12 @@ public:
 
 	UFUNCTION()
 	void LerpImage();
+
+	UFUNCTION(BlueprintCallable)
+	void CloseAllOpenCanvas();
+
+	UFUNCTION(BlueprintCallable)
+	void GetButtons();
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
@@ -67,18 +75,22 @@ private:
 	float ImageLerpT;
 	
 	FVector2D DestinationLocation;
-	FVector2D DestinationSize;
-
 	FVector2D OriginLocation;
 	FVector2D CurrentLocation;
 
-	FVector2D OriginSize;
-	FVector2D CurrentSize;
+	float DestinationRotation;
+	float OriginRotation;
+	float CurrentRotation;
 
+	
 
+	UPROPERTY()
+	TArray<UCanvasPanel*> OpenCanvas;
 
-
-	void ResetLerp(FVector2D DestinationLocation_, FVector2D DestinationSize_);
+	UPROPERTY()
+	UButton* ActiveTab;
+	
+	void ResetLerp(FVector2D DestinationLocation_, float DestinationRotation_);
 
 
 };

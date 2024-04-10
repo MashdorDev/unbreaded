@@ -26,6 +26,8 @@ class UNBREAD_API USMenuButton : public UCanvasPanel
 	GENERATED_BODY()
 
 public:
+	USMenuButton();
+	
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	UButton* Button;
 	
@@ -33,7 +35,7 @@ public:
 	TArray<FString> Connections;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCanvasPanel* ChildCanvas;
+	TArray<UCanvasPanel*> ChildCanvas;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCanvasPanel* ParentCanvas;
@@ -41,8 +43,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	FString Name;
 
+	UPROPERTY(EditAnywhere)
+	bool IsPermanent;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnMenuButtonHovered Hovered;
+
+	UPROPERTY(EditAnywhere)
+	FVector2D SelectedLocationOffset;
+
+	UPROPERTY(EditAnywhere)
+	float SelectedRotationOffset;
 	
 	UFUNCTION()
 	void AddConnection(EDirection Direction_, FString Name_);
@@ -54,7 +65,7 @@ public:
 	void BindOnHovered();
 
 	UFUNCTION()
-	bool HasChildCanvas() const { return (ChildCanvas) ? true : false;}
+	bool HasChildrenCanvas() const { return (!ChildCanvas.IsEmpty()) ? true : false;};
 
 	UFUNCTION()
 	bool HasParentCanvas() const { return (ParentCanvas) ? true : false;}

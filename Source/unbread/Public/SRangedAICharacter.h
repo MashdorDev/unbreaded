@@ -146,10 +146,10 @@ public:
 	bool Dead = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	float WalkSpeed = 110.f;
+	float WalkSpeed = 300.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	float CrouchedWalkSpeed = 100.f;
+	float CrouchedWalkSpeed = 300.f;
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	float BaseDamage = 0.01f;
@@ -173,11 +173,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdateWidgetVis(bool NewBool);
 
+	UFUNCTION(BlueprintCallable)
+	void SetAttackState();
+	
 	UFUNCTION()
 	FHitResult CapsuleTrace();
 
 	UFUNCTION(BlueprintCallable)
 	void StartWaponFire();
+	void CheckAndSpawnProjectile();
 
 	UFUNCTION(BlueprintCallable)
 	void StopWeaponFire();
@@ -188,10 +192,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
 	FTimerHandle FireHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Health")
+	FTimerHandle AnimHandle;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Projectile")
 	TSubclassOf<class ASProjectile> Projectile;
 	
-	
+	ASProjectile* pr;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -206,4 +213,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="AI", meta=(AllowPrivateAccess="true"))
 	UBehaviorTree* Tree;
+
+	
 };

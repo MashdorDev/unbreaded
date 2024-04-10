@@ -16,6 +16,7 @@
 #include "SPlayerState.h"
 #include "SGameplayAbility.h"
 #include "SHealthAttributeSet.h"
+#include "SInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "SWeapon.h"
@@ -36,12 +37,21 @@ ASCharacter::ASCharacter()
 
 	DynamicCamera = CreateDefaultSubobject<UDynamicCameraComponent>("DynamicCamera");
 
+	InteractionComponent = CreateDefaultSubobject<USInteractionComponent>("InteractionComponent");
+
 	// TEMPORARY
 	bIsJumping = false;
-
+	GravityAppliedOnWalk = 3.f;
+	GravityAppliedOnFall = 6.f;
+	JumpBufferDuration = 0.1f;
+	LaunchHeadMaxDuration = 1.f;
+	
 	BodySpeed = 0.8;
 	HeadSpeed = 1.0f;
 	Speed = BodySpeed;
+
+	RollAngleMin = -30.f;
+	RollAngleMax = 30.f;
 
 }
 
@@ -63,14 +73,15 @@ void ASCharacter::BeginPlay()
 	camMan = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 	camMan->ViewPitchMax = -50.0f;
 	camMan->ViewPitchMax = 10.0f;
-
-	
 	
 	ASPlayerState* PState = GetPlayerState<ASPlayerState>();
 	if (!PState)
 	{
 		return;
 	}
+
+	// Set Gravity
+	//GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
 
 	// Hook Up Delegates
 	USHealthAttributeSet* HealthAttributeSet = PState->HealthAttributeSet;
@@ -121,10 +132,6 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	
 	// Right / Left
 	AddMovementInput(Right, NormalizedMoveVector.X * AdjSpeed);
-
-	// TODO: Update forward and right vectors according to camera position and rotation
-	//
-	//
 	
 	if(!bUseNewRotation) return;
 
@@ -145,6 +152,18 @@ void ASCharacter::Move(const FInputActionValue& Value)
 
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
+	const FVector2D RotVector = Value.Get<FVector2D>();	
+	const float YawAngle = RotVector.X;	
+	const float RollAngle = RotVector.Y;
+	
+	FRotator CameraRotation{RollAngle, YawAngle * CameraRotationMultiplier, 0.f};
+	SpringArmComponent->AddRelativeRotation(CameraRotation);
+
+	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
+	ClampedRotation.Pitch = FMath::Clamp(SpringArmComponent->GetRelativeRotation().Pitch, RollAngleMin, RollAngleMax);
+	SpringArmComponent->SetRelativeRotation(ClampedRotation);
+	
+	/*
 	if(bUseNewRotation) return;
 	
 	const FVector2D RotVector = Value.Get<FVector2D>();
@@ -159,36 +178,45 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
-	GetMesh()->SetWorldRotation(LerpedRotation);
-}
-
-void ASCharacter::CheckJump()
-{
-	
+	GetMesh()->AddWorldRotation(LerpedRotation);
+	*/
 }
 
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("JUMP!"));
 	if (!bIsJumping)
 	{
-		bIsJumping = true;
-		Super::Jump();
-		GetCharacterMovement()->GravityScale = 3.0f;
+		Super::Jump();	
 	}
-
+	else if (bIsJumping)
+	{
+		BufferJump();
+	}
 }
 
 void ASCharacter::StopJumping()
 {
 	Super::StopJumping();
-	//GetCharacterMovement()->GravityScale = 5.0f;
-	//bIsJumping = false;
+	if (!GetCharacterMovement()->IsWalking())
+	{
+		GetCharacterMovement()->GravityScale = GravityAppliedOnFall;
+	}
+	
 }
 
-void ASCharacter::Landed(const FHitResult& Hit)
+void ASCharacter::BufferJump()
 {
-	Super::Landed(Hit);
-	bIsJumping = false;
+	UE_LOG(LogTemp, Warning, TEXT("JUMP BUFFERED!"));
+	bJumpBuffered = true;
+	GetWorldTimerManager().SetTimer(JumpBufferTimer, this, &ASCharacter::UnBufferJump, JumpBufferDuration);
+}
+
+void ASCharacter::UnBufferJump()
+{
+	UE_LOG(LogTemp, Error, TEXT("JUMP UN-BUFFERED!"));
+	bJumpBuffered = false;
+	GetWorldTimerManager().ClearTimer(JumpBufferTimer);
 }
 
 void ASCharacter::SetNextCamera_Implementation(AActor* CameraActor)
@@ -211,6 +239,12 @@ void ASCharacter::SetNearestCrumblePile_Implementation(AActor* CrumblesActor)
 
 void ASCharacter::LaunchHead()
 {
+
+	if(bIsLevelSequencePlaying)
+	{
+		return;
+	}
+	
 	bIsHeadForm = true;
 	
 	FVector Start = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
@@ -247,12 +281,84 @@ void ASCharacter::LaunchHead()
 
 	// Move head forward & launch
 	AddActorWorldOffset(GetMesh()->GetRightVector() * 50.f, true);
-
+	
 	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
 	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd;
 	//GetCharacterMovement()->Velocity = LaunchVelocity;
 
+	GetCharacterMovement()->FallingLateralFriction = 0;
+	GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
 	GetCharacterMovement()->Launch(LaunchVelocity);
+	GetWorldTimerManager().SetTimer(LaunchHeadTimerHandle, this, &ASCharacter::ResetLaunchHeadTimer, LaunchHeadMaxDuration);
+
+	
+	// Spawn the body and add it to ActiveBodies
+	FActorSpawnParameters Parameters {};
+	Parameters.bNoFail = true;
+	auto Spawned = GetWorld()->SpawnActor<ASExplodingBody>(BodyClass, BodySpawnLocation, BodySpawnRotation, Parameters);
+	FVector Impulse = isCollision ? GetMesh()->GetRightVector() : -GetMesh()->GetRightVector();
+	Spawned->Mesh->AddImpulse(Impulse * 10 * HeadLaunchVelocityMultiplier);
+	Spawned->SetInstigator(this);
+	ActiveBodies.AddUnique(Spawned);
+	
+	Speed = HeadSpeed;
+	
+}
+
+void ASCharacter::LaunchHeadVertical()
+{
+	if(bIsLevelSequencePlaying)
+	{
+		return;
+	}
+	
+	bIsHeadForm = true;
+	
+	FVector Start = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f);
+	FVector End = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 100;
+	FHitResult OutHit;
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.AddUnique(this);
+	
+	const bool isCollision = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f,
+		ETraceTypeQuery::TraceTypeQuery_MAX, false, ActorsToIgnore, EDrawDebugTrace::None, OutHit, true, FColor::Green);
+
+	FVector BodySpawnLocation ;
+
+	// Store the current location and rotation of the character
+	if(isCollision)
+	{
+		BodySpawnLocation = GetMesh()->GetComponentLocation() +
+			 FVector(0.f, 0.f, 50.f) + GetMesh()->GetRightVector() * 140;
+	}
+	else
+	{
+ 		BodySpawnLocation = GetMesh()->GetComponentLocation() + FVector(0.f, 0.f, 50.f) + -GetMesh()->GetRightVector() * 20;
+	}
+	FRotator BodySpawnRotation =  GetMesh()->GetComponentRotation();
+
+	
+	// Swap the mesh and launch the head
+	GetMesh()->SetSkeletalMeshAsset(HeadMesh);
+
+	// Move the head down & Adjust the collider
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -150.f)); 
+	GetCapsuleComponent()->SetCapsuleHalfHeight(34.f);
+
+	// Move head forward & launch
+	AddActorWorldOffset(GetMesh()->GetUpVector() * 120.f, true);
+	
+	FVector LaunchVelocity = ((GetMesh()->GetRightVector()) * HeadLaunchVelocityMultiplier);
+	LaunchVelocity.X = 0;
+	LaunchVelocity.Y = 0;
+	LaunchVelocity.Z += HeadLaunchVelocityZAxisAdd * 0.8;
+	//GetCharacterMovement()->Velocity = LaunchVelocity;
+
+	GetCharacterMovement()->FallingLateralFriction = 0;
+	GetCharacterMovement()->GravityScale = GravityAppliedOnWalk;
+	GetCharacterMovement()->Launch(LaunchVelocity);
+	GetWorldTimerManager().SetTimer(LaunchHeadTimerHandle, this, &ASCharacter::ResetLaunchHeadTimer, LaunchHeadMaxDuration);
 
 	
 	// Spawn the body and add it to ActiveBodies
@@ -314,15 +420,68 @@ void ASCharacter::ReformBody()
 }
 
 
+void ASCharacter::ResetLaunchHeadTimer()
+{
+	GetCharacterMovement()->FallingLateralFriction = 4.0f;
+}
+
+/*void ASCharacter::MeleeInteract()
+{
+	if (ensure(InteractionComponent))
+	{
+		InteractionComponent->MeleeInteract();	
+	}
+}*/
+
+/*void ASCharacter::Punch()
+{
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	
+	FVector EyeLocation;
+	FRotator EyeRotation;
+	GetMesh()->GetSocketWorldLocationAndRotation(TEXT("spine_004"), EyeLocation, EyeRotation);
+	FRotator Correction (0.0f, 90.0f, 0.f);
+	FRotator CorrecterRotation = EyeRotation + Correction;
+	FVector End = EyeLocation + (CorrecterRotation.Vector() * 500);
+
+	TArray<FHitResult> Hits;
+
+	float DebugRadius = 30.f;
+
+	FCollisionShape CollisionShape;
+	CollisionShape.SetSphere(DebugRadius);
+
+	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, CollisionShape);
+	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+	
+	/*for (FHitResult Hit : Hits)
+	{
+		if (AActor* HitActor = Hit.GetActor())
+		{
+			if(HitActor->Implements<USGameplayAbility>())
+			{
+				APawn* MyPawn = Cast<APawn>(this);
+				ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
+				break;
+			}
+		}
+		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, DebugRadius, 16, LineColor, false, 2.0f);
+	}#1#
+	DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	
+}*/
+
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	/*
+	 * Deprecated Occlusion Mask; using Post+Processing instead
+	 *
 
-	if (bIsJumping)
-	{
-		ACharacter::Jump();
-	}
+	TArray<FHitResult> OutHit;
 
 	TArray<FHitResult> OutHits;
 	FVector CamLocation = camMan->GetCameraLocation();
@@ -336,8 +495,12 @@ void ASCharacter::Tick(float DeltaTime)
 	FVector End = CamLocation + (CamLocation - GetActorLocation()).GetSafeNormal() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> CollisionObjectTypes;
-	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
-	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+
+#define CAMERA_OCCLUSION_CHANNEL ECollisionChannel::ECC_EngineTraceChannel4
+	CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(CAMERA_OCCLUSION_CHANNEL));
+
+	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	//CollisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	
 	bool isCollision = UKismetSystemLibrary::CapsuleTraceMultiForObjects(
 	GetWorld(), Start, End, 1,
@@ -346,61 +509,85 @@ void ASCharacter::Tick(float DeltaTime)
 	EDrawDebugTrace::None,
 	OutHits, true);
 	
-	TArray<AActor*> ActorsJustOccluded;
+	TArray<const UStaticMeshComponent*> MeshesJustOccluded;
 	if(isCollision && OutHits.Num() > 0)
 	{
 		for(int i = 0; i < OutHits.Num(); ++i)
 		{
-			AActor* HitActor = OutHits[i].GetActor();
-			if(HitActor->GetInstigator())
+			UStaticMeshComponent* HitComponent = Cast<UStaticMeshComponent>(OutHits[i].GetComponent());
+			if(!HitComponent || HitComponent->GetOwner()->GetInstigator())
 			{
 				return;
 			}
 			
-			HideOccludedActor(HitActor);
-			ActorsJustOccluded.AddUnique(HitActor);
+			HideOccludedActor(HitComponent);
+			MeshesJustOccluded.AddUnique(HitComponent);
 		}
-		for(auto& [Key, Value]: OccludedActors)
+	}
+	for(auto& [Key, Value]: OccludedActors)
+	{
+		if(!MeshesJustOccluded.Contains(Value.StaticMesh) && Value.IsOccluded)
 		{
-			if(!ActorsJustOccluded.Contains(Key) && Value.IsOccluded)
+			if (!IsValid(Value.Actor))
 			{
-				if (!IsValid(Value.Actor))
-				{
-					OccludedActors.Remove(Value.Actor);
-				}
-				Value.IsOccluded = false;
-				for(int i = 0; i < Value.Materials.Num(); i++)
-				{
-					Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
-				}
+				OccludedActors.Remove(Value.StaticMesh);
+			}
+			Value.IsOccluded = false;
+			for(int i = 0; i < Value.Materials.Num(); i++)
+			{
+				Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
+			}
+		}
+	}
+	*/
+}
+
+void ASCharacter::HideOccludedActor(UStaticMeshComponent* OccludedMesh)
+{
+	if(OccludedMesh)
+	{
+		FCameraOccludedActor* ExistingActor = OccludedActors.Find(OccludedMesh);
+		if(ExistingActor && ExistingActor->IsOccluded)
+		{
+			return;
+		}
+		if(ExistingActor && ExistingActor->StaticMesh == OccludedMesh)
+		{
+			ExistingActor->IsOccluded = true;
+			for(int i = 0; i < ExistingActor->StaticMesh->GetNumMaterials(); i++)
+			{
+				ExistingActor->StaticMesh->SetMaterial(i, FadeMaterial);
+			}
+		}
+		else
+		{
+			FCameraOccludedActor OccludedActor;
+			OccludedActor.Actor = OccludedMesh->GetOwner();
+			OccludedActor.Materials = OccludedMesh->GetMaterials();
+			OccludedActor.StaticMesh = OccludedMesh;
+			OccludedActor.IsOccluded = true;
+			OccludedActors.Add(OccludedMesh, OccludedActor);
+
+			for(int i = 0; i < OccludedActor.StaticMesh->GetNumMaterials(); i++)
+			{
+				OccludedActor.StaticMesh->SetMaterial(i, FadeMaterial);
 			}
 		}
 	}
 }
 
-void ASCharacter::HideOccludedActor(const AActor* Actor)
+void ASCharacter::ForceShowActors()
 {
-	UStaticMeshComponent* StaticMesh = Cast<UStaticMeshComponent>(Actor->GetComponentByClass(UStaticMeshComponent::StaticClass()));
-	if(StaticMesh)
+	for(auto& [Key, Value]: OccludedActors)
 	{
-		FCameraOccludedActor* ExistingActor = OccludedActors.Find(Actor);
-		if(ExistingActor && ExistingActor->IsOccluded)
+		if (!IsValid(Value.Actor))
 		{
-			return;
+			OccludedActors.Remove(Value.StaticMesh);
 		}
-		else
+		Value.IsOccluded = false;
+		for(int i = 0; i < Value.Materials.Num(); i++)
 		{
-			FCameraOccludedActor OccludedActor;
-			OccludedActor.Actor = Actor;
-			OccludedActor.Materials = StaticMesh->GetMaterials();
-			OccludedActor.StaticMesh = StaticMesh;
-			OccludedActor.IsOccluded = true;
-			OccludedActors.Add(Actor, OccludedActor);
-
-			for(int i = 0; i < StaticMesh->GetNumMaterials(); i++)
-			{
-				StaticMesh->SetMaterial(i, FadeMaterial);
-			}
+			Value.StaticMesh->SetMaterial(i, Value.Materials[i]);
 		}
 	}
 }
@@ -414,7 +601,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ASCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 		
 		// GAS

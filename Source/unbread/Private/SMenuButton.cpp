@@ -5,6 +5,11 @@
 #include "iostream"
 #include "Components/Button.h"
 
+USMenuButton::USMenuButton()
+	:Connections({"", "", "", "", "", ""})
+{
+}
+
 void USMenuButton::AddConnection(EDirection Direction_, FString Name_)
 {
 	if(Connections.IsEmpty())
@@ -24,7 +29,5 @@ void USMenuButton::BindOnHovered()
 {
 	Button->OnHovered.AddDynamic(this, &USMenuButton::MenuButtonOnHovered);
 }
-
-
 
 

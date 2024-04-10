@@ -36,4 +36,5 @@ void USRangedAnimInstance::SetCharacterProperties()
 	bHasPath = Character->SmartObject != nullptr;
 	bHasDetected = Character->detectedPlayer;
 	bIsShooting = Character->AnimValues.bIsShooting;
+	bHasProjectile = Character->pr != nullptr;
 }
