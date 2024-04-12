@@ -425,13 +425,52 @@ void ASCharacter::ResetLaunchHeadTimer()
 	GetCharacterMovement()->FallingLateralFriction = 4.0f;
 }
 
-void ASCharacter::MeleeInteract()
+/*void ASCharacter::MeleeInteract()
 {
 	if (ensure(InteractionComponent))
 	{
 		InteractionComponent->MeleeInteract();	
 	}
-}
+}*/
+
+/*void ASCharacter::Punch()
+{
+	FCollisionObjectQueryParams ObjectQueryParams;
+	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	
+	FVector EyeLocation;
+	FRotator EyeRotation;
+	GetMesh()->GetSocketWorldLocationAndRotation(TEXT("spine_004"), EyeLocation, EyeRotation);
+	FRotator Correction (0.0f, 90.0f, 0.f);
+	FRotator CorrecterRotation = EyeRotation + Correction;
+	FVector End = EyeLocation + (CorrecterRotation.Vector() * 500);
+
+	TArray<FHitResult> Hits;
+
+	float DebugRadius = 30.f;
+
+	FCollisionShape CollisionShape;
+	CollisionShape.SetSphere(DebugRadius);
+
+	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, CollisionShape);
+	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+	
+	/*for (FHitResult Hit : Hits)
+	{
+		if (AActor* HitActor = Hit.GetActor())
+		{
+			if(HitActor->Implements<USGameplayAbility>())
+			{
+				APawn* MyPawn = Cast<APawn>(this);
+				ISGameplayInterface::Execute_Interact(HitActor, MyPawn);
+				break;
+			}
+		}
+		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, DebugRadius, 16, LineColor, false, 2.0f);
+	}#1#
+	DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	
+}*/
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)

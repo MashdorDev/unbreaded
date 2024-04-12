@@ -60,6 +60,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CloseAllOpenCanvas();
+
+	UFUNCTION(BlueprintCallable)
+	void GetButtons();
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
@@ -78,6 +81,8 @@ private:
 	float DestinationRotation;
 	float OriginRotation;
 	float CurrentRotation;
+
+	
 
 	UPROPERTY()
 	TArray<UCanvasPanel*> OpenCanvas;
