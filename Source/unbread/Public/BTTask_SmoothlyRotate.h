@@ -23,5 +23,8 @@ public:
 	
 	class ASRanged_AIController* Cntrl;
 	ASRangedAICharacter* MyActor = nullptr;
-	AActor* TargetActor = nullptr;
+	FVector TargetLoc = FVector();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
+	float InterpSpeed = 5.0f;
 };

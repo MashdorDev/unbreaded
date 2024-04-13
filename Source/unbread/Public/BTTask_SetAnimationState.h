@@ -17,9 +17,6 @@ public:
 	UBTTask_SetAnimationState(const FObjectInitializer& ObjectInitializer);
 
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
-	bool ADS = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
 	bool Combat = false;
@@ -27,6 +24,4 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
 	bool Focus = false;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blackboard")
-	bool Crouch = false;
 };

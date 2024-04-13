@@ -139,7 +139,7 @@ void ASRangedAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	UpdateWindgerRef();
-
+ 
 	// ** GAS ** //
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetHealthAttribute()).AddUObject(this, &ASRangedAICharacter::OnHealthAttributeChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(HealthAttributeSet->GetShieldAttribute()).AddUObject(this, &ASRangedAICharacter::OnShieldAttributeChanged);
@@ -253,19 +253,7 @@ void ASRangedAICharacter::ToggleCombat(const bool Newbool)
 	AnimValues.bIsInCombat = Newbool;
 	bUseControllerRotationYaw = Newbool;
 	GetCharacterMovement()->bOrientRotationToMovement = !Newbool;
-	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? 450.f : 94.f;
-}
-
-void ASRangedAICharacter::ToggleCrouch(const bool Newbool)
-{
-	AnimValues.bIsCrouching = Newbool;
-	const float Speed = AnimValues.bIsInCombat ? 450.f : WalkSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? CrouchedWalkSpeed : Speed;
-}
-
-void ASRangedAICharacter::ToggleADS(const bool Newbool)
-{
-	AnimValues.bADS = Newbool;
+	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? 450.f : 170.f;
 }
 
 void ASRangedAICharacter::DestroyCharacter()
