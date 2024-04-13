@@ -19,8 +19,8 @@ public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 	int32_t Index = 0;
-	int32_t OccupiedIndex = 0;
+	int32_t PreviousIndex = 0;
 private:
 	
-	int32_t GetNextPoint(class ASPathActor* pathRef);
+	int32_t GetNextPoint(class ASPathActor* pathRef, int32& nextPoint);
 };

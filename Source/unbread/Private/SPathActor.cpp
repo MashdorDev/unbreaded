@@ -10,7 +10,7 @@ ASPathActor::ASPathActor()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Path = CreateDefaultSubobject<USplineComponent>(TEXT("PATH"));
-	Path->SetupAttachment(RootComponent);
+	Path->SetupAttachment(FacingDirection);
 	Path->bDrawDebug = true;
 }
 

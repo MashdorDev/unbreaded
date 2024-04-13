@@ -28,19 +28,10 @@ struct FAnimValues
 public:
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	bool bIsCrouching = false;
-
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	bool bIsInCombat = false;
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	bool bIsShooting = false;
-
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	bool bADS = false;
-
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	bool bIsSitting = false;
 
 };
 
@@ -130,8 +121,7 @@ public:
 
 	UBehaviorTree* GetBehaviourTree() const;
 	void ToggleCombat(bool Newbool);
-	void ToggleCrouch(bool Newbool);
-	void ToggleADS(bool Newbool);
+
 	
 	UFUNCTION(BlueprintCallable)
 	void DestroyCharacter();

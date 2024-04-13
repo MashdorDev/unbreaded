@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/ArrowComponent.h"
 #include "GameFramework/Actor.h"
 #include "S_SmartObject.generated.h"
 
@@ -16,10 +17,10 @@ public:
 	AS_SmartObject();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	class UBillboardComponent* Billboard;
+	UBillboardComponent* Billboard;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	class UArrowComponent* FacingDirection;
+	UArrowComponent* FacingDirection;
 
 protected:
 	// Called when the game starts or when spawned
