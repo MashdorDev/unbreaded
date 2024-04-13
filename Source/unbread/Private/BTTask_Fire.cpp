@@ -55,7 +55,6 @@ EBTNodeResult::Type UBTTask_Fire::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 
 void UBTTask_Fire::Shoot(bool NewBool)
 {
-	Chr->ToggleADS(NewBool);
 	if(NewBool)
 	{
 		if(!Chr->FireHandle.IsValid())

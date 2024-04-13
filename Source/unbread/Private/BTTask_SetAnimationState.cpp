@@ -22,8 +22,6 @@ EBTNodeResult::Type UBTTask_SetAnimationState::ExecuteTask(UBehaviorTreeComponen
 	if(MyController && chr)
 	{
 		chr->ToggleCombat(Combat);
-		chr->ToggleADS(ADS);
-		chr->ToggleCrouch(Crouch);
 
 		const UBlackboardComponent* myBlackboard = OwnerComp.GetBlackboardComponent();
 		auto myID = myBlackboard->GetKeyID(BlackboardKey.SelectedKeyName);

@@ -9,6 +9,15 @@
 /**
  * 
  */
+USTRUCT()
+struct FLocation
+{
+	GENERATED_BODY()
+public:
+	FVector Location;
+	bool isOccupied = false;
+};
+
 UCLASS()
 class UNBREAD_API ASPathActor : public AS_SmartObject
 {
@@ -23,6 +32,6 @@ public:
 
 	void GetSplinePoints();
 
-	TArray<FVector> Locations;
+	TArray<FLocation> Locations;
 	
 };

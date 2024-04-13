@@ -36,7 +36,8 @@ public:
 	
 	UPROPERTY(transient)
 	UBlackboardComponent*  BBC;
-
+	
+	UPROPERTY(BlueprintReadWrite)
 	class ASRangedAICharacter* Agent;
 
 	UPROPERTY(BlueprintReadWrite)
