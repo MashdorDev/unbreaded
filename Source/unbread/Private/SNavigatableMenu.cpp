@@ -143,7 +143,8 @@ void USNavigatableMenu::SetSelected(USMenuButton* SelectedButton_)
 {
 	if (SelectedButton_)
 	{
-		Selected = *Buttons.Find(SelectedButton_->Name);
+
+		Selected = SelectedButton_;
 
 		if (Selected && Selected->Button)
 		{

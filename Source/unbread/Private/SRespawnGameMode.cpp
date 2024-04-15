@@ -90,6 +90,8 @@ bool ASRespawnGameMode::CheckLoss()
 
 void ASRespawnGameMode::EndGame(bool Won)
 {
+	if(UGameplayStatics::IsGamePaused(GetWorld())) return;
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	GameOver.Broadcast(Won);
 }
 
@@ -100,6 +102,7 @@ void ASRespawnGameMode::SetSpawnLocation(FTransform Location)
 
 void ASRespawnGameMode::PauseGame()
 {
+	if(UGameplayStatics::IsGamePaused(GetWorld())) return;
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
 	GamePaused.Broadcast(true);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Paused"));
@@ -109,6 +112,8 @@ void ASRespawnGameMode::PauseGame()
 
 void ASRespawnGameMode::UnpauseGame()
 {
+	if(!UGameplayStatics::IsGamePaused(GetWorld())) return;
+
 	UGameplayStatics::SetGamePaused(GetWorld(), false);
 	GamePaused.Broadcast(false);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Unpaused"));
