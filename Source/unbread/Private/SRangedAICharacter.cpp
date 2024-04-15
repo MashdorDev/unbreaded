@@ -253,7 +253,7 @@ void ASRangedAICharacter::ToggleCombat(const bool Newbool)
 	AnimValues.bIsInCombat = Newbool;
 	bUseControllerRotationYaw = Newbool;
 	GetCharacterMovement()->bOrientRotationToMovement = !Newbool;
-	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? 450.f : 170.f;
+	GetCharacterMovement()->MaxWalkSpeed = (Newbool) ? 650.f : 170.f;
 }
 
 void ASRangedAICharacter::DestroyCharacter()
@@ -271,7 +271,7 @@ void ASRangedAICharacter::DestroyCharacter()
 		ControllerRef->ClearFocus(EAIFocusPriority::LastFocusPriority);
 		ControllerRef->GetAIPerceptionComponent()->DestroyComponent(true);
 		ControllerRef->AIManager->RemoveAgent(ControllerRef);
-		SetLifeSpan(10);
+		SetLifeSpan(1);
 	}
 }
 

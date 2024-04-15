@@ -33,23 +33,24 @@ USTRUCT(BlueprintType)
 struct FCameraOccludedActor
 {
 	GENERATED_USTRUCT_BODY()
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	const AActor* Actor;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* StaticMesh;
-  
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<UMaterialInterface*> Materials;
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool IsOccluded;
 };
 
 
 UCLASS()
-class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface, public IInteractInterface, public ICookieInterface
+class UNBREAD_API ASCharacter : public ACharacter, public IDynamicCameraInterface, public IAbilitySystemInterface,
+                                public IInteractInterface, public ICookieInterface
 {
 	GENERATED_BODY()
 
@@ -58,7 +59,6 @@ public:
 	ASCharacter();
 
 private:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* SpringArmComponent;
 
@@ -66,16 +66,17 @@ private:
 	UCameraComponent* CameraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	UDynamicCameraComponent*  DynamicCamera;
+	UDynamicCameraComponent* DynamicCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	USInteractionComponent* InteractionComponent;
-	
-	APlayerCameraManager*  camMan;
-	
+
+	APlayerCameraManager* camMan;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void MoveStopped(const FInputActionValue& Value);
 
 	UPROPERTY(BlueprintReadOnly, Category = "Input")
 	FVector LookTargetPos;
@@ -122,10 +123,11 @@ protected:
 	// FUNCTIONS AND VARIABLES
 
 	void Move(const FInputActionValue& Value);
+	void StopedRotate(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
 
 	// Camera Rotation Speed
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)//, Category = "Camera")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) //, Category = "Camera")
 	float CameraRotationMultiplier = 2.0f;
 
 	// JUMP
@@ -135,10 +137,17 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float GravityAppliedOnFall;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsJumping;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsOverlappingPad;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanRotateCamera = true;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bJumpBuffered;
 
@@ -147,23 +156,23 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsLevelSequencePlaying;
-	
+
 	FTimerHandle JumpBufferTimer;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RollAngleMin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RollAngleMax;
-	
+
 	void Jump(const FInputActionValue& Value);
 	void StopJumping() override;
 
 	UFUNCTION(BlueprintCallable)
 	void BufferJump();
-	
+
 	UFUNCTION(BlueprintCallable)
 	void UnBufferJump();
-	
+
 	float Speed;
 
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -179,7 +188,7 @@ protected:
 	bool bUseNewRotation = true;
 
 	// Splitting Variables
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsHeadForm = false;
 
@@ -206,7 +215,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<const UStaticMeshComponent*, FCameraOccludedActor> OccludedActors;
-	
+
 	// GAS setup
 	void OnPrimaryAttack(const FInputActionValue& Value);
 	void OnSecondaryAttack(const FInputActionValue& Value);
@@ -230,7 +239,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void LaunchHead();
-	
+
 	UFUNCTION(BlueprintCallable)
 	void LaunchHeadVertical();
 
@@ -242,7 +251,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float LaunchHeadMaxDuration;
-	
+
 	FTimerHandle LaunchHeadTimerHandle;
 
 	void ResetLaunchHeadTimer();
