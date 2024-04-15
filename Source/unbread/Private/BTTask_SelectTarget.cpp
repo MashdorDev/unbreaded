@@ -44,6 +44,11 @@ void UBTTask_SelectTarget::EnemySeekerQueryFinished(TSharedPtr<FEnvQueryResult> 
 		ASRangedAICharacter* Character = Cast<ASRangedAICharacter>(Actor);
 		if(player)
 		{
+			if(player->GetMesh()->IsSimulatingPhysics())
+			{
+				BestTarget = nullptr;
+				break;
+			}
 			BestTarget = player;
 			break;
 		}
