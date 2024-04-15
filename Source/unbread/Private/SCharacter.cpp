@@ -103,6 +103,11 @@ void ASCharacter::BeginPlay()
 	}
 }
 
+void ASCharacter::MoveStopped(const FInputActionValue& Value)
+{
+	//bCanRotateCamera = true;
+}
+
 void ASCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D MoveVector = Value.Get<FVector2D>();
@@ -148,6 +153,12 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
 	GetMesh()->SetWorldRotation(LerpedRotation);
+	//bCanRotateCamera = false;
+}
+
+void ASCharacter::StopedRotate(const FInputActionValue& Value)
+{
+	bCanRotateCamera = true;
 }
 
 void ASCharacter::Rotate(const FInputActionValue& Value)
@@ -162,7 +173,7 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
 	ClampedRotation.Pitch = FMath::Clamp(SpringArmComponent->GetRelativeRotation().Pitch, RollAngleMin, RollAngleMax);
 	SpringArmComponent->SetRelativeRotation(ClampedRotation);
-	
+	bCanRotateCamera = false;
 	/*
 	if(bUseNewRotation) return;
 	
@@ -185,7 +196,7 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 void ASCharacter::Jump(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("JUMP!"));
-	if (!bIsJumping)
+ 	if (!bIsJumping)
 	{
 		Super::Jump();	
 	}
@@ -197,8 +208,9 @@ void ASCharacter::Jump(const FInputActionValue& Value)
 
 void ASCharacter::StopJumping()
 {
+
 	Super::StopJumping();
-	if (!GetCharacterMovement()->IsWalking())
+	if (!GetCharacterMovement()->IsWalking() && !bIsOverlappingPad)
 	{
 		GetCharacterMovement()->GravityScale = GravityAppliedOnFall;
 	}
@@ -600,7 +612,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ASCharacter::MoveStopped);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
+		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Completed, this, &ASCharacter::StopedRotate);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ASCharacter::StopJumping);
 		
