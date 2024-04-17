@@ -76,7 +76,8 @@ private:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void MoveStopped(const FInputActionValue& Value);
+	void StartMove(const FInputActionValue& Value);
+
 
 	UPROPERTY(BlueprintReadOnly, Category = "Input")
 	FVector LookTargetPos;
@@ -124,6 +125,7 @@ protected:
 
 	void Move(const FInputActionValue& Value);
 	void StopedRotate(const FInputActionValue& Value);
+	void StartRotate(const FInputActionValue& Value);
 	void Rotate(const FInputActionValue& Value);
 
 	// Camera Rotation Speed
@@ -147,6 +149,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanRotateCamera = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanResetTimeline = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bJumpBuffered;

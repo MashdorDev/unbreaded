@@ -98,8 +98,8 @@ public:
 
 	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
 	UAnimMontage* SurprisedAnimation;
-
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = "AI")
+	
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "AI")
 	UAnimMontage* FireAnimation;
 	
 	virtual bool CanBeSeenFrom

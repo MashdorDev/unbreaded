@@ -103,9 +103,9 @@ void ASCharacter::BeginPlay()
 	}
 }
 
-void ASCharacter::MoveStopped(const FInputActionValue& Value)
+void ASCharacter::StartMove(const FInputActionValue& Value)
 {
-	//bCanRotateCamera = true;
+	bCanResetTimeline = true;
 }
 
 void ASCharacter::Move(const FInputActionValue& Value)
@@ -153,13 +153,13 @@ void ASCharacter::Move(const FInputActionValue& Value)
 	FRotator LerpedRotation = FMath::Lerp(GetMesh()->GetComponentRotation(), TargetRotation, LerpSpeed);
 	
 	GetMesh()->SetWorldRotation(LerpedRotation);
-	//bCanRotateCamera = false;
 }
 
 void ASCharacter::StopedRotate(const FInputActionValue& Value)
 {
 	bCanRotateCamera = true;
 }
+
 
 void ASCharacter::Rotate(const FInputActionValue& Value)
 {
@@ -173,7 +173,6 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	FRotator ClampedRotation = SpringArmComponent->GetRelativeRotation();
 	ClampedRotation.Pitch = FMath::Clamp(SpringArmComponent->GetRelativeRotation().Pitch, RollAngleMin, RollAngleMax);
 	SpringArmComponent->SetRelativeRotation(ClampedRotation);
-	bCanRotateCamera = false;
 	/*
 	if(bUseNewRotation) return;
 	
@@ -191,6 +190,7 @@ void ASCharacter::Rotate(const FInputActionValue& Value)
 	
 	GetMesh()->AddWorldRotation(LerpedRotation);
 	*/
+	bCanRotateCamera = false;
 }
 
 void ASCharacter::Jump(const FInputActionValue& Value)
@@ -611,8 +611,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Started, this, &ASCharacter::StartMove);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASCharacter::Move);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ASCharacter::MoveStopped);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ASCharacter::Rotate);
 		EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Completed, this, &ASCharacter::StopedRotate);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ASCharacter::Jump);
