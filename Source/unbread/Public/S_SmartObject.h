@@ -7,6 +7,9 @@
 #include "GameFramework/Actor.h"
 #include "S_SmartObject.generated.h"
 
+class UBillboardComponent;
+class UArrowComponent;
+
 UCLASS()
 class UNBREAD_API AS_SmartObject : public AActor
 {
